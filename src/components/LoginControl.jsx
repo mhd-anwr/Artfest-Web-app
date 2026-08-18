@@ -61,7 +61,7 @@ export default function LoginControl() {
           if (!wrapRef.current?.contains(e.relatedTarget)) setOpen(false)
         }}
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-subtle text-mainText text-xs font-semibold hover:bg-lavender transition shadow-sm"
+        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass-btn text-mainText text-xs font-semibold shadow-sm transition-all duration-300 select-none"
       >
         <span>Login</span>
         <ChevronDown size={14} className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
@@ -70,7 +70,7 @@ export default function LoginControl() {
       <div
         onMouseEnter={clearCloseTimer}
         onMouseLeave={scheduleClose}
-        className={`absolute right-0 mt-2 w-48 rounded-2xl bg-card border border-subtle shadow-xl overflow-hidden z-50 backdrop-blur-sm origin-top-right transition-all duration-200 ease-out ${
+        className={`absolute right-0 mt-2 w-48 rounded-2xl liquid-glass-dropdown shadow-xl overflow-hidden z-50 origin-top-right transition-all duration-200 ease-out ${
           open ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-1 scale-95 pointer-events-none'
         }`}
       >

@@ -150,7 +150,7 @@ export default function Home() {
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-brand font-bold text-mainText mb-4 leading-tight">
-            Rendezvous'26
+            Rendezvous
           </h1>
           <p className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl">
             ISRA life Festival 2026 — Tracked, Celebrated, Remembered
@@ -160,13 +160,13 @@ export default function Home() {
               onClick={() => navigate('/results')}
               className="cta-gradient px-8 py-3 font-semibold font-inter"
             >
-              View Results
+              Results
             </button>
             <button
               onClick={() => scrollTo(aboutRef)}
               className="px-8 py-3 bg-card border border-subtle text-mainText rounded-full font-semibold font-inter hover:bg-lavender transition"
             >
-              About the Fest
+              About
             </button>
           </div>
         </div>
