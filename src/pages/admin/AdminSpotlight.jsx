@@ -39,10 +39,12 @@ function AlbumPicker({ albums, value, newValue, onValue, onNewValue, label }) {
 
 export default function AdminSpotlight() {
   const [images, setImages] = useState([])
-  const [file, setFile] = useState(null)
+  const [files, setFiles] = useState([])
   const [caption, setCaption] = useState('')
   const [album, setAlbum] = useState('')
   const [newAlbum, setNewAlbum] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [editing, setEditing] = useState(null)
   const [editCaption, setEditCaption] = useState('')
   const [editAlbum, setEditAlbum] = useState('')
@@ -54,18 +56,65 @@ export default function AdminSpotlight() {
 
   const albums = [...new Set(images.map(i => (i.album || '').trim()).filter(Boolean))]
 
+  const handleFileChange = (e) => {
+    const selected = Array.from(e.target.files || [])
+    if (selected.length === 0) return
+
+    let combined = [...files, ...selected]
+    if (combined.length > 10) {
+      toast('You can upload a maximum of 10 images at a time.', 'error')
+      combined = combined.slice(0, 10)
+    }
+    setFiles(combined)
+    e.target.value = ''
+  }
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleUpload = async () => {
-    if (!file) return toast('Select an image', 'error')
-    const { data } = await supabase.storage.from('photos').upload(`spotlight/${Date.now()}_${file.name}`, file)
-    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(data.path)
-    await supabase.from('spotlight').insert({
-      imageURL: urlData.publicUrl,
-      caption,
-      isFeatured: false,
-      album: resolveAlbum(album, newAlbum) || null,
-    })
-    setFile(null); setCaption(''); setAlbum(''); setNewAlbum('')
-    toast('Image uploaded!')
+    if (files.length === 0) return toast('Select an image', 'error')
+    if (files.length > 10) {
+      toast('You can upload a maximum of 10 images at a time.', 'error')
+      return
+    }
+
+    setUploading(true)
+    let successCount = 0
+    const resolvedAlbum = resolveAlbum(album, newAlbum) || null
+
+    for (let i = 0; i < files.length; i++) {
+      setUploadProgress(i + 1)
+      const currentFile = files[i]
+      const sanitizedName = currentFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const filePath = `spotlight/${Date.now()}_${i}_${sanitizedName}`
+
+      const { data, error: uploadErr } = await supabase.storage.from('photos').upload(filePath, currentFile)
+      if (uploadErr) {
+        console.error('Upload failed for file:', currentFile.name, uploadErr)
+        continue
+      }
+
+      const { data: urlData } = supabase.storage.from('photos').getPublicUrl(data.path)
+
+      const { error: dbErr } = await supabase.from('spotlight').insert({
+        imageURL: urlData.publicUrl,
+        caption: caption ? (files.length > 1 ? `${caption} (${i + 1})` : caption) : null,
+        isFeatured: false,
+        album: resolvedAlbum,
+      })
+
+      if (!dbErr) successCount++
+    }
+
+    setUploading(false)
+    setUploadProgress(0)
+    setFiles([])
+    setCaption('')
+    setAlbum('')
+    setNewAlbum('')
+    toast(successCount === 1 ? 'Image uploaded!' : `${successCount} images uploaded!`)
     load()
   }
 
@@ -110,6 +159,12 @@ export default function AdminSpotlight() {
     load()
   }
 
+  const getButtonText = () => {
+    if (uploading) return `Uploading ${uploadProgress} / ${files.length}...`
+    if (files.length <= 1) return 'Upload Image'
+    return `Upload ${files.length} Images`
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText mb-2">Spotlight Manager</h2>
@@ -118,9 +173,58 @@ export default function AdminSpotlight() {
       </p>
 
       <div className="bg-card rounded-2xl p-4 mb-6 shadow-sm border border-secondary/30">
-        <h3 className="text-mainText font-bold mb-3 text-sm sm:text-base">Upload New Image</h3>
-        <input type="file" accept="image/*" className="w-full text-mutedText mb-3 text-sm" onChange={e => setFile(e.target.files[0])} />
-        <input className="w-full bg-black/20 text-mainText rounded-xl p-3 mb-3 outline-none border border-secondary/40 focus:border-mainText text-sm sm:text-base" placeholder="Caption (optional)" value={caption} onChange={e => setCaption(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
+        <h3 className="text-mainText font-bold mb-3 text-sm sm:text-base">Upload New Images (Max 10)</h3>
+        
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          disabled={uploading}
+          className="w-full text-mutedText mb-3 text-sm cursor-pointer file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-mainText hover:file:bg-primary/30"
+          onChange={handleFileChange}
+        />
+
+        {files.length > 0 && (
+          <div className="mb-3 bg-black/20 rounded-xl p-3 border border-secondary/30">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-mutedText text-xs font-semibold">{files.length} / 10 images selected</span>
+              <button
+                type="button"
+                onClick={() => setFiles([])}
+                disabled={uploading}
+                className="text-mutedText hover:text-red-400 text-xs transition"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+              {files.map((f, idx) => (
+                <div key={idx} className="relative group w-16 h-16 rounded-lg overflow-hidden border border-secondary/40 bg-black/40 shrink-0">
+                  <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                  {!uploading && (
+                    <button
+                      type="button"
+                      onClick={() => removeFile(idx)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white rounded-full p-0.5 hover:bg-red-600 transition"
+                      title="Remove image"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <input
+          className="w-full bg-black/20 text-mainText rounded-xl p-3 mb-3 outline-none border border-secondary/40 focus:border-mainText text-sm sm:text-base"
+          placeholder="Caption (optional)"
+          value={caption}
+          disabled={uploading}
+          onChange={e => setCaption(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))}
+        />
+
         <AlbumPicker
           albums={albums}
           value={album}
@@ -129,8 +233,13 @@ export default function AdminSpotlight() {
           onNewValue={setNewAlbum}
           label="Album"
         />
-        <button onClick={handleUpload} className="w-full bg-primary text-white rounded-xl p-3 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base hover:bg-primary/90 transition">
-          <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Upload Image
+
+        <button
+          onClick={handleUpload}
+          disabled={uploading || files.length === 0}
+          className="w-full bg-primary text-white rounded-xl p-3 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> {getButtonText()}
         </button>
       </div>
 
