@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase/client'
 import { parseParticipantFile, validateParticipants } from '../utils/bulkImportParser'
-import { X, Upload, FileText, CheckCircle2, AlertTriangle, Trash2, RefreshCw } from 'lucide-react'
+import { X, Upload, FileText, CheckCircle2, AlertTriangle, Trash2, RefreshCw, Download, FileCheck } from 'lucide-react'
 
 export default function BulkImportModal({
   isOpen,
@@ -11,7 +11,7 @@ export default function BulkImportModal({
   existingTeams = [],
   existingCategories = [],
 }) {
-  const [step, setStep] = useState('upload') // 'upload' | 'preview' | 'summary'
+  const [step, setStep] = useState('select_file') // 'select_file' | 'file_ready' | 'preview' | 'summary'
   const [file, setFile] = useState(null)
   const [isParsing, setIsParsing] = useState(false)
   const [parseError, setParseError] = useState('')
@@ -22,14 +22,20 @@ export default function BulkImportModal({
 
   if (!isOpen) return null
 
-  const handleFileSelect = async (selectedFile) => {
+  const handleFileChoose = (selectedFile) => {
     if (!selectedFile) return
     setFile(selectedFile)
+    setParseError('')
+    setStep('file_ready')
+  }
+
+  const handleExtract = async () => {
+    if (!file) return
     setParseError('')
     setIsParsing(true)
 
     try {
-      const result = await parseParticipantFile(selectedFile, {
+      const result = await parseParticipantFile(file, {
         existingStudents,
         existingTeams,
         existingCategories,
@@ -38,10 +44,28 @@ export default function BulkImportModal({
       setStep('preview')
     } catch (err) {
       console.error('File parsing failed:', err)
-      setParseError(err.message || 'Failed to extract data from file.')
+      setParseError(err.message || 'Failed to extract data from file. Please check file format and try again.')
     } finally {
       setIsParsing(false)
     }
+  }
+
+  const handleDownloadTemplate = () => {
+    const csvContent = [
+      'Full name,Chest No,Category,Team',
+      'Muhammed Anwar,101,HS,Dimashqi Dara',
+      'Ahmed Rahman,102,Premier,Bukhariyan Baza',
+      'Abdul Basith,103,Junior,Qayrawani Qaza',
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'participant_import_template.csv')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const handleItemChange = (rIdx, field, val) => {
@@ -49,7 +73,6 @@ export default function BulkImportModal({
       if (idx !== rIdx) return item
       const newItem = { ...item, [field]: val }
 
-      // If team field changed, map team name/id to teamId
       if (field === 'team') {
         const found = existingTeams.find(t => t.id === val || t.name.toLowerCase() === val.toLowerCase())
         newItem.team = found ? found.name : val
@@ -59,7 +82,6 @@ export default function BulkImportModal({
       return newItem
     })
 
-    // Revalidate items after edit
     const revalidated = validateParticipants(updated, {
       existingStudents,
       existingTeams,
@@ -118,7 +140,7 @@ export default function BulkImportModal({
   }
 
   const resetState = () => {
-    setStep('upload')
+    setStep('select_file')
     setFile(null)
     setParseError('')
     setItems([])
@@ -134,7 +156,6 @@ export default function BulkImportModal({
     onClose()
   }
 
-  // Summary counts
   const totalCount = items.length
   const validCount = items.filter(i => i.isValid).length
   const errorCount = items.filter(i => !i.isValid).length
@@ -147,7 +168,7 @@ export default function BulkImportModal({
   })
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-3 sm:p-6" onClick={handleClose}>
+    <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-3 sm:p-6" onClick={handleClose}>
       <div
         className="bg-card rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl border border-secondary/30 overflow-hidden"
         onClick={e => e.stopPropagation()}
@@ -156,81 +177,136 @@ export default function BulkImportModal({
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-secondary/30 bg-black/20">
           <div>
             <h3 className="text-mainText font-bold text-lg sm:text-xl flex items-center gap-2">
-              <FileText className="text-primary" size={22} /> Bulk Participant Import
+              <FileText className="text-primary" size={22} /> Bulk Import Participants
             </h3>
             <p className="text-mutedText text-xs sm:text-sm mt-0.5">
-              Extract and import participants using the 4 existing fields (Full name, Chest No, Category, Team)
+              Upload PDF or CSV containing Full name, Chest No, Category, and Team
             </p>
           </div>
-          <button onClick={handleClose} className="text-mutedText hover:text-mainText p-1 transition rounded-lg hover:bg-white/10">
+          <button onClick={handleClose} className="text-mutedText hover:text-mainText p-1.5 transition rounded-lg hover:bg-white/10">
             <X size={20} />
           </button>
         </div>
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-          {/* STEP 1: Upload File */}
-          {step === 'upload' && (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
+          {/* STEP 1: Select File */}
+          {step === 'select_file' && (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
               <div
-                className="w-full max-w-md border-2 border-dashed border-secondary/50 rounded-2xl p-8 bg-black/20 hover:bg-black/30 hover:border-primary transition cursor-pointer flex flex-col items-center"
+                className="w-full max-w-lg border-2 border-dashed border-secondary/50 rounded-2xl p-8 bg-black/20 hover:bg-black/30 hover:border-primary transition cursor-pointer flex flex-col items-center"
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => {
                   e.preventDefault()
-                  if (e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0])
+                  if (e.dataTransfer.files?.[0]) handleFileChoose(e.dataTransfer.files[0])
                 }}
-                onClick={() => document.getElementById('bulk-file-input')?.click()}
+                onClick={() => document.getElementById('bulk-pdf-input')?.click()}
               >
                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-4">
                   <Upload size={32} />
                 </div>
-                <p className="text-mainText font-semibold text-base sm:text-lg mb-1">
-                  Upload Participant List PDF, CSV, or XLSX
+                <p className="text-mainText font-bold text-base sm:text-lg mb-1">
+                  Upload PDF or Data File
                 </p>
-                <p className="text-mutedText text-xs sm:text-sm mb-4">
-                  Drag and drop file here or click to browse
+                <p className="text-mutedText text-xs sm:text-sm mb-5">
+                  Drag and drop your file here, or click to choose
                 </p>
-                <span className="inline-block bg-primary text-white text-xs font-semibold px-4 py-2 rounded-xl">
-                  Select File
-                </span>
+
+                <div className="flex items-center gap-3 flex-wrap justify-center" onClick={e => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('bulk-pdf-input')?.click()}
+                    className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2"
+                  >
+                    <Upload size={16} /> Choose PDF / File
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    className="bg-black/40 hover:bg-black/60 text-mainText border border-secondary/40 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                  >
+                    <Download size={16} /> Download Template
+                  </button>
+                </div>
+
                 <input
-                  id="bulk-file-input"
+                  id="bulk-pdf-input"
                   type="file"
                   accept=".pdf,.csv,.xlsx,.xls"
                   className="hidden"
-                  onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                  onChange={e => e.target.files?.[0] && handleFileChoose(e.target.files[0])}
                 />
               </div>
 
-              {isParsing && (
-                <div className="flex items-center gap-3 mt-6 text-primary font-semibold">
-                  <RefreshCw className="animate-spin" size={20} /> Extracting participant data from file…
-                </div>
-              )}
-
               {parseError && (
-                <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-400 text-sm max-w-md">
+                <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-400 text-sm max-w-lg">
                   {parseError}
                 </div>
               )}
 
-              <div className="mt-8 text-left max-w-md text-xs text-mutedText space-y-1 bg-black/20 p-4 rounded-xl border border-secondary/20">
-                <p className="font-semibold text-mainText text-sm mb-1">Expected 4 Fields:</p>
-                <p>1. <strong className="text-mainText">Full name</strong> (e.g. Muhammed Anwar)</p>
-                <p>2. <strong className="text-mainText">Chest No</strong> (e.g. 101)</p>
-                <p>3. <strong className="text-mainText">Category</strong> ({existingCategories.join(', ') || 'Minor, HS, Premier, Sub Junior, Junior'})</p>
-                <p>4. <strong className="text-mainText">Team</strong> ({existingTeams.map(t => t.name).join(', ') || 'Team Names'})</p>
+              <div className="mt-6 text-left max-w-lg text-xs text-mutedText space-y-1.5 bg-black/20 p-4 rounded-xl border border-secondary/20">
+                <p className="font-semibold text-mainText text-sm mb-1">Supported Fields:</p>
+                <p>• <strong className="text-mainText">Full name</strong> (e.g. Muhammed Anwar)</p>
+                <p>• <strong className="text-mainText">Chest No</strong> (e.g. 101)</p>
+                <p>• <strong className="text-mainText">Category</strong> ({existingCategories.join(', ') || 'Minor, HS, Premier, Sub Junior, Junior'})</p>
+                <p>• <strong className="text-mainText">Team</strong> ({existingTeams.map(t => t.name).join(', ') || 'Team Names'})</p>
               </div>
             </div>
           )}
 
-          {/* STEP 2: Preview & Validation Table */}
+          {/* STEP 2: File Ready -> Extract Button */}
+          {step === 'file_ready' && (
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-6">
+              <div className="w-20 h-20 rounded-2xl bg-primary/20 text-primary flex items-center justify-center border border-primary/30">
+                <FileCheck size={40} />
+              </div>
+
+              <div>
+                <p className="text-mutedText text-xs uppercase tracking-wider font-semibold mb-1">Selected File</p>
+                <h4 className="text-xl font-bold text-mainText max-w-md truncate">{file?.name}</h4>
+                <p className="text-mutedText text-xs mt-1">{(file?.size / 1024).toFixed(1)} KB</p>
+              </div>
+
+              {isParsing ? (
+                <div className="flex items-center gap-3 text-primary font-semibold py-2">
+                  <RefreshCw className="animate-spin" size={20} /> Extracting participants from PDF…
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep('select_file')}
+                    className="px-4 py-2.5 bg-black/30 border border-secondary/40 text-mainText hover:bg-black/50 rounded-xl font-semibold text-sm transition"
+                  >
+                    Change File
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleExtract}
+                    className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold text-sm transition shadow-md flex items-center gap-2"
+                  >
+                    <RefreshCw size={16} /> Extract Participants
+                  </button>
+                </div>
+              )}
+
+              {parseError && (
+                <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-400 text-sm max-w-md">
+                  {parseError}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 3: Preview Table & Validation */}
           {step === 'preview' && (
             <div className="space-y-4">
               {/* Summary Stats & Filter Tabs */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-black/20 p-3 sm:p-4 rounded-xl border border-secondary/20">
                 <div className="flex items-center gap-3 flex-wrap text-xs sm:text-sm">
-                  <span className="text-mainText font-bold">Detected: {totalCount}</span>
+                  <span className="text-mainText font-bold">Extracted: {totalCount}</span>
                   <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold">
                     Valid: {validCount}
                   </span>
@@ -243,6 +319,7 @@ export default function BulkImportModal({
 
                 <div className="flex items-center gap-1 bg-black/30 p-1 rounded-xl border border-secondary/30 text-xs">
                   <button
+                    type="button"
                     onClick={() => setFilterTab('all')}
                     className={`px-3 py-1 rounded-lg font-semibold transition ${
                       filterTab === 'all' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
@@ -251,6 +328,7 @@ export default function BulkImportModal({
                     All ({totalCount})
                   </button>
                   <button
+                    type="button"
                     onClick={() => setFilterTab('valid')}
                     className={`px-3 py-1 rounded-lg font-semibold transition ${
                       filterTab === 'valid' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
@@ -259,6 +337,7 @@ export default function BulkImportModal({
                     Valid ({validCount})
                   </button>
                   <button
+                    type="button"
                     onClick={() => setFilterTab('errors')}
                     className={`px-3 py-1 rounded-lg font-semibold transition ${
                       filterTab === 'errors' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
@@ -381,6 +460,7 @@ export default function BulkImportModal({
                           {/* Action */}
                           <td className="p-3 text-center">
                             <button
+                              type="button"
                               onClick={() => handleRemoveRow(realIdx)}
                               className="text-mutedText hover:text-rose-400 transition p-1"
                               title="Delete row"
@@ -397,7 +477,7 @@ export default function BulkImportModal({
             </div>
           )}
 
-          {/* STEP 3: Summary Screen */}
+          {/* STEP 4: Summary Screen */}
           {step === 'summary' && (
             <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
@@ -427,7 +507,8 @@ export default function BulkImportModal({
           {step === 'preview' && (
             <>
               <button
-                onClick={() => setStep('upload')}
+                type="button"
+                onClick={() => setStep('select_file')}
                 className="px-4 py-2 bg-black/30 border border-secondary/40 text-mainText hover:bg-black/50 rounded-xl font-semibold text-xs sm:text-sm transition"
               >
                 Upload Different File
@@ -435,12 +516,14 @@ export default function BulkImportModal({
 
               <div className="flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={handleClose}
                   className="px-4 py-2 text-mutedText hover:text-mainText font-semibold text-xs sm:text-sm transition"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleImport}
                   disabled={selectedValidCount === 0 || isImporting}
                   className={`px-5 py-2.5 rounded-xl font-semibold text-white text-xs sm:text-sm transition flex items-center gap-2 ${
@@ -463,6 +546,7 @@ export default function BulkImportModal({
 
           {step === 'summary' && (
             <button
+              type="button"
               onClick={handleClose}
               className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition text-sm sm:text-base shadow-md"
             >
