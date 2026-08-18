@@ -54,7 +54,10 @@ export default function AdminLayout() {
           <Menu size={24} />
         </button>
         <div className="flex items-center gap-2.5">
-          <IsraLogo variant="mark" className="w-8 h-8" />
+          <Link to="/" className="flex flex-col items-start select-none font-sora text-slate-950 dark:text-white">
+            <span className="font-extrabold text-xl leading-none uppercase tracking-tight">ISRA</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight mt-0.5 opacity-90">LIFE FESTIVAL</span>
+          </Link>
         </div>
       </div>
 
@@ -69,9 +72,19 @@ export default function AdminLayout() {
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 dark:border-black/10">
-          <IsraLogo variant="mark" className="w-10 h-10" />
+        {/* Brand Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-black/10 dark:border-white/10">
+          <Link
+            to="/"
+            className="flex flex-col items-start select-none font-sora text-slate-950 dark:text-white"
+          >
+            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight">
+              ISRA
+            </span>
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90">
+              LIFE FESTIVAL
+            </span>
+          </Link>
           <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1 text-mutedText hover:text-mainText">
             <X size={22} />
           </button>
@@ -88,16 +101,16 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-white/10 text-mainText border border-white/15 shadow-inner'
+                    ? 'bg-white/10 dark:bg-purple/20 border border-white/15 dark:border-purple/30 shadow-inner admin-nav-item-active font-bold'
                     : 'text-inherit opacity-70 hover:opacity-100 border border-transparent'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={18} className={isActive ? 'text-accent' : 'text-mutedText group-hover:text-mainText'} />
-                  <span className="flex-1 truncate">{label}</span>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-accent' : 'bg-transparent'}`} />
+                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'text-mutedText group-hover:text-mainText shrink-0'} />
+                  <span className={isActive ? 'flex-1 truncate admin-nav-item-active font-bold' : 'flex-1 truncate'}>{label}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'admin-nav-dot-active' : 'bg-transparent'}`} />
                 </>
               )}
             </NavLink>

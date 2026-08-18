@@ -547,6 +547,30 @@ body {
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* Admin Sidebar Active Nav Item Visibility (Light: Black, Dark: White) */
+.admin-nav-item-active {
+  color: #000000 !important;
+}
+.admin-nav-icon-active {
+  color: #000000 !important;
+}
+.admin-nav-dot-active {
+  background-color: #000000 !important;
+}
+
+[data-theme='dark'] .admin-nav-item-active,
+.dark .admin-nav-item-active {
+  color: #FFFFFF !important;
+}
+[data-theme='dark'] .admin-nav-icon-active,
+.dark .admin-nav-icon-active {
+  color: #FFFFFF !important;
+}
+[data-theme='dark'] .admin-nav-dot-active,
+.dark .admin-nav-dot-active {
+  background-color: #FFFFFF !important;
+}
+
 /* Leaderboard rows — 1st gold / 2nd silver / 3rd bronze */
 .lb-item {
   border-radius: 18px;
