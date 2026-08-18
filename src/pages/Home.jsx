@@ -21,7 +21,7 @@ const stats = [
 const teamMembers = [
   { name: 'Anwar Ahmed', role: 'Festival Chairman', initials: 'AA', tint: 'from-[#6366F1] to-[#7BEAFE]', photo: '/team/Anwar.jpg' },
   { name: 'Muhammed AbdulQadar', role: 'Festival Convenor', initials: 'MA', tint: 'from-[#7BEAFE] to-[#FFDA63]', photo: '/team/Mohammed.jpeg' },
-  { name: 'Sayyid Mueen Hussain', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#FFDA63] to-[#6366F1]', photo: '/team/Moinu.jpeg' },
+  { name: 'Sayyid Mueenudheen ', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#FFDA63] to-[#6366F1]', photo: '/team/Moinu.jpeg' },
   { name: 'Shammas Mujeeb', role: 'Vice Chairman', initials: 'SM', tint: 'from-[#6366F1] to-[#A78BFA]', photo: '/team/Shammas.jpeg' },
   { name: 'Midlaj Moideen', role: 'Vice Chairman', initials: 'MM', tint: 'from-[#A78BFA] to-[#7BEAFE]', photo: '/team/midlaj moideen.jpg' },
   { name: 'Afsal Sharafudheen', role: 'Joint Convenor', initials: 'AS', tint: 'from-[#7BEAFE] to-[#94A3B8]', photo: '/team/Afsal.jpg' },
@@ -150,7 +150,7 @@ export default function Home() {
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-brand font-bold text-mainText mb-4 leading-tight">
-            Rendezvous
+            Rendezvous'26
           </h1>
           <p className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl">
             ISRA life Festival 2026 — Tracked, Celebrated, Remembered
@@ -178,9 +178,8 @@ export default function Home() {
         {/* Team Standings — ranked list only */}
         <div
           ref={teamsReveal.ref}
-          className={`bento-standings-card p-6 md:p-10 w-full mb-12 scroll-mt-24 reveal ${
-            teamsReveal.visible ? 'reveal-visible' : ''
-          }`}
+          className={`bento-standings-card p-6 md:p-10 w-full mb-12 scroll-mt-24 reveal ${teamsReveal.visible ? 'reveal-visible' : ''
+            }`}
         >
           <div className="ember-field">
             {embers.map(e => (
@@ -391,7 +390,7 @@ export default function Home() {
               aria-label="Instagram"
               className="hover:text-purple transition"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
             </a>
             <a
               href="https://www.youtube.com/@isra_media"
@@ -400,7 +399,7 @@ export default function Home() {
               aria-label="YouTube"
               className="hover:text-purple transition"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
             </a>
           </div>
         </footer>
