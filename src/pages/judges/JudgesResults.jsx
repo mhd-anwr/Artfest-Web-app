@@ -119,10 +119,14 @@ export default function JudgesResults() {
     .filter(p => !lockedProgrammeIds.has(p.id))
     .sort((a, b) => (resultNoMap[a.id] || 999) - (resultNoMap[b.id] || 999) || a.name.localeCompare(b.name))
 
-  const lockedResults = savedResults.filter(r => r.locked)
+  const validProgrammeMap = new Map(programmes.map(p => [p.id, p]))
+  const lockedResults = savedResults.filter(r => {
+    const prog = validProgrammeMap.get(r.programmeId)
+    return r.locked && prog && prog.isFinished
+  })
   const filteredLockedResults = categoryFilter
     ? lockedResults.filter(r => {
-        const prog = programmes.find(p => p.id === r.programmeId)
+        const prog = validProgrammeMap.get(r.programmeId)
         return categoryFilter === 'General' ? prog?.category === 'General' : prog?.category === categoryFilter
       })
     : lockedResults

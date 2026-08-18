@@ -99,9 +99,21 @@ export const getResultByProgrammeId = async (programmeId) => {
 }
 
 export const getAllResults = async () => {
-  const { data, error } = await supabase.from('results').select('*')
-  if (error) { console.error(error); return [] }
-  const latest = latestPerProgramme(data || [])
+  const [resultsRes, progsRes] = await Promise.all([
+    supabase.from('results').select('*'),
+    supabase.from('programmes').select('id, isFinished'),
+  ])
+  if (resultsRes.error) { console.error(resultsRes.error); return [] }
+  const progMap = {}
+  ;(progsRes.data || []).forEach(p => { progMap[p.id] = p })
+
+  const validResults = (resultsRes.data || []).filter(r => {
+    const prog = progMap[r.programmeId]
+    if (!prog) return false
+    return prog.isFinished || (!r.first && !r.second && !r.third && (r.resultNo || 0) > 0)
+  })
+
+  const latest = latestPerProgramme(validResults)
   return latest.sort((a, b) => (b.resultNo || 0) - (a.resultNo || 0))
 }
 
@@ -128,7 +140,11 @@ export const getFeaturedSpotlight = async () => {
 
 export async function getTeamPlacements(teamId) {
   const { data: allStudents } = await supabase.from('students').select('id, team')
-  const teams = await supabase.from('teams').select('id, name').then(r => r.data || [])
+  const [teams, progsRes] = await Promise.all([
+    supabase.from('teams').select('id, name').then(r => r.data || []),
+    supabase.from('programmes').select('id, isFinished').then(r => r.data || []),
+  ])
+  const finishedProgIds = new Set(progsRes.filter(p => p.isFinished).map(p => p.id))
   const teamNameToId = {}
   teams.forEach(t => { teamNameToId[t.name] = t.id })
   const studentIds = (allStudents || [])
@@ -141,7 +157,8 @@ export async function getTeamPlacements(teamId) {
     .select('*')
   if (resErr) return { first: [], second: [], third: [] }
 
-  const unique = latestPerProgramme(results)
+  const validResults = (results || []).filter(r => finishedProgIds.has(r.programmeId))
+  const unique = latestPerProgramme(validResults)
   const placements = { first: [], second: [], third: [] }
   for (const result of unique) {
     if (result.first?.studentId && studentIds.includes(result.first.studentId)) {
@@ -166,9 +183,14 @@ export const getStudentsByTeamId = async (teamId) => {
 }
 
 export async function getStudentResults(studentId) {
-  const { data: allResults, error } = await supabase.from('results').select('*')
-  if (error) return []
-  const unique = latestPerProgramme(allResults)
+  const [resultsRes, progsRes] = await Promise.all([
+    supabase.from('results').select('*'),
+    supabase.from('programmes').select('id, isFinished'),
+  ])
+  if (resultsRes.error) return []
+  const finishedProgIds = new Set((progsRes.data || []).filter(p => p.isFinished).map(p => p.id))
+  const validResults = (resultsRes.data || []).filter(r => finishedProgIds.has(r.programmeId))
+  const unique = latestPerProgramme(validResults)
   const studentResults = []
   for (const result of unique) {
     const placement = [result.first, result.second, result.third].find(p => p?.studentId === studentId)
@@ -180,11 +202,9 @@ export async function getStudentResults(studentId) {
 }
 
 export async function getStudentPoints(studentId) {
-  const { data: results, error } = await supabase.from('results').select('*')
-  if (error) return 0
+  const studentResults = await getStudentResults(studentId)
   let total = 0
-  const unique = latestPerProgramme(results)
-  for (const r of unique) {
+  for (const r of studentResults) {
     if (r.first?.studentId === studentId) total += (r.first.points || 0)
     if (r.second?.studentId === studentId) total += (r.second.points || 0)
     if (r.third?.studentId === studentId) total += (r.third.points || 0)
@@ -354,7 +374,7 @@ export const getTeamCategoryPoints = async () => {
 
     for (const result of Object.values(latestPerProg)) {
       const prog = progMap[result.programmeId]
-      if (!prog) continue
+      if (!prog || !prog.isFinished) continue
 
       const catName = prog.category === 'General' ? 'General Cat-A' : prog.category
 

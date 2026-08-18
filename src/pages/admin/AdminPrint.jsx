@@ -401,9 +401,10 @@ export default function AdminPrint() {
             <div className="space-y-3">
               {allResults.length === 0 && <p className="text-mutedText text-center">No results found.</p>}
               {allResults.filter(res => {
-                if (!catFilter) return true
                 const prog = programmes.find(p => p.id === res.programmeId)
-                return prog?.category === catFilter
+                if (!prog || !prog.isFinished) return false
+                if (!catFilter) return true
+                return prog.category === catFilter
               }).map(res => {
                 const prog = programmes.find(p => p.id === res.programmeId)
                 const isSelected = selectedSet.has(res.id)

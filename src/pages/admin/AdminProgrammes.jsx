@@ -75,20 +75,36 @@ export default function AdminProgrammes() {
 
   const toggleFinished = async (prog) => {
     const originalStatus = prog.isFinished
-    setProgrammes(prev => prev.map(p => p.id === prog.id ? { ...p, isFinished: !originalStatus } : p))
+    const nextStatus = !originalStatus
+    setProgrammes(prev => prev.map(p => p.id === prog.id ? { ...p, isFinished: nextStatus } : p))
 
     try {
-      const { data: updated, error } = await supabase.from('programmes').update({ isFinished: !originalStatus }).eq('id', prog.id).select('id')
+      const { data: updated, error } = await supabase.from('programmes').update({ isFinished: nextStatus }).eq('id', prog.id).select('id')
       if (error) throw error
       if (!updated || updated.length === 0) throw new Error('the database rejected the update (permission denied)')
+
+      if (!nextStatus) {
+        await supabase.from('results').delete().eq('programmeId', prog.id)
+        loadData()
+      }
     } catch (err) {
       setProgrammes(prev => prev.map(p => p.id === prog.id ? { ...p, isFinished: originalStatus } : p))
       toast('Failed to update status: ' + err.message, 'error')
     }
   }
 
+  const handleClearResult = async (prog) => {
+    if (!window.confirm(`Clear all results for "${prog.name}"?`)) return
+    const { error: resErr } = await supabase.from('results').delete().eq('programmeId', prog.id)
+    if (resErr) return toast('Failed to clear result: ' + resErr.message, 'error')
+    await supabase.from('programmes').update({ isFinished: false }).eq('id', prog.id)
+    toast('Result cleared!')
+    loadData()
+  }
+
   const handleDelete = async (prog) => {
     if (!window.confirm(`Delete programme "${prog.name}"? This cannot be undone.`)) return
+    await supabase.from('results').delete().eq('programmeId', prog.id)
     const { error } = await supabase.from('programmes').delete().eq('id', prog.id)
     if (error) {
       console.error('Programme delete failed:', error)
