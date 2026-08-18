@@ -89,16 +89,16 @@ export default function Home() {
     <div className="min-h-screen">
 
       {/* ── Floating Top Nav ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 sm:px-8 pt-4">
-        <div className="floating-nav grid grid-cols-[1fr_auto_1fr] items-center w-full max-w-3xl px-4 py-2 sm:px-5">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-8 pt-3 sm:pt-4">
+        <div className="floating-nav flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] w-full max-w-3xl px-3 py-2 sm:px-5">
           <Link
             to="/"
             aria-label="Go to the festival home"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2 tracking-tight select-none focus:outline-none justify-self-start font-sora"
+            className="flex items-center gap-1 sm:gap-2 tracking-tight select-none focus:outline-none justify-self-start font-sora shrink-0"
           >
-            <span className="font-bold text-2xl sm:text-3xl leading-none uppercase text-mainText">ISRA</span>
-            <div className="flex flex-col text-[10px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider text-mainText border-l-0 pl-1">
+            <span className="font-bold text-xl sm:text-3xl leading-none uppercase text-mainText">ISRA</span>
+            <div className="flex flex-col text-[9px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider text-mainText border-l-0 pl-0.5">
               <span>LIFE</span>
               <span>FESTIVAL</span>
             </div>
@@ -113,7 +113,7 @@ export default function Home() {
             </button>
           </nav>
 
-          <div className="flex items-center gap-3 justify-self-end ml-2 sm:ml-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 justify-self-end shrink-0">
             <LoginControl />
             <ThemeToggle />
           </div>
