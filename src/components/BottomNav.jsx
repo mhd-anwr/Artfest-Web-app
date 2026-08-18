@@ -10,7 +10,7 @@ const tabs = [
 export default function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const [isSliding, setIsSliding] = useState(false)
+  const [animClass, setAnimClass] = useState('')
   const touchStartX = useRef(null)
 
   // Hide the shared bottom nav inside the Student, Judge and Admin panels.
@@ -24,8 +24,9 @@ export default function BottomNav() {
 
   const handleTabClick = (targetIndex) => {
     if (targetIndex !== activeIndex) {
-      setIsSliding(true)
-      setTimeout(() => setIsSliding(false), 380)
+      const cls = targetIndex === 1 ? 'slide-to-results' : 'slide-to-home'
+      setAnimClass(cls)
+      setTimeout(() => setAnimClass(''), 440)
     }
   }
 
@@ -64,11 +65,9 @@ export default function BottomNav() {
         <div className="liquid-glass-track">
           {activeIndex !== -1 && (
             <div
-              className="liquid-glass-lens"
+              className={`liquid-glass-lens ${animClass}`}
               style={{
-                transform: activeIndex === 1
-                  ? (isSliding ? 'translateX(100%) scaleX(1.08) scaleY(0.92)' : 'translateX(100%) scaleX(1) scaleY(1)')
-                  : (isSliding ? 'translateX(0%) scaleX(1.08) scaleY(0.92)' : 'translateX(0%) scaleX(1) scaleY(1)'),
+                transform: activeIndex === 1 ? 'translateX(100%)' : 'translateX(0%)',
               }}
             />
           )}

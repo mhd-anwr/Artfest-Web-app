@@ -196,11 +196,11 @@ body {
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.38);
   background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.15) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.85), transparent 60%);
-  -webkit-backdrop-filter: blur(18px) saturate(200%);
-  backdrop-filter: blur(18px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.32) 50%, rgba(255, 255, 255, 0.15) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.9), transparent 60%);
+  -webkit-backdrop-filter: blur(20px) saturate(210%);
+  backdrop-filter: blur(20px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
   box-shadow:
     0 6px 18px rgba(45, 25, 85, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.04),
@@ -214,16 +214,55 @@ body {
 
 [data-theme='dark'] .liquid-glass-lens,
 .dark .liquid-glass-lens {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.02) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.45), transparent 60%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.03) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.5), transparent 60%);
+  border: 1px solid rgba(255, 255, 255, 0.32);
   box-shadow:
     0 6px 20px rgba(0, 0, 0, 0.45),
     0 2px 6px rgba(0, 0, 0, 0.25),
-    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.4),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.42),
     inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Liquid Physics Elastic Keyframe Sliding Animations */
+@keyframes liquid-slide-to-results {
+  0% {
+    transform: translateX(0%) scaleX(1) scaleY(1);
+  }
+  38% {
+    transform: translateX(48%) scaleX(1.18) scaleY(0.88);
+  }
+  75% {
+    transform: translateX(100%) scaleX(0.93) scaleY(1.05);
+  }
+  100% {
+    transform: translateX(100%) scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes liquid-slide-to-home {
+  0% {
+    transform: translateX(100%) scaleX(1) scaleY(1);
+  }
+  38% {
+    transform: translateX(52%) scaleX(1.18) scaleY(0.88);
+  }
+  75% {
+    transform: translateX(0%) scaleX(0.93) scaleY(1.05);
+  }
+  100% {
+    transform: translateX(0%) scaleX(1) scaleY(1);
+  }
+}
+
+.liquid-glass-lens.slide-to-results {
+  animation: liquid-slide-to-results 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.liquid-glass-lens.slide-to-home {
+  animation: liquid-slide-to-home 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .nav-link {
