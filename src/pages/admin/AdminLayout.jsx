@@ -101,14 +101,14 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-white/10 dark:bg-purple/20 border border-white/15 dark:border-purple/30 shadow-inner admin-nav-item-active font-bold'
-                    : 'text-inherit opacity-70 hover:opacity-100 border border-transparent'
+                    ? 'bg-white/15 dark:bg-purple/20 border border-white/20 dark:border-purple/30 shadow-inner admin-nav-item-active font-bold'
+                    : 'text-white/70 dark:text-slate-600 hover:text-white dark:hover:text-slate-950 border border-transparent'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'text-mutedText group-hover:text-mainText shrink-0'} />
+                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'text-white/60 dark:text-slate-500 group-hover:text-white dark:group-hover:text-slate-950 shrink-0'} />
                   <span className={isActive ? 'flex-1 truncate admin-nav-item-active font-bold' : 'flex-1 truncate'}>{label}</span>
                   <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'admin-nav-dot-active' : 'bg-transparent'}`} />
                 </>
@@ -124,9 +124,9 @@ export default function AdminLayout() {
               {(adminEmail || 'A').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-inherit truncate">{adminEmail || 'Admin'}</p>
+              <p className="text-sm font-semibold text-white dark:text-slate-950 truncate">{adminEmail || 'Admin'}</p>
             </div>
-            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-mutedText hover:text-red-400 hover:bg-white/10 transition">
+            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-white/70 dark:text-slate-600 hover:text-red-400 dark:hover:text-red-600 hover:bg-white/10 dark:hover:bg-black/10 transition">
               <LogOut size={18} />
             </button>
           </div>

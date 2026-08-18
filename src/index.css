@@ -535,50 +535,50 @@ body {
 }
 
 .admin-sidebar {
-  background: #ffffff;
-  color: #111111;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-[data-theme='dark'] .admin-sidebar,
-.dark .admin-sidebar {
   background: #1d192b;
   color: #ffffff;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Admin Sidebar Brand Header Text (Light: Black #111111, Dark: White #FFFFFF) */
+[data-theme='dark'] .admin-sidebar,
+.dark .admin-sidebar {
+  background: #ffffff;
+  color: #111111;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Admin Sidebar Brand Header Text (Light Theme: White #FFFFFF, Dark Theme: Black #111111) */
 .admin-brand-text {
-  color: #111111 !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .admin-brand-text,
 .dark .admin-brand-text {
-  color: #ffffff !important;
+  color: #111111 !important;
 }
 
-/* Admin Sidebar Active Nav Item Visibility (Light: Black #111111, Dark: White #FFFFFF) */
+/* Admin Sidebar Active Nav Item Visibility (Light Theme: White #FFFFFF, Dark Theme: Black #111111) */
 .admin-nav-item-active {
-  color: #111111 !important;
+  color: #ffffff !important;
 }
 .admin-nav-icon-active {
-  color: #111111 !important;
+  color: #ffffff !important;
 }
 .admin-nav-dot-active {
-  background-color: #111111 !important;
+  background-color: #ffffff !important;
 }
 
 [data-theme='dark'] .admin-nav-item-active,
 .dark .admin-nav-item-active {
-  color: #ffffff !important;
+  color: #111111 !important;
 }
 [data-theme='dark'] .admin-nav-icon-active,
 .dark .admin-nav-icon-active {
-  color: #ffffff !important;
+  color: #111111 !important;
 }
 [data-theme='dark'] .admin-nav-dot-active,
 .dark .admin-nav-dot-active {
-  background-color: #ffffff !important;
+  background-color: #111111 !important;
 }
 
 /* Leaderboard rows — 1st gold / 2nd silver / 3rd bronze */
