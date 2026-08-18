@@ -356,46 +356,24 @@ export default function Home() {
             to life — from stage lights to score sheets.
           </p>
 
-          <div className="grid grid-cols-4 gap-x-6 gap-y-10 place-items-center max-w-6xl mx-auto px-4 mb-8">
-            {teamMembers.slice(0, 4).map(member => (
-              <div key={member.name} className="w-full max-w-[301px] text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10 place-items-center max-w-6xl mx-auto px-4">
+            {teamMembers.map(member => (
+              <div key={member.name} className="w-full max-w-[301px] text-center flex flex-col items-center">
                 {member.photo ? (
                   <img
                     src={member.photo}
                     alt={member.name}
-                    className="mx-auto mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[24px] object-cover object-top shadow-lg"
+                    className="mx-auto mb-3 sm:mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[18px] sm:rounded-[24px] object-cover object-top shadow-lg"
                   />
                 ) : (
                   <div
-                    className={`mx-auto mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[24px] bg-gradient-to-br ${member.tint} flex items-center justify-center font-display text-2xl font-bold text-white shadow-lg`}
+                    className={`mx-auto mb-3 sm:mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[18px] sm:rounded-[24px] bg-gradient-to-br ${member.tint} flex items-center justify-center font-display text-xl sm:text-2xl font-bold text-white shadow-lg`}
                   >
                     {member.initials}
                   </div>
                 )}
-                <p className="team-profile-name text-center">{member.name}</p>
-                <p className="team-profile-role text-center">{member.role}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-4 gap-x-6 gap-y-8 place-items-center max-w-6xl mx-auto px-4">
-            {teamMembers.slice(4).map(member => (
-              <div key={member.name} className="w-full max-w-[301px] text-center">
-                {member.photo ? (
-                  <img
-                    src={member.photo}
-                    alt={member.name}
-                    className="mx-auto mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[24px] object-cover object-top shadow-lg"
-                  />
-                ) : (
-                  <div
-                    className={`mx-auto mb-4 aspect-[301/280] w-full max-w-[301px] rounded-[24px] bg-gradient-to-br ${member.tint} flex items-center justify-center font-display text-2xl font-bold text-white shadow-lg`}
-                  >
-                    {member.initials}
-                  </div>
-                )}
-                <p className="team-profile-name text-center">{member.name}</p>
-                <p className="team-profile-role text-center">{member.role}</p>
+                <p className="team-profile-name text-center w-full">{member.name}</p>
+                <p className="team-profile-role text-center w-full">{member.role}</p>
               </div>
             ))}
           </div>
