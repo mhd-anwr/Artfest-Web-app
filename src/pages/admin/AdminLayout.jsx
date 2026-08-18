@@ -54,9 +54,9 @@ export default function AdminLayout() {
           <Menu size={24} />
         </button>
         <div className="flex items-center gap-2.5">
-          <Link to="/" className="flex flex-col items-start select-none font-sora text-slate-950 dark:text-white">
-            <span className="font-extrabold text-xl leading-none uppercase tracking-tight">ISRA</span>
-            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight mt-0.5 opacity-90">LIFE FESTIVAL</span>
+          <Link to="/" className="flex flex-col items-start select-none font-sora admin-brand-text">
+            <span className="font-extrabold text-xl leading-none uppercase tracking-tight admin-brand-text">ISRA</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight mt-0.5 opacity-90 admin-brand-text">LIFE FESTIVAL</span>
           </Link>
         </div>
       </div>
@@ -76,16 +76,16 @@ export default function AdminLayout() {
         <div className="flex items-center justify-between px-6 py-5 border-b border-black/10 dark:border-white/10">
           <Link
             to="/"
-            className="flex flex-col items-start select-none font-sora text-slate-950 dark:text-white"
+            className="flex flex-col items-start select-none font-sora admin-brand-text"
           >
-            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight">
+            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight admin-brand-text">
               ISRA
             </span>
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90 admin-brand-text">
               LIFE FESTIVAL
             </span>
           </Link>
-          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1 text-mutedText hover:text-mainText">
+          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1 opacity-70 hover:opacity-100">
             <X size={22} />
           </button>
         </div>
