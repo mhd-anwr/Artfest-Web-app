@@ -56,23 +56,25 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2.5rem)] max-w-[19rem] -translate-x-1/2 sm:hidden pb-[env(safe-area-inset-bottom,0px)] select-none">
       <div
-        className="liquid-glass-vessel relative flex items-center p-[0.35rem]"
+        className="liquid-glass-vessel relative flex items-center p-[0.35rem] overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* ONE Physical Liquid Glass Lens Sliding inside Container */}
-        {activeIndex !== -1 && (
-          <div
-            className="liquid-glass-lens"
-            style={{
-              transform: activeIndex === 1
-                ? (isSliding ? 'translateX(calc(100% + 0.35rem)) scaleX(1.12) scaleY(0.92)' : 'translateX(calc(100% + 0.35rem)) scaleX(1) scaleY(1)')
-                : (isSliding ? 'translateX(0) scaleX(1.12) scaleY(0.92)' : 'translateX(0) scaleX(1) scaleY(1)'),
-            }}
-          />
-        )}
+        {/* Equal Inset Lens Track Container */}
+        <div className="liquid-glass-track">
+          {activeIndex !== -1 && (
+            <div
+              className="liquid-glass-lens"
+              style={{
+                transform: activeIndex === 1
+                  ? (isSliding ? 'translateX(100%) scaleX(1.08) scaleY(0.92)' : 'translateX(100%) scaleX(1) scaleY(1)')
+                  : (isSliding ? 'translateX(0%) scaleX(1.08) scaleY(0.92)' : 'translateX(0%) scaleX(1) scaleY(1)'),
+              }}
+            />
+          )}
+        </div>
 
-        {/* Seamless Navigation Items (No button borders or card boxes) */}
+        {/* Seamless Navigation Items */}
         <div className="relative z-10 flex w-full items-center">
           {tabs.map(({ path, icon: Icon, label }, index) => {
             const active = location.pathname === path
