@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase/client'
 import { getStudents, getTeams, getProgrammes, getCategories, STUDENT_CATEGORIES } from '../../supabase/queries'
-import { Plus, X, Pencil, Trash2 } from 'lucide-react'
+import { Plus, X, Pencil, Trash2, Upload } from 'lucide-react'
 import StudentAvatar from '../../components/StudentAvatar'
 import FilterDropdown from '../../components/FilterDropdown'
 import KebabMenu from '../../components/KebabMenu'
 import { useToast } from '../../components/Toast'
+import BulkImportModal from '../../components/BulkImportModal'
 
 export default function AdminStudents() {
   const [students, setStudents] = useState([])
   const [teams, setTeams] = useState([])
   const [programmes, setProgrammes] = useState([])
   const [formOpen, setFormOpen] = useState(false)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
   const [name, setName] = useState('')
   const [chestNo, setChestNo] = useState('')
   const [category, setCategory] = useState('')
@@ -219,9 +221,17 @@ export default function AdminStudents() {
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Participants</h2>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base">
-          <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Participant
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setBulkImportOpen(true)}
+            className="flex items-center gap-1.5 sm:gap-2 bg-black/20 hover:bg-black/40 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base"
+          >
+            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Bulk Import
+          </button>
+          <button onClick={openAdd} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
+            <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Participant
+          </button>
+        </div>
       </div>
 
       {formOpen && (
@@ -353,6 +363,19 @@ export default function AdminStudents() {
       </div>
 
       {viewStudent && programmesModal(viewStudent)}
+
+      <BulkImportModal
+        isOpen={bulkImportOpen}
+        onClose={() => setBulkImportOpen(false)}
+        onImportSuccess={async () => {
+          const refreshed = await getStudents()
+          setStudents(refreshed)
+          toast('Bulk import completed successfully!')
+        }}
+        existingStudents={students}
+        existingTeams={teams}
+        existingCategories={categories}
+      />
     </div>
   )
 }
