@@ -212,6 +212,10 @@ body {
   box-sizing: border-box;
 }
 
+.liquid-glass-lens.is-dragging {
+  transition: none !important;
+}
+
 [data-theme='dark'] .liquid-glass-lens,
 .dark .liquid-glass-lens {
   background: rgba(255, 255, 255, 0.16);
