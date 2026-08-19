@@ -30,8 +30,8 @@ export default function Results() {
   const [orderedCategories, setOrderedCategories] = useState(PROGRAMME_CATEGORIES)
   const [category, setCategory] = useState('')
   const [unfinishedOnly, setUnfinishedOnly] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  const [expanded, setExpanded] = useState(false)
+  const containerRef = useRef(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -52,8 +52,8 @@ export default function Results() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false)
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setExpanded(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -119,53 +119,62 @@ export default function Results() {
           </p>
         </div>
 
-        {/* Filter Controls: Custom Category Dropdown + Unfinished Button */}
-        <div className="flex items-center gap-3 mb-8 relative z-30 flex-wrap">
-          {/* Category Dropdown */}
-          <div className="relative inline-block" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className={`filter-btn flex items-center gap-2 ${!unfinishedOnly ? 'active' : ''}`}
-              aria-haspopup="listbox"
-              aria-expanded={dropdownOpen}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-accent-purple shrink-0" style={{ backgroundColor: CATEGORY_COLORS[category] || '#9CA3AF' }} />
-              <span>{currentCatObj.label}</span>
-              <ChevronDown size={15} className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute top-full mt-2 left-0 min-w-[210px] bg-card border border-subtle rounded-2xl shadow-2xl z-50 overflow-hidden animate-fadeIn">
-                <div className="py-1.5 max-h-64 overflow-y-auto">
-                  {categories.map(cat => {
-                    const isSelected = !unfinishedOnly && category === cat.value
-                    const dotColor = CATEGORY_COLORS[cat.value] || '#9CA3AF'
-                    return (
-                      <button
-                        key={cat.value}
-                        onClick={() => {
-                          setCategory(cat.value)
-                          setUnfinishedOnly(false)
-                          setDropdownOpen(false)
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition ${
-                          isSelected
-                            ? 'bg-lavender text-mainText font-bold'
-                            : 'text-textMute hover:text-mainText hover:bg-lavender/50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 truncate">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: dotColor }}
-                          />
-                          <span className="truncate">{cat.label}</span>
-                        </div>
-                        {isSelected && <Check size={14} className="text-accent-purple shrink-0" />}
-                      </button>
-                    )
-                  })}
-                </div>
+        {/* Filter Controls: Horizontally Expanding Category Pill + Unfinished Button */}
+        <div className="flex items-center gap-3 mb-8 relative z-30 max-w-full">
+          {/* Expanding Category Pill Container */}
+          <div ref={containerRef} className="relative flex items-center max-w-[calc(100vw-130px)] sm:max-w-none">
+            {!expanded ? (
+              /* CLOSED STATE: Compact Pill Button */
+              <button
+                onClick={() => setExpanded(true)}
+                className={`filter-btn flex items-center gap-2 ${!unfinishedOnly ? 'active' : ''}`}
+                title="Expand categories"
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0 transition-colors"
+                  style={{ backgroundColor: CATEGORY_COLORS[category] || '#9CA3AF' }}
+                />
+                <span className="font-semibold text-xs sm:text-sm">{currentCatObj.label}</span>
+                <ChevronDown
+                  size={15}
+                  className="transition-transform duration-300 text-mutedText"
+                />
+              </button>
+            ) : (
+              /* EXPANDED STATE: Horizontal Liquid-Glass Bar */
+              <div className="inline-flex items-center gap-1 sm:gap-1.5 bg-[#1D192B] text-white dark:bg-card-white dark:text-mainText border border-subtle rounded-full p-1.5 shadow-2xl overflow-x-auto scrollbar-none max-w-full animate-fadeIn transition-all duration-300">
+                {categories.map(cat => {
+                  const isSelected = !unfinishedOnly && category === cat.value
+                  const dotColor = CATEGORY_COLORS[cat.value] || '#9CA3AF'
+                  return (
+                    <button
+                      key={cat.value}
+                      onClick={() => {
+                        setCategory(cat.value)
+                        setUnfinishedOnly(false)
+                        setExpanded(false)
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-white/20 text-white dark:bg-black/20 dark:text-mainText font-bold shadow-sm'
+                          : 'opacity-70 hover:opacity-100 hover:bg-white/10'
+                      }`}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: dotColor }}
+                      />
+                      <span>{cat.label}</span>
+                    </button>
+                  )
+                })}
+                <button
+                  onClick={() => setExpanded(false)}
+                  className="p-1.5 rounded-full opacity-60 hover:opacity-100 hover:bg-white/10 transition shrink-0 ml-1"
+                  title="Collapse categories"
+                >
+                  <ChevronDown size={15} className="rotate-180" />
+                </button>
               </div>
             )}
           </div>
@@ -174,9 +183,9 @@ export default function Results() {
           <button
             onClick={() => {
               setUnfinishedOnly(u => !u)
-              setDropdownOpen(false)
+              setExpanded(false)
             }}
-            className={`filter-btn flex items-center gap-1.5 ${unfinishedOnly ? 'active' : ''}`}
+            className={`filter-btn flex items-center gap-1.5 shrink-0 ${unfinishedOnly ? 'active' : ''}`}
           >
             <Hourglass size={14} /> Unfinished
           </button>
