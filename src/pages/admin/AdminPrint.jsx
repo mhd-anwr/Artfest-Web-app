@@ -67,11 +67,19 @@ export default function AdminPrint() {
     'General Cat-B': { light: '#FFFFFF', dark: '#F5F5F5' },
   }
 
+  const catCountByCategory = {}
+  CATEGORIES.forEach(c => { catCountByCategory[c] = 0 })
+  programmes.forEach(p => {
+    if (p.category && catCountByCategory[p.category] !== undefined) {
+      catCountByCategory[p.category] += 1
+    }
+  })
+
   const catOptions = [
-    { value: '', label: 'All Categories', icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> },
+    { value: '', label: `All Categories (${programmes.length})`, icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> },
     ...CATEGORIES.map(cat => ({
       value: cat,
-      label: cat,
+      label: `${cat} (${catCountByCategory[cat] || 0})`,
       icon: <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[cat]?.light || '#9CA3AF' }} />,
     })),
   ]

@@ -98,11 +98,19 @@ export default function JudgesResults() {
 
   const resultNoMap = getResultNoMap()
 
+  const catCountByCategory = {}
+  categories.forEach(c => { catCountByCategory[c] = 0 })
+  programmes.forEach(p => {
+    if (p.category && catCountByCategory[p.category] !== undefined) {
+      catCountByCategory[p.category] += 1
+    }
+  })
+
   const catOptions = [
-    { value: '', label: 'All Categories', icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> },
+    { value: '', label: `All Categories (${programmes.length})`, icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> },
     ...categories.map(c => ({
       value: c,
-      label: c,
+      label: `${c} (${catCountByCategory[c] || 0})`,
       icon: <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[c]?.light || '#9CA3AF' }} />,
     })),
   ]
