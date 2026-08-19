@@ -71,14 +71,44 @@ export default function JudgesResults() {
     loadResults()
   }, [])
 
+  const getCandidatesForProg = (prog) => {
+    if (!prog) return []
+    const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
+
+    if (registered.length === 0) {
+      return Array.from({ length: 8 }, (_, i) => {
+        const letter = String.fromCharCode(65 + i)
+        return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter }
+      })
+    }
+
+    const sorted = [...registered].sort((a, b) => (a.chestNo || a.name || a.id).localeCompare(b.chestNo || b.name || b.id))
+
+    return sorted.map((cand, idx) => ({
+      id: cand.id,
+      name: cand.name,
+      chestNo: cand.chestNo,
+      code: cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
+    }))
+  }
+
   const getStudentObj = (id) => {
     const s = students.find(s => s.id === id)
     return s ? { studentId: s.id, name: s.name, photoURL: s.photoURL } : null
   }
 
-  const placement = (studentId, points) => {
+  const placement = (studentId, points, prog) => {
+    const candidates = getCandidatesForProg(prog)
+    const cand = candidates.find(c => c.id === studentId)
     const s = getStudentObj(studentId)
-    return s ? { ...s, points: Number(points) || 0, grade: calcGrade(points) } : null
+    const code = cand ? cand.code : (studentId?.startsWith('anon_') ? studentId.split('_').pop() : 'A')
+    if (s) {
+      return { ...s, code, points: Number(points) || 0, grade: calcGrade(points) }
+    }
+    if (studentId) {
+      return { studentId, name: `Performance ${code}`, code, points: Number(points) || 0, grade: calcGrade(points) }
+    }
+    return null
   }
 
   const getProgrammeType = (prog) => prog?.programmeType || prog?.type || prog?.programme_type || ''
@@ -355,9 +385,9 @@ export default function JudgesResults() {
     const payload = {
       programmeId: editProg.id,
       name: editProg.name,
-      first: placement(first, firstPoints),
-      second: placement(second, secondPoints),
-      third: placement(third, thirdPoints),
+      first: placement(first, firstPoints, editProg),
+      second: placement(second, secondPoints, editProg),
+      third: placement(third, thirdPoints, editProg),
       updatedAt: new Date().toISOString(),
       locked: true,
     }
@@ -538,7 +568,9 @@ export default function JudgesResults() {
                           }`}>
                             {rank}
                           </span >
-                          <span className="text-mainText font-medium text-sm sm:text-base">{data.name}</span>
+                          <span className="text-mainText font-medium text-sm sm:text-base">
+                            Performance {data.code || 'Entry'}
+                          </span>
                           <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                           {data.grade && data.grade !== '-' && (
                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${
@@ -662,26 +694,54 @@ export default function JudgesResults() {
             {placementLabels.map((label, i) => {
               const v = placementVals[i]
               const grade = calcGrade(v.points)
+              const candidates = getCandidatesForProg(editProg)
+              const selectedCand = candidates.find(c => c.id === v.student)
+
               return (
-                <div key={label} className="mb-4">
-                  <label className="text-mutedText text-xs sm:text-sm mb-1 block">{label}</label>
-                  <div className="flex gap-2">
-                    <select className="flex-1 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base" value={v.student} onChange={e => v.setStudent(e.target.value)}>
-                      <option value="">Select Participant</option>
-                      {editStudentOptions.map(s => (
-                        <option key={s.id} value={s.id} label={s.name}>
-                          {s.name}{s.chestNo ? ` (#${s.chestNo})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      placeholder="Pts"
-                      className="w-16 sm:w-20 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-center text-sm sm:text-base"
-                      value={v.points}
-                      onChange={e => v.setPoints(e.target.value)}
-                    />
-                    <div className={`flex items-center justify-center w-12 sm:w-14 rounded-xl text-xs sm:text-sm font-bold ${
+                <div key={label} className="mb-5 bg-secondary/10 p-3.5 sm:p-4 rounded-2xl border border-secondary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-mainText text-xs sm:text-sm font-bold">{label}</label>
+                    {selectedCand && (
+                      <span className="text-xs font-bold text-accent bg-accent/15 px-2.5 py-1 rounded-full border border-accent/30">
+                        Selected: Performance {selectedCand.code}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-mutedText text-[11px] sm:text-xs mb-2 font-medium">Select Performance Code:</p>
+                    <div className="flex items-center gap-2 flex-wrap max-h-36 overflow-y-auto p-1 scrollbar-none">
+                      {candidates.map(cand => {
+                        const isSelected = v.student === cand.id
+                        return (
+                          <button
+                            key={cand.id}
+                            type="button"
+                            onClick={() => v.setStudent(cand.id)}
+                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl font-poppins font-bold text-sm sm:text-base border transition flex items-center justify-center ${
+                              isSelected
+                                ? 'bg-accent text-white border-accent shadow-md scale-105 ring-2 ring-accent/40'
+                                : 'bg-black/20 hover:bg-black/30 text-mainText border-secondary/30'
+                            }`}
+                          >
+                            {cand.code}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-3 pt-2 border-t border-secondary/20">
+                    <div className="flex-1">
+                      <input
+                        type="number"
+                        placeholder="Enter Points (e.g. 10)"
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 sm:p-3 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base"
+                        value={v.points}
+                        onChange={e => v.setPoints(e.target.value)}
+                      />
+                    </div>
+                    <div className={`flex items-center justify-center w-14 h-10 sm:h-11 rounded-xl text-xs sm:text-sm font-bold shrink-0 ${
                       grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
                       grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
                       grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
@@ -689,9 +749,9 @@ export default function JudgesResults() {
                       'bg-orange-500/15 text-orange-400 border border-orange-500/40'
                     }`}>
                       {grade}
-                    </div >
-                  </div >
-                </div >
+                    </div>
+                  </div>
+                </div>
               )
             })}
 
