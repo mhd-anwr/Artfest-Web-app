@@ -2,11 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
 import { getProgrammes, getResultNoMap, getCategories, getTeams, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
-import { Plus, X, Printer, Pencil, Trash2 } from 'lucide-react'
+import { Plus, X, Printer, Pencil, Trash2, Upload } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
 import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
 import { useToast } from '../../components/Toast'
+import ProgrammeBulkImportModal from '../../components/ProgrammeBulkImportModal'
 
 export default function AdminProgrammes() {
   const addNameRef = useRef(null)
@@ -22,6 +23,7 @@ export default function AdminProgrammes() {
   const [students, setStudents] = useState([])
   const [teams, setTeams] = useState([])
   const [showAdd, setShowAdd] = useState(false)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
   const [programmeType, setProgrammeType] = useState('')
@@ -211,10 +213,16 @@ export default function AdminProgrammes() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Programmes</h2>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base">
+          <button
+            onClick={() => setBulkImportOpen(true)}
+            className="flex items-center gap-1.5 sm:gap-2 bg-black/20 hover:bg-black/40 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base"
+          >
+            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Bulk Import
+          </button>
+          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
             <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Programme
           </button>
-          <button onClick={() => navigate('/admin/print')} className="flex items-center gap-2 bg-success hover:bg-success/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base">
+          <button onClick={() => navigate('/admin/print')} className="flex items-center gap-2 bg-success hover:bg-success/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
             <Printer size={16} className="sm:w-[18px] sm:h-[18px]" /> Print
           </button>
         </div>
@@ -440,6 +448,17 @@ export default function AdminProgrammes() {
 
       {/* View Participants Modal */}
       {viewProg && participantsModal(viewProg)}
+
+      <ProgrammeBulkImportModal
+        isOpen={bulkImportOpen}
+        onClose={() => setBulkImportOpen(false)}
+        onImportSuccess={() => {
+          loadData()
+          toast('Programme bulk import completed successfully!')
+        }}
+        existingProgrammes={programmes}
+        existingCategories={categories}
+      />
     </div>
   )
 }
