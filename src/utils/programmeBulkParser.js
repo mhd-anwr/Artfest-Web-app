@@ -17,7 +17,7 @@ export const APPROVED_CATEGORIES = [
   'General Cat-B'
 ]
 
-export const APPROVED_TYPES = PROGRAMME_TYPES // ['On-Stage', 'Off-stage'] or ['On Stage', 'Off Stage']
+export const APPROVED_TYPES = PROGRAMME_TYPES // ['On-Stage', 'Off-Stage']
 export const APPROVED_PARTICIPATION = PARTICIPATION_TYPES // ['Individual', 'Group']
 
 /**
@@ -174,12 +174,11 @@ export function normalizeType(val) {
   const str = String(val).trim().toLowerCase()
 
   if (str.includes('on') || str.includes('stage') && !str.includes('off')) {
-    // Check whether database uses 'On-stage' or 'On Stage'
-    const onStageOpt = PROGRAMME_TYPES.find(t => t.toLowerCase().includes('on')) || 'On-stage'
+    const onStageOpt = PROGRAMME_TYPES.find(t => t.toLowerCase().includes('on')) || 'On-Stage'
     return onStageOpt
   }
   if (str.includes('off')) {
-    const offStageOpt = PROGRAMME_TYPES.find(t => t.toLowerCase().includes('off')) || 'Off-stage'
+    const offStageOpt = PROGRAMME_TYPES.find(t => t.toLowerCase().includes('off')) || 'Off-Stage'
     return offStageOpt
   }
 

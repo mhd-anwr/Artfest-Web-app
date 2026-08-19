@@ -55,7 +55,7 @@ export default function ProgrammeBulkImportModal({
     const csvContent = [
       'Programme Name,Category,Type,Individual / Group,Result Number',
       `Elocution English,${validCategories[0] || 'HS'},${PROGRAMME_TYPES[0] || 'On-Stage'},${PARTICIPATION_TYPES[0] || 'Individual'},1`,
-      `Group Song,${validCategories[1] || 'Junior'},${PROGRAMME_TYPES[0] || 'On-stage'},${PARTICIPATION_TYPES[1] || 'Group'},2`,
+      `Group Song,${validCategories[1] || 'Junior'},${PROGRAMME_TYPES[0] || 'On-Stage'},${PARTICIPATION_TYPES[1] || 'Group'},2`,
       `Essay Writing Malayalam,${validCategories[2] || 'Premier'},${PROGRAMME_TYPES[1] || 'Off-Stage'},${PARTICIPATION_TYPES[0] || 'Individual'},3`,
     ].join('\n')
 
