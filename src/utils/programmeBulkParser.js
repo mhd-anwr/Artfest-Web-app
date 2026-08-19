@@ -17,7 +17,7 @@ export const APPROVED_CATEGORIES = [
   'General Cat-B'
 ]
 
-export const APPROVED_TYPES = PROGRAMME_TYPES // ['On-stage', 'Off-stage'] or ['On Stage', 'Off Stage']
+export const APPROVED_TYPES = PROGRAMME_TYPES // ['On-Stage', 'Off-stage'] or ['On Stage', 'Off Stage']
 export const APPROVED_PARTICIPATION = PARTICIPATION_TYPES // ['Individual', 'Group']
 
 /**

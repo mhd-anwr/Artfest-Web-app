@@ -309,7 +309,7 @@ export default function Home() {
             <p className="text-mutedText text-sm sm:text-base italic leading-loose">
               Campus Art Fest is an annual celebration of creativity and talent, bringing together
               participants from all departments to showcase their skills in dance, music, art,
-              literary arts, and stage performances. Our mission is to Track, Celebrate, and
+              literary arts, and Stage performances. Our mission is to Track, Celebrate, and
               Remember every moment of this vibrant festival.
             </p>
             <p className="text-mutedText text-sm sm:text-base italic leading-loose">
@@ -352,7 +352,7 @@ export default function Home() {
           </h3>
           <p className="max-w-2xl mx-auto text-mutedText text-sm sm:text-base italic leading-loose mb-12 px-2">
             A passionate crew of organizers, coordinators, and volunteers who bring the festival
-            to life — from stage lights to score sheets.
+            to life — from Stage lights to score sheets.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10 place-items-center max-w-6xl mx-auto px-4">

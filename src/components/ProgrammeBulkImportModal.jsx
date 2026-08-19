@@ -54,9 +54,9 @@ export default function ProgrammeBulkImportModal({
   const handleDownloadTemplate = () => {
     const csvContent = [
       'Programme Name,Category,Type,Individual / Group,Result Number',
-      `Elocution English,${validCategories[0] || 'HS'},${PROGRAMME_TYPES[0] || 'On-stage'},${PARTICIPATION_TYPES[0] || 'Individual'},1`,
+      `Elocution English,${validCategories[0] || 'HS'},${PROGRAMME_TYPES[0] || 'On-Stage'},${PARTICIPATION_TYPES[0] || 'Individual'},1`,
       `Group Song,${validCategories[1] || 'Junior'},${PROGRAMME_TYPES[0] || 'On-stage'},${PARTICIPATION_TYPES[1] || 'Group'},2`,
-      `Essay Writing Malayalam,${validCategories[2] || 'Premier'},${PROGRAMME_TYPES[1] || 'Off-stage'},${PARTICIPATION_TYPES[0] || 'Individual'},3`,
+      `Essay Writing Malayalam,${validCategories[2] || 'Premier'},${PROGRAMME_TYPES[1] || 'Off-Stage'},${PARTICIPATION_TYPES[0] || 'Individual'},3`,
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -326,27 +326,24 @@ export default function ProgrammeBulkImportModal({
                   <button
                     type="button"
                     onClick={() => setFilterTab('all')}
-                    className={`px-3 py-1 rounded-lg font-semibold transition ${
-                      filterTab === 'all' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
-                    }`}
+                    className={`px-3 py-1 rounded-lg font-semibold transition ${filterTab === 'all' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
+                      }`}
                   >
                     All ({totalCount})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterTab('valid')}
-                    className={`px-3 py-1 rounded-lg font-semibold transition ${
-                      filterTab === 'valid' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
-                    }`}
+                    className={`px-3 py-1 rounded-lg font-semibold transition ${filterTab === 'valid' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
+                      }`}
                   >
                     Valid ({validCount})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterTab('errors')}
-                    className={`px-3 py-1 rounded-lg font-semibold transition ${
-                      filterTab === 'errors' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
-                    }`}
+                    className={`px-3 py-1 rounded-lg font-semibold transition ${filterTab === 'errors' ? 'bg-primary text-white' : 'text-mutedText hover:text-mainText'
+                      }`}
                   >
                     Errors ({totalErrors})
                   </button>
@@ -381,9 +378,8 @@ export default function ProgrammeBulkImportModal({
                       return (
                         <tr
                           key={item.rowId}
-                          className={`transition ${
-                            !item.isValid ? 'bg-rose-500/10' : item.selected ? 'bg-white/5' : 'opacity-60'
-                          }`}
+                          className={`transition ${!item.isValid ? 'bg-rose-500/10' : item.selected ? 'bg-white/5' : 'opacity-60'
+                            }`}
                         >
                           {/* Checkbox */}
                           <td className="p-3 text-center">
@@ -546,11 +542,10 @@ export default function ProgrammeBulkImportModal({
                   type="button"
                   onClick={handleImport}
                   disabled={selectedValidCount === 0 || isImporting}
-                  className={`px-5 py-2.5 rounded-xl font-semibold text-white text-xs sm:text-sm transition flex items-center gap-2 ${
-                    selectedValidCount > 0 && !isImporting
-                      ? 'bg-primary hover:bg-primary/90 shadow-md'
-                      : 'bg-gray-600/50 cursor-not-allowed opacity-60'
-                  }`}
+                  className={`px-5 py-2.5 rounded-xl font-semibold text-white text-xs sm:text-sm transition flex items-center gap-2 ${selectedValidCount > 0 && !isImporting
+                    ? 'bg-primary hover:bg-primary/90 shadow-md'
+                    : 'bg-gray-600/50 cursor-not-allowed opacity-60'
+                    }`}
                 >
                   {isImporting ? (
                     <>

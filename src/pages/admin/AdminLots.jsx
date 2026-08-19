@@ -25,7 +25,7 @@ function shuffleArray(arr) {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
+      ;[a[i], a[j]] = [a[j], a[i]]
   }
   return a
 }
@@ -92,7 +92,7 @@ export default function AdminLots() {
         <ThemeToggle />
       </div>
       <p className="text-mutedText text-sm mb-6">
-        Draw the stage-entry order for a programme&apos;s candidates. Each card hides a unique value, randomly placed.
+        Draw the Stage-entry order for a programme&apos;s candidates. Each card hides a unique value, randomly placed.
       </p>
 
       {step === 'mode' && (

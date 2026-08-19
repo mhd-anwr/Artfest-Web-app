@@ -98,7 +98,7 @@ The mission statement used on the site: **"Track, Celebrate, Remember."**
   - Each completed programme row has a **Download Poster** button (uses `ResultPoster`).
 
 ### 3.4 Programmes (`/programmes`) & Programme Result (`/programmes/:id`)
-- **Programmes list** — search + category + type filters (On-stage / Off-stage), shows `#resultNo`, category, type, and a **Finished / Unfinished** status.
+- **Programmes list** — search + category + type filters (On-Stage / Off-Stage), shows `#resultNo`, category, type, and a **Finished / Unfinished** status.
 - **ProgrammeResult** — programme card with Finished/Pending pill. When finished, shows the podium (1st/2nd/3rd with medals, avatars, points) and a **Download Poster** button that opens the themed `ResultPoster` modal (Classic / Vibrant / Minimal themes) rendered with html2canvas and saved via file-saver.
 
 ### 3.5 Student panel (`/student/login`, `/student/dashboard`)
@@ -236,7 +236,7 @@ Used for category filter chips, stacked standing bars, and badge gradients (`lin
 ### Tables
 **`students`** — `id` (uuid), `name`, `class` (category), `team` (team id or name), `photoURL`, `programmeIds` (jsonb array of programme ids), `createdAt`, plus session columns `sessionActive` (bool), `sessionExpiresAt` (timestamptz), `sessionToken` (text).
 
-**`programmes`** — `id`, `name`, `category`, `isFinished` (bool), plus `programmeType` (On-stage / Off-stage) and a legacy `type`/`programme_type` fallback read by `getProgrammeType`.
+**`programmes`** — `id`, `name`, `category`, `isFinished` (bool), plus `programmeType` (On-Stage / Off-Stage) and a legacy `type`/`programme_type` fallback read by `getProgrammeType`.
 
 **`teams`** — `id`, `name`, `color`, `totalPoints` (maintained by DB trigger, see below).
 
@@ -268,7 +268,7 @@ Used for category filter chips, stacked standing bars, and badge gradients (`lin
 ### Categories / constants
 - `PROGRAMME_CATEGORIES = ['General', 'Minor', 'HS', 'Premier', 'Sub Junior', 'Junior']`
 - `STUDENT_CATEGORIES = ['Minor', 'HS', 'Premier', 'Sub Junior', 'Junior']` (no General)
-- `PROGRAMME_TYPES = ['On-stage', 'Off-stage']`
+- `PROGRAMME_TYPES = ['On-Stage', 'Off-Stage']`
 - `SESSION_EXPIRY_MS = 8 * 60 * 60 * 1000`
 - Grading: `10 → A+`, `8–9 → A`, `6–7 → B`, `4–5 → C`, else `-` (`calcGrade`).
 
