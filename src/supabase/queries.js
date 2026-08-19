@@ -402,3 +402,83 @@ export const getTeamCategoryPoints = async () => {
 
   return { teamData, categories }
 }
+
+export const getIndividualCategoryPoints = async () => {
+  const [students, programmes, allResults, teams] = await Promise.all([
+    supabase.from('students').select('*').then(r => r.data || []),
+    supabase.from('programmes').select('*').then(r => r.data || []),
+    supabase.from('results').select('*').then(r => r.data || []),
+    supabase.from('teams').select('*').then(r => r.data || []),
+  ])
+
+  const latestPerProg = {}
+  for (const r of allResults) {
+    if (!r.updatedAt) continue
+    if (!latestPerProg[r.programmeId] || r.updatedAt > latestPerProg[r.programmeId].updatedAt) {
+      latestPerProg[r.programmeId] = r
+    }
+  }
+
+  const progMap = {}
+  programmes.forEach(p => { progMap[p.id] = p })
+
+  const studentMap = {}
+  students.forEach(s => { studentMap[s.id] = s })
+
+  const teamMap = {}
+  teams.forEach(t => { teamMap[t.id] = t })
+
+  const eligibleCategories = DEFAULT_STUDENT_CATEGORIES
+  const studentPointsMap = {}
+
+  for (const result of Object.values(latestPerProg)) {
+    const prog = progMap[result.programmeId]
+    if (!prog || !prog.isFinished) continue
+
+    const partType = (prog.participationType || prog.participation_type || '').toLowerCase()
+    if (partType !== 'individual') continue
+
+    const cat = prog.category
+    if (!cat || !eligibleCategories.includes(cat)) continue
+
+    const placements = [
+      result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
+      result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
+      result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
+    ]
+
+    for (const p of placements) {
+      if (!p?.studentId) continue
+      const student = studentMap[p.studentId]
+      if (student) {
+        studentPointsMap[student.id] = (studentPointsMap[student.id] || 0) + p.points
+      }
+    }
+  }
+
+  const leaderboardByCategory = {}
+  eligibleCategories.forEach(cat => {
+    const catStudents = students
+      .filter(s => s.class === cat)
+      .map(s => {
+        const teamObj = teamMap[s.team] || teams.find(t => t.name === s.team)
+        return {
+          id: s.id,
+          name: s.name,
+          chestNo: s.chestNo,
+          category: s.class,
+          team: teamObj ? teamObj.name : (s.team || 'Unassigned'),
+          teamColor: teamObj ? teamObj.color : '#2872A1',
+          totalPoints: studentPointsMap[s.id] || 0,
+        }
+      })
+      .filter(s => s.totalPoints > 0)
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, 10)
+      .map((s, idx) => ({ ...s, rank: idx + 1 }))
+
+    leaderboardByCategory[cat] = catStudents
+  })
+
+  return { leaderboardByCategory, eligibleCategories }
+}

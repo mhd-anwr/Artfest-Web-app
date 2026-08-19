@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase/client'
-import { getTeamCategoryPoints, PROGRAMME_CATEGORIES } from '../../supabase/queries'
-import { Users, Trophy, Layers, BookOpen, RefreshCw, Sparkles } from 'lucide-react'
+import { getTeamCategoryPoints, getIndividualCategoryPoints, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { Users, Trophy, Layers, BookOpen, RefreshCw, Sparkles, Award } from 'lucide-react'
 import ThemeToggle from '../../components/ThemeToggle'
 
 const countRows = async (table) => {
@@ -13,6 +13,9 @@ const countRows = async (table) => {
 export default function AdminDashboard() {
   const [counts, setCounts] = useState({ students: 0, teams: 0, categories: 0, programmes: 0 })
   const [teamData, setTeamData] = useState([])
+  const [indData, setIndData] = useState({})
+  const [selectedCat, setSelectedCat] = useState('Minor')
+  const [eligibleCats, setEligibleCats] = useState(['Minor', 'HS', 'Premier', 'Sub Junior', 'Junior'])
   const [refreshing, setRefreshing] = useState(false)
 
   const loadCounts = async () => {
@@ -38,15 +41,24 @@ export default function AdminDashboard() {
     setTeamData(sorted)
   }
 
+  const loadIndividualPoints = async () => {
+    const { leaderboardByCategory, eligibleCategories } = await getIndividualCategoryPoints()
+    setIndData(leaderboardByCategory || {})
+    if (eligibleCategories?.length > 0) {
+      setEligibleCats(eligibleCategories)
+    }
+  }
+
   const refresh = async () => {
     setRefreshing(true)
-    await Promise.all([loadCounts(), loadTeamPoints()])
+    await Promise.all([loadCounts(), loadTeamPoints(), loadIndividualPoints()])
     setRefreshing(false)
   }
 
   useEffect(() => {
     loadCounts()
     loadTeamPoints()
+    loadIndividualPoints()
   }, [])
 
   const stats = [
@@ -84,7 +96,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Team Points Status */}
-      <div className="bg-card rounded-2xl shadow-sm border border-secondary/30 overflow-hidden">
+      <div className="bg-card rounded-2xl shadow-sm border border-secondary/30 overflow-hidden mb-8">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-secondary/30">
           <div className="flex items-center gap-3">
             <Sparkles size={18} className="text-accent" />
@@ -119,6 +131,68 @@ export default function AdminDashboard() {
               <span className="text-mutedText text-[10px] sm:text-xs shrink-0 hidden sm:inline">pts</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Individual Points Status */}
+      <div className="bg-card rounded-2xl shadow-sm border border-secondary/30 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-secondary/30">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <Award size={20} className="text-accent" />
+              <h2 className="font-poppins font-bold text-mainText text-base sm:text-lg">Individual Points Status</h2>
+            </div>
+            <p className="text-mutedText text-xs sm:text-sm mt-0.5">A leaderboard showing top 10 positions in each category.</p>
+          </div>
+
+          {/* Category Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            {eligibleCats.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCat(cat)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  selectedCat === cat
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'bg-black/10 hover:bg-black/20 text-mutedText hover:text-mainText border border-secondary/20'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="divide-y divide-secondary/20">
+          {(!indData[selectedCat] || indData[selectedCat].length === 0) ? (
+            <p className="text-mutedText text-sm text-center py-8">No individual points recorded for {selectedCat} yet.</p>
+          ) : (
+            indData[selectedCat].map((student) => (
+              <div key={student.id} className="flex items-center gap-3 px-4 sm:px-5 py-3.5 hover:bg-white/5 transition">
+                <span className="text-mutedText text-xs font-bold w-5 shrink-0">#{student.rank}</span>
+                <div
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0 shadow-sm"
+                  style={{ background: student.teamColor || '#2872A1' }}
+                >
+                  {student.chestNo || student.name?.charAt(0)?.toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-mainText font-medium text-sm sm:text-base truncate">
+                    {student.name}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] sm:text-xs text-mutedText">
+                    <span className="truncate font-medium" style={{ color: student.teamColor }}>{student.team}</span>
+                    <span>•</span>
+                    <span className="bg-secondary/20 text-mainText px-1.5 py-0.5 rounded text-[10px] font-semibold">{student.category}</span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-accent font-bold text-sm sm:text-base">{student.totalPoints}</span>
+                  <span className="text-mutedText text-[10px] sm:text-xs ml-1">pts</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
