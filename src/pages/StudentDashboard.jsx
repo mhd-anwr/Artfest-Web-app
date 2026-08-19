@@ -224,14 +224,50 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen bg-mainBackground p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6 gap-3">
-          <h2 className="text-2xl font-display font-bold text-mainText">Participant Profile</h2>
-          <div className="flex items-center gap-2">
+        {/* Mobile Header (< md) */}
+        <div className="md:hidden mb-6">
+          {/* Row 1: Title + ThemeToggle */}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h1 className="text-3xl sm:text-[38px] font-display font-extrabold text-mainText leading-[1.08] tracking-tight">
+              Participant<br />Profile
+            </h1>
+            <div className="shrink-0 pt-1">
+              <ThemeToggle />
+            </div>
+          </div>
+
+          {/* Row 2: Action Buttons */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={openEditModal}
+              className="flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-subtle bg-card text-xs sm:text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition whitespace-nowrap"
+            >
+              <Pencil size={15} /> Edit Details
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-subtle bg-card text-xs sm:text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition whitespace-nowrap"
+            >
+              <LogOut size={15} /> Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Header (>= md) */}
+        <div className="hidden md:flex items-center justify-between mb-6 gap-3">
+          <h2 className="text-2xl lg:text-3xl font-display font-bold text-mainText">Participant Profile</h2>
+          <div className="flex items-center gap-3">
             <ThemeToggle />
-            <button onClick={openEditModal} className="flex items-center gap-2 rounded-full border border-subtle bg-card px-3 py-2 text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition">
+            <button
+              onClick={openEditModal}
+              className="flex items-center gap-2 rounded-full border border-subtle bg-card px-4 py-2 text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition whitespace-nowrap"
+            >
               <Pencil size={16} /> Edit Details
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 rounded-full border border-subtle bg-card px-3 py-2 text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-full border border-subtle bg-card px-4 py-2 text-sm font-semibold text-mainText shadow-sm hover:bg-lavender transition whitespace-nowrap"
+            >
               <LogOut size={16} /> Logout
             </button>
           </div>
