@@ -705,7 +705,7 @@ export default function JudgesResults() {
                       value={v.student}
                       onChange={e => v.setStudent(e.target.value)}
                     >
-                      <option value="" className="bg-card text-mainText">Select Performance</option>
+                      <option value="" className="bg-card text-mainText">Select Code Letter</option>
                       {candidates.map(cand => (
                         <option key={cand.id} value={cand.id} className="bg-card text-mainText">
                           {cand.code}
