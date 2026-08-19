@@ -430,16 +430,22 @@ export const getIndividualCategoryPoints = async () => {
 
   const eligibleCategories = DEFAULT_STUDENT_CATEGORIES
   const studentPointsMap = {}
+  let totalPublishedResults = 0
+  let afterPublishedResults = 0
 
   for (const result of Object.values(latestPerProg)) {
     const prog = progMap[result.programmeId]
     if (!prog || !prog.isFinished) continue
+
+    totalPublishedResults += 1
 
     const partType = (prog.participationType || prog.participation_type || '').toLowerCase()
     if (partType !== 'individual') continue
 
     const cat = prog.category
     if (!cat || !eligibleCategories.includes(cat)) continue
+
+    afterPublishedResults += 1
 
     const placements = [
       result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
@@ -480,5 +486,10 @@ export const getIndividualCategoryPoints = async () => {
     leaderboardByCategory[cat] = catStudents
   })
 
-  return { leaderboardByCategory, eligibleCategories }
+  return {
+    leaderboardByCategory,
+    eligibleCategories,
+    totalPublishedResults,
+    afterPublishedResults
+  }
 }

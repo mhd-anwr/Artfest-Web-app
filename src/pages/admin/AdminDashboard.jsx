@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase/client'
 import { getTeamCategoryPoints, getIndividualCategoryPoints, PROGRAMME_CATEGORIES } from '../../supabase/queries'
-import { Users, Trophy, Layers, BookOpen, RefreshCw, Sparkles, Award } from 'lucide-react'
+import { Users, Trophy, Layers, BookOpen, RefreshCw, Sparkles, Award, Calculator } from 'lucide-react'
 import ThemeToggle from '../../components/ThemeToggle'
 
 const countRows = async (table) => {
@@ -16,6 +16,9 @@ export default function AdminDashboard() {
   const [indData, setIndData] = useState({})
   const [selectedCat, setSelectedCat] = useState('Minor')
   const [eligibleCats, setEligibleCats] = useState(['Minor', 'HS', 'Premier', 'Sub Junior', 'Junior'])
+  const [totalPubCount, setTotalPubCount] = useState(0)
+  const [afterPubCount, setAfterPubCount] = useState(0)
+  const [calculatingInd, setCalculatingInd] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
   const loadCounts = async () => {
@@ -42,11 +45,15 @@ export default function AdminDashboard() {
   }
 
   const loadIndividualPoints = async () => {
-    const { leaderboardByCategory, eligibleCategories } = await getIndividualCategoryPoints()
+    setCalculatingInd(true)
+    const { leaderboardByCategory, eligibleCategories, totalPublishedResults, afterPublishedResults } = await getIndividualCategoryPoints()
     setIndData(leaderboardByCategory || {})
     if (eligibleCategories?.length > 0) {
       setEligibleCats(eligibleCategories)
     }
+    setTotalPubCount(totalPublishedResults || 0)
+    setAfterPubCount(afterPublishedResults || 0)
+    setCalculatingInd(false)
   }
 
   const refresh = async () => {
@@ -136,6 +143,7 @@ export default function AdminDashboard() {
 
       {/* Individual Points Status */}
       <div className="bg-card rounded-2xl shadow-sm border border-secondary/30 overflow-hidden">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-secondary/30">
           <div>
             <div className="flex items-center gap-2.5">
@@ -145,24 +153,44 @@ export default function AdminDashboard() {
             <p className="text-mutedText text-xs sm:text-sm mt-0.5">A leaderboard showing top 10 positions in each category.</p>
           </div>
 
-          {/* Category Filter Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-            {eligibleCats.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCat(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                  selectedCat === cat
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'bg-black/10 hover:bg-black/20 text-mutedText hover:text-mainText border border-secondary/20'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <button
+              onClick={refresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
+            >
+              <RefreshCw size={15} className={`${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
+              onClick={loadIndividualPoints}
+              disabled={calculatingInd}
+              className="flex items-center gap-2 bg-black/20 hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/15 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
+            >
+              <Calculator size={15} className={`${calculatingInd ? 'animate-spin' : ''}`} />
+              Calculate (After {totalPubCount} results)
+            </button>
           </div>
         </div>
 
+        {/* Category Selector Bar */}
+        <div className="px-4 sm:px-5 py-3 border-b border-secondary/20 bg-black/5 dark:bg-white/5 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          {eligibleCats.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCat(cat)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                selectedCat === cat
+                  ? 'bg-accent text-white shadow-sm'
+                  : 'bg-black/10 hover:bg-black/20 text-mutedText hover:text-mainText border border-secondary/20'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Leaderboard Rows */}
         <div className="divide-y divide-secondary/20">
           {(!indData[selectedCat] || indData[selectedCat].length === 0) ? (
             <p className="text-mutedText text-sm text-center py-8">No individual points recorded for {selectedCat} yet.</p>
@@ -193,6 +221,12 @@ export default function AdminDashboard() {
               </div>
             ))
           )}
+        </div>
+
+        {/* Card Footer with Result Counters */}
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-t border-secondary/30 bg-black/5 dark:bg-white/5 text-mutedText text-xs font-medium">
+          <span>Total Published Results: <strong className="text-mainText font-bold">{totalPubCount}</strong></span>
+          <span>After Published Results: <strong className="text-mainText font-bold">{afterPubCount}</strong></span>
         </div>
       </div>
     </div>
