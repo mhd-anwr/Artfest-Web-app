@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, User, ShieldCheck, Gavel, Map } from 'lucide-react'
+import { ChevronDown, User, ShieldCheck, Gavel, DoorOpen } from 'lucide-react'
 
 const LOGIN_OPTIONS = [
   { label: 'Participant', path: '/student/login', icon: User },
   { label: 'Judges', path: '/judges/login', icon: Gavel },
   { label: 'Admin', path: '/admin/login', icon: ShieldCheck },
-  { label: 'Lots', path: '/lots', icon: Map },
+  { label: 'Green Room', path: '/lots', icon: DoorOpen },
 ]
 
 export default function LoginControl() {
