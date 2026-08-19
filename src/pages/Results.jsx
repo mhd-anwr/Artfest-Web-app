@@ -141,8 +141,8 @@ export default function Results() {
                 />
               </button>
             ) : (
-              /* EXPANDED STATE: Horizontal Liquid-Glass Bar */
-              <div className="inline-flex items-center gap-1 sm:gap-1.5 bg-[#1D192B] text-white dark:bg-card-white dark:text-mainText border border-subtle rounded-full p-1.5 shadow-2xl overflow-x-auto scrollbar-none max-w-full animate-fadeIn transition-all duration-300">
+              /* EXPANDED STATE: Horizontal Segmented Glass Bar */
+              <div className="inline-flex items-center gap-1 bg-card border border-subtle rounded-full p-1 shadow-lg backdrop-blur-md overflow-x-auto scrollbar-none max-w-full animate-fadeIn transition-all duration-300">
                 {categories.map(cat => {
                   const isSelected = !unfinishedOnly && category === cat.value
                   const dotColor = CATEGORY_COLORS[cat.value] || '#9CA3AF'
@@ -156,8 +156,8 @@ export default function Results() {
                       }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
                         isSelected
-                          ? 'bg-white/20 text-white dark:bg-black/20 dark:text-mainText font-bold shadow-sm'
-                          : 'opacity-70 hover:opacity-100 hover:bg-white/10'
+                          ? 'bg-[#1D192B] text-white dark:bg-white dark:text-[#1D192B] font-bold shadow-sm'
+                          : 'text-textMute hover:text-mainText hover:bg-black/5 dark:hover:bg-white/10'
                       }`}
                     >
                       <span
@@ -170,7 +170,7 @@ export default function Results() {
                 })}
                 <button
                   onClick={() => setExpanded(false)}
-                  className="p-1.5 rounded-full opacity-60 hover:opacity-100 hover:bg-white/10 transition shrink-0 ml-1"
+                  className="p-1.5 rounded-full text-textMute hover:text-mainText hover:bg-black/5 dark:hover:bg-white/10 transition shrink-0 ml-0.5"
                   title="Collapse categories"
                 >
                   <ChevronDown size={15} className="rotate-180" />
