@@ -379,7 +379,10 @@ export const getTeamCategoryPoints = async () => {
     }
   }
 
+  const fontColors = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('artfest_team_font_colors') || '{}') : {}
+
   const teamData = teams.map(team => {
+    const savedFontColor = team.font_color || team.fontColor || fontColors[team.id] || fontColors[team.name] || team.color || '#2872A1'
     const catPoints = {}
     categories.forEach(c => { catPoints[c] = 0 })
 
@@ -408,7 +411,13 @@ export const getTeamCategoryPoints = async () => {
     }
 
     const total = Object.values(catPoints).reduce((a, b) => a + b, 0)
-    return { ...team, catPoints, totalPoints: total }
+    return {
+      ...team,
+      font_color: savedFontColor,
+      fontColor: savedFontColor,
+      catPoints,
+      totalPoints: total,
+    }
   })
 
   return { teamData, categories, totalPublishedResults, afterPublishedResults }
@@ -473,13 +482,17 @@ export const getIndividualCategoryPoints = async () => {
     }
   }
 
+  const fontColors = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('artfest_team_font_colors') || '{}') : {}
+
   const leaderboardByCategory = {}
   eligibleCategories.forEach(cat => {
     const catStudents = students
       .filter(s => s.class === cat)
       .map(s => {
         const teamObj = teamMap[s.team] || teams.find(t => t.name === s.team)
-        const teamFontColor = teamObj ? (teamObj.fontColor || teamObj.font_color || teamObj.color || '#2872A1') : '#2872A1'
+        const teamFontColor = teamObj
+          ? (teamObj.font_color || teamObj.fontColor || fontColors[teamObj.id] || fontColors[teamObj.name] || teamObj.color || '#2872A1')
+          : '#2872A1'
         return {
           id: s.id,
           name: s.name,

@@ -51,7 +51,10 @@ export default function AdminTeams() {
     setEditing(team)
     setEditName(team.name || '')
     setEditColor(team.color || TEAM_COLORS[0])
-    setEditFontColor(team.fontColor || team.font_color || team.color || TEAM_COLORS[0])
+
+    const savedMap = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('artfest_team_font_colors') || '{}') : {}
+    const fontColorVal = team.font_color || team.fontColor || savedMap[team.id] || savedMap[team.name] || team.color || '#000000'
+    setEditFontColor(fontColorVal)
   }
 
   const saveEdit = async () => {
@@ -59,27 +62,47 @@ export default function AdminTeams() {
     if (!editName.trim()) return toast('Team name cannot be empty', 'error')
     setSaving(true)
 
-    // Attempt to save fontColor, fallback gracefully if DB column isn't present
+    // 1. Immediately cache in localStorage for client-side persistence
+    try {
+      const fontColors = JSON.parse(localStorage.getItem('artfest_team_font_colors') || '{}')
+      fontColors[editing.id] = editFontColor
+      fontColors[editing.name] = editFontColor
+      fontColors[editName.trim()] = editFontColor
+      localStorage.setItem('artfest_team_font_colors', JSON.stringify(fontColors))
+    } catch (e) {
+      console.warn('localStorage error', e)
+    }
+
+    // 2. Persist to Supabase DB (support both font_color and fontColor column names)
     let { error } = await supabase
       .from('teams')
-      .update({ name: editName.trim(), color: editColor, fontColor: editFontColor })
+      .update({ name: editName.trim(), color: editColor, font_color: editFontColor })
       .eq('id', editing.id)
 
-    if (error && error.message?.includes('fontColor')) {
+    if (error && error.message?.includes('font_color')) {
       const fallback = await supabase
         .from('teams')
-        .update({ name: editName.trim(), color: editColor, font_color: editFontColor })
+        .update({ name: editName.trim(), color: editColor, fontColor: editFontColor })
         .eq('id', editing.id)
       error = fallback.error
     }
 
-    if (error && (error.message?.includes('font_color') || error.message?.includes('column'))) {
+    if (error && (error.message?.includes('column') || error.message?.includes('fontColor'))) {
       const basicFallback = await supabase
         .from('teams')
         .update({ name: editName.trim(), color: editColor })
         .eq('id', editing.id)
       error = basicFallback.error
     }
+
+    // 3. Immediately update React state for instant UI reflection without page reload
+    setTeamData(prev =>
+      prev.map(t =>
+        t.id === editing.id
+          ? { ...t, name: editName.trim(), color: editColor, font_color: editFontColor, fontColor: editFontColor }
+          : t
+      )
+    )
 
     setSaving(false)
     if (error) return toast('Failed to update team: ' + error.message, 'error')
@@ -169,22 +192,26 @@ export default function AdminTeams() {
 
             <label className="text-mutedText text-sm block mb-1.5 font-semibold">Font Colour</label>
             <div className="grid grid-cols-9 gap-2 mb-6">
-              {FONT_COLORS.map(fc => (
-                <button
-                  key={fc.value}
-                  onClick={() => setEditFontColor(fc.value)}
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-secondary/40 flex items-center justify-center transition-all ${
-                    editFontColor === fc.value ? 'ring-2 ring-mainText ring-offset-2 ring-offset-card scale-110' : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: fc.value }}
-                  title={fc.label}
-                  aria-label={`Select font color ${fc.label}`}
-                >
-                  {editFontColor === fc.value && (
-                    <Check size={14} className={fc.value === '#FFFFFF' || fc.value === '#D1D5DB' ? 'text-black' : 'text-white'} />
-                  )}
-                </button>
-              ))}
+              {FONT_COLORS.map(fc => {
+                const isSelected = editFontColor && editFontColor.toUpperCase() === fc.value.toUpperCase()
+                return (
+                  <button
+                    key={fc.value}
+                    type="button"
+                    onClick={() => setEditFontColor(fc.value)}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-secondary/40 flex items-center justify-center transition-all ${
+                      isSelected ? 'ring-2 ring-mainText ring-offset-2 ring-offset-card scale-110' : 'hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: fc.value }}
+                    title={fc.label}
+                    aria-label={`Select font color ${fc.label}`}
+                  >
+                    {isSelected && (
+                      <Check size={14} className={fc.value === '#FFFFFF' || fc.value === '#D1D5DB' ? 'text-black' : 'text-white'} />
+                    )}
+                  </button>
+                )
+              })}
             </div>
 
             <div className="flex gap-2">
