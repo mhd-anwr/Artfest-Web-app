@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Shuffle, RefreshCw, Hash, Type, Dice5 } from 'lucide-react'
+import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import ThemeToggle from '../../components/ThemeToggle'
 
@@ -18,6 +18,13 @@ const MODES = [
     label: 'Code Letter',
     icon: Type,
     desc: 'Reveal entry-order letters A to Nth',
+  },
+  {
+    id: 'assign',
+    label: 'Assign',
+    icon: UserCheck,
+    desc: 'Code letter to participant',
+    isVisualOnly: true,
   },
 ]
 
@@ -48,6 +55,8 @@ export default function AdminLots() {
   const maxForMode = mode === 'code' ? MAX_CODE_LETTERS : MAX_CARDS
 
   const pickMode = (id) => {
+    const target = MODES.find(m => m.id === id)
+    if (target?.isVisualOnly) return
     setMode(id)
     setCount('')
     setCards([])
@@ -96,12 +105,12 @@ export default function AdminLots() {
       </p>
 
       {step === 'mode' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl">
           {MODES.map(({ id, label, icon: Icon, desc }) => (
             <button
               key={id}
               onClick={() => pickMode(id)}
-              className="bg-card rounded-2xl p-5 flex flex-col items-center gap-2 sm:gap-3 hover:bg-secondary/10 transition text-center shadow-lg border border-secondary/30"
+              className="bg-card rounded-2xl p-5 flex flex-col items-center gap-2 sm:gap-3 hover:bg-secondary/10 transition text-center shadow-lg border border-secondary/30 h-full"
             >
               <Icon size={28} className="sm:w-8 sm:h-8" color="#7FC3EA" />
               <span className="text-mainText font-medium text-sm sm:text-base">{label}</span>
