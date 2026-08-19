@@ -294,9 +294,26 @@ function processRawProgrammeRows(rawRows, { validCategories }) {
   }).filter(item => item.name || item.category || item.programmeType || item.participationType)
 }
 
+function buildProgrammeKey(name, category, programmeType, participationType) {
+  const normName = String(name || '').toLowerCase().trim().replace(/\s+/g, ' ')
+  const normCat = String(category || '').toLowerCase().trim().replace(/\s+/g, ' ')
+  const normType = String(programmeType || '').toLowerCase().trim().replace(/\s+/g, ' ')
+  const normPart = String(participationType || '').toLowerCase().trim().replace(/\s+/g, ' ')
+  return `${normName}::${normCat}::${normType}::${normPart}`
+}
+
 export function validateProgrammes(items, { existingProgrammes = [], validCategories = APPROVED_CATEGORIES }) {
-  const existingNames = new Set(existingProgrammes.map(p => String(p.name || '').toLowerCase().trim()))
-  const batchNames = new Set()
+  const existingKeys = new Set(
+    existingProgrammes.map(p =>
+      buildProgrammeKey(
+        p.name,
+        p.category,
+        p.programmeType || p.type || '',
+        p.participationType || p.participation_type || ''
+      )
+    )
+  )
+  const batchKeys = new Set()
 
   return items.map(item => {
     const errors = []
@@ -305,14 +322,6 @@ export function validateProgrammes(items, { existingProgrammes = [], validCatego
     // Field 1: Programme Name
     if (!item.name) {
       errors.push('Missing Programme Name')
-    } else {
-      if (existingNames.has(item.name.toLowerCase())) {
-        warnings.push(`Programme "${item.name}" already exists in database`)
-      }
-      if (batchNames.has(item.name.toLowerCase())) {
-        errors.push(`Duplicate Programme "${item.name}" in import file`)
-      }
-      batchNames.add(item.name.toLowerCase())
     }
 
     // Field 2: Category
@@ -334,6 +343,19 @@ export function validateProgrammes(items, { existingProgrammes = [], validCatego
       errors.push('Missing Individual / Group')
     } else if (!PARTICIPATION_TYPES.includes(item.participationType)) {
       errors.push(`Invalid Participation "${item.participationType}" (allowed: ${PARTICIPATION_TYPES.join(', ')})`)
+    }
+
+    // Duplicate Check: Composite Key (Name + Category + Type + Individual/Group)
+    if (item.name && item.category && item.programmeType && item.participationType) {
+      const key = buildProgrammeKey(item.name, item.category, item.programmeType, item.participationType)
+
+      if (existingKeys.has(key)) {
+        warnings.push(`Programme "${item.name}" (${item.category} · ${item.programmeType} · ${item.participationType}) already exists in database`)
+      }
+      if (batchKeys.has(key)) {
+        errors.push(`Duplicate Programme "${item.name}" (${item.category} · ${item.programmeType} · ${item.participationType}) in import file`)
+      }
+      batchKeys.add(key)
     }
 
     // Field 5: Result Number (optional number)
