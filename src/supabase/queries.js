@@ -368,6 +368,17 @@ export const getTeamCategoryPoints = async () => {
   const teamNameToId = {}
   teams.forEach(t => { teamNameToId[t.name] = t.id })
 
+  let totalPublishedResults = 0
+  let afterPublishedResults = 0
+
+  for (const result of Object.values(latestPerProg)) {
+    const prog = progMap[result.programmeId]
+    if (prog && prog.isFinished) {
+      totalPublishedResults += 1
+      afterPublishedResults += 1
+    }
+  }
+
   const teamData = teams.map(team => {
     const catPoints = {}
     categories.forEach(c => { catPoints[c] = 0 })
@@ -400,7 +411,7 @@ export const getTeamCategoryPoints = async () => {
     return { ...team, catPoints, totalPoints: total }
   })
 
-  return { teamData, categories }
+  return { teamData, categories, totalPublishedResults, afterPublishedResults }
 }
 
 export const getIndividualCategoryPoints = async () => {
