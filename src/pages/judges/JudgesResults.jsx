@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { judgeClient, verifyJudgeClient } from '../../supabase/client'
-import { getProgrammes, getStudents, getAllResults, getCategories, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { getProgrammes, getStudents, getAllResults, getCategories, getCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
 import { ArrowLeft, LogOut, Lock, ChevronDown, ChevronUp, Pencil, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import FilterDropdown from '../../components/FilterDropdown'
@@ -24,6 +24,7 @@ export default function JudgesResults() {
   const [categoryFilter, setCategoryFilter] = useState('')
   const [categories, setCategories] = useState(PROGRAMME_CATEGORIES)
   const [expandedId, setExpandedId] = useState(null)
+  const [progAssignments, setProgAssignments] = useState({})
 
   // Edit flow state
   const [editProg, setEditProg] = useState(null)
@@ -88,7 +89,7 @@ export default function JudgesResults() {
       id: cand.id,
       name: cand.name,
       chestNo: cand.chestNo,
-      code: cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
+      code: progAssignments[cand.id] || cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
     }))
   }
 
@@ -181,10 +182,12 @@ export default function JudgesResults() {
     setPromptOpen(true)
   }
 
-  const openNewEntry = (prog) => {
+  const openNewEntry = async (prog) => {
     setIsFirstTime(true)
     setEditProg(prog)
     setEditError('')
+    const assignmentsMap = await getCodeAssignments(prog.id)
+    setProgAssignments(assignmentsMap || {})
     setEditOpen(true)
     setFirst('')
     setFirstPoints('')
@@ -351,11 +354,14 @@ export default function JudgesResults() {
     }
 
     setVerifyOpen(false)
-    openEdit(editProg)
+    await openEdit(editProg)
   }
 
-  const openEdit = (prog, preserveFields = false) => {
+  const openEdit = async (prog, preserveFields = false) => {
     const latest = savedResults.find(r => r.programmeId === prog.id)
+    const assignmentsMap = await getCodeAssignments(prog.id)
+    setProgAssignments(assignmentsMap || {})
+
     if (!preserveFields) {
       setFirst(latest?.first?.studentId || '')
       setFirstPoints(latest?.first?.points != null ? String(latest.first.points) : '')

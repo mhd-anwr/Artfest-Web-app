@@ -519,3 +519,64 @@ export const getIndividualCategoryPoints = async () => {
     afterPublishedResults
   }
 }
+
+export const getCodeAssignments = async (programmeId) => {
+  let dbAssignments = {}
+  try {
+    const { data, error } = await supabase
+      .from('performance_code_assignments')
+      .select('*')
+      .eq('programme_id', programmeId)
+    if (!error && data) {
+      data.forEach(item => {
+        const pid = item.participant_id || item.participantId
+        const code = item.code_letter || item.codeLetter
+        if (pid && code) dbAssignments[pid] = code
+      })
+    }
+  } catch (e) {
+    console.warn('getCodeAssignments DB query notice:', e)
+  }
+
+  const localKey = `artfest_code_assignments_${programmeId}`
+  const localAssignments = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem(localKey) || '{}') : {}
+
+  return { ...localAssignments, ...dbAssignments }
+}
+
+export const saveCodeAssignments = async (programmeId, category, assignmentList) => {
+  const localKey = `artfest_code_assignments_${programmeId}`
+  const localMap = {}
+  assignmentList.forEach(a => {
+    if (a.participantId && a.codeLetter) {
+      localMap[a.participantId] = a.codeLetter
+    }
+  })
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(localKey, JSON.stringify(localMap))
+  }
+
+  try {
+    const rows = assignmentList.map(a => ({
+      programme_id: programmeId,
+      category_id: category,
+      category: category,
+      participant_id: a.participantId,
+      code_letter: a.codeLetter,
+      updated_at: new Date().toISOString(),
+    }))
+
+    const { error } = await supabase
+      .from('performance_code_assignments')
+      .upsert(rows, { onConflict: 'programme_id,participant_id' })
+
+    if (error) {
+      console.warn('saveCodeAssignments Supabase upsert notice:', error.message)
+    }
+  } catch (e) {
+    console.warn('saveCodeAssignments DB error fallback used:', e)
+  }
+
+  return true
+}

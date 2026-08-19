@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck, ArrowLeft, Check, AlertCircle } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import ThemeToggle from '../../components/ThemeToggle'
+import { getProgrammes, getStudents, getCategories, getCodeAssignments, saveCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
 
 const MAX_CARDS = 60
 const MAX_CODE_LETTERS = 26
@@ -24,7 +26,6 @@ const MODES = [
     label: 'Assign',
     icon: UserCheck,
     desc: 'Code letter to participant',
-    isVisualOnly: true,
   },
 ]
 
@@ -49,15 +50,38 @@ export default function AdminLots() {
   const [count, setCount] = useState('')
   const [cards, setCards] = useState([])
   const [drawId, setDrawId] = useState(0)
+
+  // Assignment Workflow state
+  const [programmes, setProgrammes] = useState([])
+  const [students, setStudents] = useState([])
+  const [categories, setCategories] = useState(PROGRAMME_CATEGORIES)
+  const [selectedCat, setSelectedCat] = useState('')
+  const [selectedProg, setSelectedProg] = useState(null)
+  const [assignmentsMap, setAssignmentsMap] = useState({})
+  const [savingAssignments, setSavingAssignments] = useState(false)
+  const [validationError, setValidationError] = useState('')
+
   const toast = useToast()
 
   const flippedCount = cards.filter(c => c.flipped).length
   const maxForMode = mode === 'code' ? MAX_CODE_LETTERS : MAX_CARDS
 
+  useEffect(() => {
+    getProgrammes().then(setProgrammes).catch(err => console.error(err))
+    getStudents().then(setStudents).catch(err => console.error(err))
+    getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error(err))
+  }, [])
+
   const pickMode = (id) => {
-    const target = MODES.find(m => m.id === id)
-    if (target?.isVisualOnly) return
     setMode(id)
+    if (id === 'assign') {
+      setSelectedCat('')
+      setSelectedProg(null)
+      setAssignmentsMap({})
+      setValidationError('')
+      setStep('assign_cat')
+      return
+    }
     setCount('')
     setCards([])
     setStep('setup')
@@ -67,6 +91,9 @@ export default function AdminLots() {
     setStep('mode')
     setCount('')
     setCards([])
+    setSelectedCat('')
+    setSelectedProg(null)
+    setValidationError('')
   }
 
   const startDraw = () => {
@@ -92,18 +119,102 @@ export default function AdminLots() {
     setStep('setup')
   }
 
+  // Assign Workflow helper methods
+  const selectCategory = (cat) => {
+    setSelectedCat(cat)
+    setSelectedProg(null)
+    setValidationError('')
+    setStep('assign_prog')
+  }
+
+  const selectProgramme = async (prog) => {
+    setSelectedProg(prog)
+    setValidationError('')
+    const existing = await getCodeAssignments(prog.id)
+    setAssignmentsMap(existing || {})
+    setStep('assign_list')
+  }
+
+  const getProgCandidates = (prog) => {
+    if (!prog) return []
+    const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
+    if (registered.length === 0) {
+      return Array.from({ length: 6 }, (_, i) => {
+        const letter = String.fromCharCode(65 + i)
+        return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, chestNo: '' }
+      })
+    }
+    return [...registered].sort((a, b) => (a.chestNo || a.name || a.id).localeCompare(b.chestNo || b.name || b.id))
+  }
+
+  const handleAssignmentChange = (participantId, codeLetter) => {
+    setValidationError('')
+    setAssignmentsMap(prev => ({
+      ...prev,
+      [participantId]: codeLetter
+    }))
+  }
+
+  const handleSaveAssignments = async () => {
+    if (!selectedProg) return
+    const candidates = getProgCandidates(selectedProg)
+    if (candidates.length === 0) return toast('No candidates to assign', 'error')
+
+    setValidationError('')
+
+    // 1. Check for unassigned candidates
+    const unassigned = candidates.filter(c => !assignmentsMap[c.id])
+    if (unassigned.length > 0) {
+      const msg = 'Please select a Code Letter for every participant before saving.'
+      setValidationError(msg)
+      return toast(msg, 'error')
+    }
+
+    // 2. Check for duplicate code letters in the same programme
+    const usedLetters = candidates.map(c => assignmentsMap[c.id]).filter(Boolean)
+    const duplicates = usedLetters.filter((item, index) => usedLetters.indexOf(item) !== index)
+    if (duplicates.length > 0) {
+      const msg = `Duplicate Code Letter "${duplicates[0]}" detected! Each code letter must be unique within a programme.`
+      setValidationError(msg)
+      return toast(msg, 'error')
+    }
+
+    setSavingAssignments(true)
+    const payload = candidates.map(c => ({
+      participantId: c.id,
+      codeLetter: assignmentsMap[c.id]
+    }))
+
+    await saveCodeAssignments(selectedProg.id, selectedCat, payload)
+    setSavingAssignments(false)
+    toast('Code letters assigned successfully!')
+  }
+
   const activeMode = MODES.find(m => m.id === mode)
+
+  // Filter categories to only those containing programmes
+  const progsByCategory = {}
+  categories.forEach(c => { progsByCategory[c] = [] })
+  programmes.forEach(p => {
+    if (p.category && progsByCategory[p.category]) {
+      progsByCategory[p.category].push(p)
+    }
+  })
+
+  const availableCategories = categories.filter(c => (progsByCategory[c] || []).length > 0)
+  const categoryProgs = selectedCat ? (progsByCategory[selectedCat] || []) : []
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between gap-3 mb-2">
-        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Lot Draw</h2>
+        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Lot Draw & Green Room</h2>
         <ThemeToggle />
       </div>
       <p className="text-mutedText text-sm mb-6">
-        Draw the Stage-entry order for a programme&apos;s candidates. Each card hides a unique value, randomly placed.
+        Draw entry order or assign stage performance code letters to candidates per programme.
       </p>
 
+      {/* Mode Selection */}
       {step === 'mode' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl">
           {MODES.map(({ id, label, icon: Icon, desc }) => (
@@ -120,14 +231,15 @@ export default function AdminLots() {
         </div>
       )}
 
+      {/* Setup for Topic / Code Letter Shuffle */}
       {step === 'setup' && activeMode && (
         <>
           <div className="flex items-center gap-3 mb-4">
             <span className="flex items-center gap-2 bg-white/10 text-mainText px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold">
               <activeMode.icon size={14} className="sm:w-4 sm:h-4" /> {activeMode.label} mode
             </span>
-            <button onClick={goToModes} className="text-mainText text-xs sm:text-sm underline hover:opacity-80 transition">
-              Change Mode
+            <button onClick={goToModes} className="text-mainText text-xs sm:text-sm underline hover:opacity-80 transition flex items-center gap-1">
+              <ArrowLeft size={14} /> Change Mode
             </button>
           </div>
 
@@ -153,6 +265,7 @@ export default function AdminLots() {
         </>
       )}
 
+      {/* Card Reveal Step */}
       {step === 'draw' && (
         <>
           <div className="flex items-center justify-between mb-4">
@@ -190,6 +303,172 @@ export default function AdminLots() {
           </div>
         </>
       )}
+
+      {/* ── ASSIGN WORKFLOW: STEP 1 - SELECT CATEGORY ── */}
+      {step === 'assign_cat' && (
+        <>
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={goToModes} className="flex items-center gap-1.5 text-mainText text-xs sm:text-sm font-semibold hover:opacity-80 transition bg-card px-3 py-1.5 rounded-xl border border-secondary/30">
+              <ArrowLeft size={14} /> Back to Modes
+            </button>
+          </div>
+
+          <div className="bg-card rounded-2xl p-5 shadow-lg border border-secondary/30 max-w-2xl">
+            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Select Category</h3>
+            <p className="text-mutedText text-xs sm:text-sm mb-4">Choose a category to view its registered programmes.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {availableCategories.map(cat => {
+                const colors = CATEGORY_COLORS[cat] || { light: '#9CA3AF', dark: '#6B7280' }
+                const count = progsByCategory[cat]?.length || 0
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => selectCategory(cat)}
+                    className="p-4 rounded-xl border border-secondary/30 bg-black/20 hover:bg-white/5 transition flex items-center justify-between group text-left"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: colors.light }} />
+                      <span className="font-poppins font-bold text-mainText text-sm sm:text-base group-hover:text-accent transition truncate">
+                        {cat}
+                      </span>
+                    </div>
+                    <span className="text-mutedText text-xs font-semibold bg-secondary/20 px-2.5 py-1 rounded-full shrink-0">
+                      {count} prog{count === 1 ? '' : 's'}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── ASSIGN WORKFLOW: STEP 2 - SELECT PROGRAMME ── */}
+      {step === 'assign_prog' && (
+        <>
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => setStep('assign_cat')} className="flex items-center gap-1.5 text-mainText text-xs sm:text-sm font-semibold hover:opacity-80 transition bg-card px-3 py-1.5 rounded-xl border border-secondary/30">
+              <ArrowLeft size={14} /> Change Category ({selectedCat})
+            </button>
+          </div>
+
+          <div className="bg-card rounded-2xl p-5 shadow-lg border border-secondary/30 max-w-2xl">
+            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Select Programme</h3>
+            <p className="text-mutedText text-xs sm:text-sm mb-4">Showing programmes in <strong className="text-mainText font-bold">{selectedCat}</strong>.</p>
+
+            <div className="flex flex-col gap-2.5">
+              {categoryProgs.length === 0 ? (
+                <p className="text-mutedText text-sm text-center py-6">No programmes found in this category.</p>
+              ) : (
+                categoryProgs.map(prog => {
+                  const candidateCount = students.filter(s => (s.programmeIds || []).includes(prog.id)).length
+                  const typeLabel = prog.programmeType || prog.type || ''
+                  return (
+                    <button
+                      key={prog.id}
+                      onClick={() => selectProgramme(prog)}
+                      className="p-4 rounded-xl border border-secondary/30 bg-black/20 hover:bg-white/5 transition flex items-center justify-between text-left group"
+                    >
+                      <div className="min-w-0 flex-1 pr-3">
+                        <p className="font-poppins font-bold text-mainText text-sm sm:text-base group-hover:text-accent transition truncate">
+                          {prog.name}
+                        </p>
+                        <p className="text-mutedText text-xs mt-0.5">
+                          {selectedCat}{typeLabel ? ` · ${typeLabel}` : ''}
+                        </p>
+                      </div>
+                      <span className="text-mainText text-xs font-semibold bg-accent/20 border border-accent/30 px-3 py-1.5 rounded-full shrink-0">
+                        {candidateCount} candidate{candidateCount === 1 ? '' : 's'}
+                      </span>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── ASSIGN WORKFLOW: STEP 3 - PARTICIPANT LIST & CODE ASSIGNMENT ── */}
+      {step === 'assign_list' && selectedProg && (
+        <>
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => setStep('assign_prog')} className="flex items-center gap-1.5 text-mainText text-xs sm:text-sm font-semibold hover:opacity-80 transition bg-card px-3 py-1.5 rounded-xl border border-secondary/30">
+              <ArrowLeft size={14} /> Change Programme
+            </button>
+          </div>
+
+          <div className="bg-card rounded-2xl p-5 shadow-lg border border-secondary/30 max-w-3xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-secondary/20 pb-4 mb-5">
+              <div>
+                <h3 className="text-lg font-poppins font-bold text-mainText">{selectedProg.name}</h3>
+                <p className="text-mutedText text-xs sm:text-sm">
+                  Category: <strong className="text-mainText font-semibold">{selectedCat}</strong>
+                </p>
+              </div>
+              <span className="text-xs font-bold bg-secondary/20 text-mainText px-3 py-1.5 rounded-full self-start sm:self-center">
+                {getProgCandidates(selectedProg).length} Candidates
+              </span>
+            </div>
+
+            {validationError && (
+              <div className="bg-red-500/15 border border-red-500/40 text-red-300 text-xs sm:text-sm p-3.5 rounded-xl mb-4 flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0 text-red-400" />
+                <span>{validationError}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 mb-6">
+              {getProgCandidates(selectedProg).map((cand, idx) => {
+                const currentCode = assignmentsMap[cand.id] || ''
+                const letterCount = Math.max(26, getProgCandidates(selectedProg).length)
+                const codeOptions = Array.from({ length: letterCount }, (_, i) => String.fromCharCode(65 + i))
+
+                return (
+                  <div key={cand.id} className="p-3.5 sm:p-4 rounded-xl border border-secondary/30 bg-black/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-mainText font-bold text-sm sm:text-base truncate">
+                        {cand.chestNo ? <span className="text-accent font-extrabold mr-2">#{cand.chestNo}</span> : null}
+                        {cand.name}
+                      </p>
+                      {cand.team ? <p className="text-mutedText text-xs mt-0.5">{cand.team}</p> : null}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className="text-mutedText text-xs font-medium shrink-0">Code Letter:</label>
+                      <select
+                        className="bg-card text-mainText rounded-xl px-3 py-2 outline-none border border-secondary/40 focus:border-mainText text-sm font-bold cursor-pointer"
+                        value={currentCode}
+                        onChange={e => handleAssignmentChange(cand.id, e.target.value)}
+                      >
+                        <option value="" className="bg-card text-mutedText">Select Code Letter</option>
+                        {codeOptions.map(letter => (
+                          <option key={letter} value={letter} className="bg-card text-mainText font-bold">
+                            Code Letter {letter}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="flex gap-3 pt-2 border-t border-secondary/20">
+              <button
+                onClick={handleSaveAssignments}
+                disabled={savingAssignments}
+                className="flex-1 bg-primary text-white rounded-xl py-3 px-4 font-semibold text-sm sm:text-base hover:bg-primary/90 transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
+              >
+                <Check size={18} />
+                {savingAssignments ? 'Saving Assignments...' : 'Assign Code Letters'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
+
