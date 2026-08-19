@@ -695,53 +695,31 @@ export default function JudgesResults() {
               const v = placementVals[i]
               const grade = calcGrade(v.points)
               const candidates = getCandidatesForProg(editProg)
-              const selectedCand = candidates.find(c => c.id === v.student)
 
               return (
-                <div key={label} className="mb-5 bg-secondary/10 p-3.5 sm:p-4 rounded-2xl border border-secondary/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-mainText text-xs sm:text-sm font-bold">{label}</label>
-                    {selectedCand && (
-                      <span className="text-xs font-bold text-accent bg-accent/15 px-2.5 py-1 rounded-full border border-accent/30">
-                        Selected: Performance {selectedCand.code}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <p className="text-mutedText text-[11px] sm:text-xs mb-2 font-medium">Select Performance Code:</p>
-                    <div className="flex items-center gap-2 flex-wrap max-h-36 overflow-y-auto p-1 scrollbar-none">
-                      {candidates.map(cand => {
-                        const isSelected = v.student === cand.id
-                        return (
-                          <button
-                            key={cand.id}
-                            type="button"
-                            onClick={() => v.setStudent(cand.id)}
-                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl font-poppins font-bold text-sm sm:text-base border transition flex items-center justify-center ${
-                              isSelected
-                                ? 'bg-accent text-white border-accent shadow-md scale-105 ring-2 ring-accent/40'
-                                : 'bg-black/20 hover:bg-black/30 text-mainText border-secondary/30'
-                            }`}
-                          >
-                            {cand.code}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-3 pt-2 border-t border-secondary/20">
-                    <div className="flex-1">
-                      <input
-                        type="number"
-                        placeholder="Enter Points (e.g. 10)"
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 sm:p-3 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base"
-                        value={v.points}
-                        onChange={e => v.setPoints(e.target.value)}
-                      />
-                    </div>
-                    <div className={`flex items-center justify-center w-14 h-10 sm:h-11 rounded-xl text-xs sm:text-sm font-bold shrink-0 ${
+                <div key={label} className="mb-4">
+                  <label className="text-mutedText text-xs sm:text-sm mb-1 block font-semibold">{label}</label>
+                  <div className="flex gap-2">
+                    <select
+                      className="flex-1 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base font-semibold"
+                      value={v.student}
+                      onChange={e => v.setStudent(e.target.value)}
+                    >
+                      <option value="" className="bg-card text-mainText">Select Performance</option>
+                      {candidates.map(cand => (
+                        <option key={cand.id} value={cand.id} className="bg-card text-mainText">
+                          {cand.code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Pts"
+                      className="w-20 sm:w-24 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-center text-sm sm:text-base font-semibold"
+                      value={v.points}
+                      onChange={e => v.setPoints(e.target.value)}
+                    />
+                    <div className={`flex items-center justify-center w-12 sm:w-14 rounded-xl text-xs sm:text-sm font-bold ${
                       grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
                       grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
                       grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
