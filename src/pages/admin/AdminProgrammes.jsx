@@ -217,7 +217,7 @@ export default function AdminProgrammes() {
             onClick={() => setBulkImportOpen(true)}
             className="flex items-center gap-1.5 sm:gap-2 bg-black/20 hover:bg-black/40 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base"
           >
-            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Bulk Import
+            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Import File
           </button>
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
             <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Programme
@@ -261,31 +261,31 @@ export default function AdminProgrammes() {
             && (!partFilter || (p.participationType || p.participation_type || '') === partFilter))
           .sort((a, b) => (resultNoMap[a.id] || Number.MAX_SAFE_INTEGER) - (resultNoMap[b.id] || Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name))
           .map(prog => (
-          <div key={prog.id} className="bg-card rounded-xl p-4 flex justify-between items-center shadow-sm border border-secondary/30">
-            <div className="cursor-pointer flex-1 min-w-0" onClick={() => setViewProg(prog)}>
-              <p className="text-mainText font-medium text-sm sm:text-base truncate">
-                {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
-                {prog.name}
-              </p>
-              <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
+            <div key={prog.id} className="bg-card rounded-xl p-4 flex justify-between items-center shadow-sm border border-secondary/30">
+              <div className="cursor-pointer flex-1 min-w-0" onClick={() => setViewProg(prog)}>
+                <p className="text-mainText font-medium text-sm sm:text-base truncate">
+                  {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
+                  {prog.name}
+                </p>
+                <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
+                <button
+                  onClick={() => toggleFinished(prog)}
+                  className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors duration-300 ${prog.isFinished ? 'bg-green-500' : 'bg-white/20'}`}
+                  title={prog.isFinished ? 'Finished' : 'Not finished'}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow transition-transform duration-300 ${prog.isFinished ? 'translate-x-5 sm:translate-x-7' : ''}`} />
+                </button>
+                <KebabMenu
+                  items={[
+                    { label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(prog) },
+                    { label: 'Delete', icon: <Trash2 size={15} />, danger: true, onClick: () => handleDelete(prog) },
+                  ]}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
-              <button
-                onClick={() => toggleFinished(prog)}
-                className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors duration-300 ${prog.isFinished ? 'bg-green-500' : 'bg-white/20'}`}
-                title={prog.isFinished ? 'Finished' : 'Not finished'}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow transition-transform duration-300 ${prog.isFinished ? 'translate-x-5 sm:translate-x-7' : ''}`} />
-              </button>
-              <KebabMenu
-                items={[
-                  { label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(prog) },
-                  { label: 'Delete', icon: <Trash2 size={15} />, danger: true, onClick: () => handleDelete(prog) },
-                ]}
-              />
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Add Modal */}

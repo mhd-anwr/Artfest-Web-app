@@ -196,9 +196,8 @@ export default function AdminStudents() {
     progList = filteredProgrammes.map(prog => (
       <label
         key={prog.id}
-        className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition ${
-          selectedProgs.includes(prog.id) ? 'bg-secondary/25 border border-secondary' : 'hover:bg-white/10'
-        }`}
+        className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition ${selectedProgs.includes(prog.id) ? 'bg-secondary/25 border border-secondary' : 'hover:bg-white/10'
+          }`}
       >
         <input
           type="checkbox"
@@ -226,7 +225,7 @@ export default function AdminStudents() {
             onClick={() => setBulkImportOpen(true)}
             className="flex items-center gap-1.5 sm:gap-2 bg-black/20 hover:bg-black/40 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base"
           >
-            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Bulk Import
+            <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Import File
           </button>
           <button onClick={openAdd} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
             <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Participant
@@ -274,11 +273,10 @@ export default function AdminStudents() {
                       key={label}
                       type="button"
                       onClick={() => setGenFilter(prev => prev === label ? '' : label)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
-                        genFilter === label
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${genFilter === label
                           ? 'bg-secondary/25 border-secondary text-mainText'
                           : 'bg-black/20 border-secondary/40 text-mutedText hover:bg-black/30'
-                      }`}
+                        }`}
                     >
                       {label}
                     </button>
@@ -291,9 +289,8 @@ export default function AdminStudents() {
                   {shownGeneralProgrammes.map(prog => (
                     <label
                       key={prog.id}
-                      className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition ${
-                        selectedProgs.includes(prog.id) ? 'bg-secondary/25 border border-secondary' : 'hover:bg-white/10'
-                      }`}
+                      className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition ${selectedProgs.includes(prog.id) ? 'bg-secondary/25 border border-secondary' : 'hover:bg-white/10'
+                        }`}
                     >
                       <input
                         type="checkbox"
@@ -339,9 +336,8 @@ export default function AdminStudents() {
         {filteredStudents.map(s => (
           <div key={s.id} className="relative bg-card rounded-xl p-4 flex items-center gap-3 shadow-sm border border-secondary/30">
             <span
-              className={`absolute -top-2 right-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-md ${
-                s.chestNo ? 'bg-primary text-white' : 'bg-black/20 text-mutedText'
-              }`}
+              className={`absolute -top-2 right-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-md ${s.chestNo ? 'bg-primary text-white' : 'bg-black/20 text-mutedText'
+                }`}
               title="Chest No"
             >
               {s.chestNo ? `#${s.chestNo}` : '—'}

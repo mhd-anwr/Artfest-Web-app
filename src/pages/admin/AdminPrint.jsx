@@ -58,11 +58,11 @@ export default function AdminPrint() {
 
   const CATEGORIES = ['Minor', 'HS', 'Premier', 'Sub Junior', 'Junior', 'General Cat-A', 'General Cat-B']
   const CATEGORY_COLORS = {
-    Minor:          { light: '#55EFC4', dark: '#00B894' },
-    HS:             { light: '#FF7675', dark: '#D63031' },
-    Premier:        { light: '#74B9FF', dark: '#0984E3' },
-    'Sub Junior':   { light: '#A29BFE', dark: '#6C5CE7' },
-    Junior:         { light: '#FDCB6E', dark: '#D68910' },
+    Minor: { light: '#55EFC4', dark: '#00B894' },
+    HS: { light: '#FF7675', dark: '#D63031' },
+    Premier: { light: '#74B9FF', dark: '#0984E3' },
+    'Sub Junior': { light: '#A29BFE', dark: '#6C5CE7' },
+    Junior: { light: '#FDCB6E', dark: '#D68910' },
     'General Cat-A': { light: '#D1D5DB', dark: '#9CA3AF' },
     'General Cat-B': { light: '#FFFFFF', dark: '#F5F5F5' },
   }
@@ -304,21 +304,19 @@ export default function AdminPrint() {
           <div className="flex justify-center gap-4 sm:gap-6 mb-6">
             <button
               onClick={() => { setActiveTab('programmes'); setSelectionMode(false); setSelectedSet(new Set()) }}
-              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold transition text-sm sm:text-base ${
-                activeTab === 'programmes'
+              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold transition text-sm sm:text-base ${activeTab === 'programmes'
                   ? 'bg-primary text-white'
                   : 'bg-secondary/15 text-mutedText'
-              }`}
+                }`}
             >
               Programmes
             </button>
             <button
               onClick={() => { setActiveTab('results'); setSelectionMode(false); setSelectedSet(new Set()) }}
-              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold transition text-sm sm:text-base ${
-                activeTab === 'results'
+              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold transition text-sm sm:text-base ${activeTab === 'results'
                   ? 'bg-primary text-white'
                   : 'bg-secondary/15 text-mutedText'
-              }`}
+                }`}
             >
               Results
             </button>
@@ -328,11 +326,10 @@ export default function AdminPrint() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={toggleSelectionMode}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition ${
-                selectionMode
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition ${selectionMode
                   ? 'bg-primary text-white'
                   : 'bg-card text-mutedText border border-secondary/30 hover:bg-secondary/10 shadow-lg'
-              }`}
+                }`}
             >
               {selectionMode ? <Square size={16} /> : <CheckSquare size={16} />}
               {selectionMode ? 'Cancel' : 'Select'}
@@ -372,14 +369,12 @@ export default function AdminPrint() {
                       if (selectionMode) { toggleItem(prog.id); return }
                       openDetail(prog, 'programme')
                     }}
-                    className={`bg-card rounded-xl p-4 cursor-pointer hover:bg-secondary/10 transition shadow-lg border border-secondary/30 flex items-center gap-3 ${
-                      selectionMode && isSelected ? 'ring-2 ring-mainText' : ''
-                    }`}
+                    className={`bg-card rounded-xl p-4 cursor-pointer hover:bg-secondary/10 transition shadow-lg border border-secondary/30 flex items-center gap-3 ${selectionMode && isSelected ? 'ring-2 ring-mainText' : ''
+                      }`}
                   >
                     {selectionMode && (
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${
-                        isSelected ? 'bg-primary border-primary' : 'border-secondary'
-                      }`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${isSelected ? 'bg-primary border-primary' : 'border-secondary'
+                        }`}>
                         {isSelected && <span className="text-white text-xs font-bold">&#10003;</span>}
                       </div>
                     )}
@@ -415,14 +410,12 @@ export default function AdminPrint() {
                       if (selectionMode) { toggleItem(res.id); return }
                       openDetail(res, 'result')
                     }}
-                    className={`bg-card rounded-xl p-4 cursor-pointer hover:bg-secondary/10 transition shadow-lg border border-secondary/30 flex items-center gap-3 ${
-                      selectionMode && isSelected ? 'ring-2 ring-mainText' : ''
-                    }`}
+                    className={`bg-card rounded-xl p-4 cursor-pointer hover:bg-secondary/10 transition shadow-lg border border-secondary/30 flex items-center gap-3 ${selectionMode && isSelected ? 'ring-2 ring-mainText' : ''
+                      }`}
                   >
                     {selectionMode && (
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${
-                        isSelected ? 'bg-primary border-primary' : 'border-secondary'
-                      }`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${isSelected ? 'bg-primary border-primary' : 'border-secondary'
+                        }`}>
                         {isSelected && <span className="text-white text-xs font-bold">&#10003;</span>}
                       </div>
                     )}
