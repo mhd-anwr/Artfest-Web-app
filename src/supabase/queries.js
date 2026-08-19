@@ -479,6 +479,7 @@ export const getIndividualCategoryPoints = async () => {
       .filter(s => s.class === cat)
       .map(s => {
         const teamObj = teamMap[s.team] || teams.find(t => t.name === s.team)
+        const teamFontColor = teamObj ? (teamObj.fontColor || teamObj.font_color || teamObj.color || '#2872A1') : '#2872A1'
         return {
           id: s.id,
           name: s.name,
@@ -486,6 +487,7 @@ export const getIndividualCategoryPoints = async () => {
           category: s.class,
           team: teamObj ? teamObj.name : (s.team || 'Unassigned'),
           teamColor: teamObj ? teamObj.color : '#2872A1',
+          teamFontColor,
           totalPoints: studentPointsMap[s.id] || 0,
         }
       })

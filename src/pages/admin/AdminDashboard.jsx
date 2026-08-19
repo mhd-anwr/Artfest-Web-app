@@ -159,8 +159,8 @@ export default function AdminDashboard() {
                   style={{ backgroundColor: team.color || '#2872A1' }}
                 />
                 <span
-                  className="font-poppins font-bold text-sm sm:text-base text-mainText truncate"
-                  style={{ color: team.color }}
+                  className="font-poppins font-bold text-sm sm:text-base truncate"
+                  style={{ color: team.fontColor || team.font_color || team.color }}
                 >
                   {team.name}
                 </span>
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                     {student.name}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5 text-[11px] sm:text-xs text-mutedText">
-                    <span className="truncate font-medium" style={{ color: student.teamColor }}>{student.team}</span>
+                    <span className="truncate font-medium" style={{ color: student.teamFontColor || student.teamColor }}>{student.team}</span>
                     <span>•</span>
                     <span className="bg-secondary/20 text-mainText px-1.5 py-0.5 rounded text-[10px] font-semibold">{student.category}</span>
                   </div>

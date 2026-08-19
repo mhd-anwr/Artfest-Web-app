@@ -12,6 +12,18 @@ const TEAM_COLORS = [
   '#A855F7', '#EC4899', '#E8845C', '#B91C1C',
 ]
 
+const FONT_COLORS = [
+  { value: '#000000', label: 'Black' },
+  { value: '#FFFFFF', label: 'White' },
+  { value: '#374151', label: 'Dark Gray' },
+  { value: '#D1D5DB', label: 'Light Gray' },
+  { value: '#1E3A8A', label: 'Navy' },
+  { value: '#7E22CE', label: 'Purple' },
+  { value: '#DC2626', label: 'Red' },
+  { value: '#15803D', label: 'Green' },
+  { value: '#1D4ED8', label: 'Blue' },
+]
+
 export default function AdminTeams() {
   const [teamData, setTeamData] = useState([])
   const [students, setStudents] = useState([])
@@ -19,6 +31,7 @@ export default function AdminTeams() {
   const [editing, setEditing] = useState(null)
   const [editName, setEditName] = useState('')
   const [editColor, setEditColor] = useState('')
+  const [editFontColor, setEditFontColor] = useState('')
   const [saving, setSaving] = useState(false)
   const toast = useToast()
 
@@ -38,16 +51,36 @@ export default function AdminTeams() {
     setEditing(team)
     setEditName(team.name || '')
     setEditColor(team.color || TEAM_COLORS[0])
+    setEditFontColor(team.fontColor || team.font_color || team.color || TEAM_COLORS[0])
   }
 
   const saveEdit = async () => {
     if (!editing) return
     if (!editName.trim()) return toast('Team name cannot be empty', 'error')
     setSaving(true)
-    const { error } = await supabase
+
+    // Attempt to save fontColor, fallback gracefully if DB column isn't present
+    let { error } = await supabase
       .from('teams')
-      .update({ name: editName.trim(), color: editColor })
+      .update({ name: editName.trim(), color: editColor, fontColor: editFontColor })
       .eq('id', editing.id)
+
+    if (error && error.message?.includes('fontColor')) {
+      const fallback = await supabase
+        .from('teams')
+        .update({ name: editName.trim(), color: editColor, font_color: editFontColor })
+        .eq('id', editing.id)
+      error = fallback.error
+    }
+
+    if (error && (error.message?.includes('font_color') || error.message?.includes('column'))) {
+      const basicFallback = await supabase
+        .from('teams')
+        .update({ name: editName.trim(), color: editColor })
+        .eq('id', editing.id)
+      error = basicFallback.error
+    }
+
     setSaving(false)
     if (error) return toast('Failed to update team: ' + error.message, 'error')
     toast('Team updated!')
@@ -61,38 +94,41 @@ export default function AdminTeams() {
       <p className="text-mutedText text-xs sm:text-sm mb-6">Points are automatically calculated from programme results.</p>
 
       <div className="flex flex-col gap-4">
-        {teamData.map(team => (
-          <div key={team.id} className="bg-card rounded-2xl overflow-hidden shadow-sm border border-secondary/30">
-            <TeamBreakdown
-              team={team}
-              isExpanded={expandedTeam === team.id}
-              onToggle={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}
-            >
-              <div className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition">
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-base sm:text-xl font-bold shadow-lg shrink-0" style={{ background: team.color || '#2872A1', color: '#fff' }}>
-                    {team.name?.charAt(0)?.toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-mainText font-poppins font-bold text-base sm:text-lg truncate" style={{ color: team.color }}>{team.name}</h3>
-                    <div className="flex items-center gap-2 sm:gap-3 mt-1">
-                      <span className="text-mainText font-bold text-lg sm:text-xl">{team.totalPoints || 0}</span>
-                      <span className="text-mutedText text-[10px] sm:text-xs">total points</span>
+        {teamData.map(team => {
+          const nameColor = team.fontColor || team.font_color || team.color
+          return (
+            <div key={team.id} className="bg-card rounded-2xl overflow-hidden shadow-sm border border-secondary/30">
+              <TeamBreakdown
+                team={team}
+                isExpanded={expandedTeam === team.id}
+                onToggle={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}
+              >
+                <div className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-base sm:text-xl font-bold shadow-lg shrink-0" style={{ background: team.color || '#2872A1', color: '#fff' }}>
+                      {team.name?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-poppins font-bold text-base sm:text-lg truncate" style={{ color: nameColor }}>{team.name}</h3>
+                      <div className="flex items-center gap-2 sm:gap-3 mt-1">
+                        <span className="text-mainText font-bold text-lg sm:text-xl">{team.totalPoints || 0}</span>
+                        <span className="text-mutedText text-[10px] sm:text-xs">total points</span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-3 sm:gap-4 shrink-0 ml-2">
+                    <span className="text-mainText font-bold text-[11px] sm:text-sm bg-secondary/20 rounded-full px-3 py-1.5">
+                      {memberCount(team.id)} members
+                    </span>
+                    <KebabMenu
+                      items={[{ label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(team) }]}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 sm:gap-4 shrink-0 ml-2">
-                  <span className="text-mainText font-bold text-[11px] sm:text-sm bg-secondary/20 rounded-full px-3 py-1.5">
-                    {memberCount(team.id)} members
-                  </span>
-                  <KebabMenu
-                    items={[{ label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(team) }]}
-                  />
-                </div>
-              </div>
-            </TeamBreakdown>
-          </div>
-        ))}
+              </TeamBreakdown>
+            </div>
+          )
+        })}
       </div>
 
       {/* Edit modal */}
@@ -127,6 +163,26 @@ export default function AdminTeams() {
                   aria-label={`Select color ${color}`}
                 >
                   {editColor === color && <Check size={16} color="#0F2A3D" />}
+                </button>
+              ))}
+            </div>
+
+            <label className="text-mutedText text-sm block mb-1.5 font-semibold">Font Colour</label>
+            <div className="grid grid-cols-9 gap-2 mb-6">
+              {FONT_COLORS.map(fc => (
+                <button
+                  key={fc.value}
+                  onClick={() => setEditFontColor(fc.value)}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-secondary/40 flex items-center justify-center transition-all ${
+                    editFontColor === fc.value ? 'ring-2 ring-mainText ring-offset-2 ring-offset-card scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: fc.value }}
+                  title={fc.label}
+                  aria-label={`Select font color ${fc.label}`}
+                >
+                  {editFontColor === fc.value && (
+                    <Check size={14} className={fc.value === '#FFFFFF' || fc.value === '#D1D5DB' ? 'text-black' : 'text-white'} />
+                  )}
                 </button>
               ))}
             </div>
