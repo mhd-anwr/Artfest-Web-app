@@ -337,40 +337,46 @@ export default function JudgesResults() {
     const cands = getCandidatesForProg(prog)
 
     if (!preserveFields) {
-      const initialRows = cands.map((cand, idx) => {
-        let savedStudentId = cand.id
-        let savedPlace = getOrdinalLabel(idx)
-        let savedPoints = ''
-
-        if (Array.isArray(latest?.entries) && latest.entries.length > 0) {
-          const entry = latest.entries.find(e => (e.studentId && e.studentId === cand.id) || (e.candidateId && e.candidateId === cand.id) || (e.code && e.code === cand.code) || (e.codeLetter && e.codeLetter === cand.code) || e.candidateNo === idx + 1) || latest.entries[idx]
-          if (entry) {
-            savedStudentId = entry.studentId || entry.candidateId || cand.id
-            savedPlace = entry.place || entry.label || getOrdinalLabel(idx)
-            savedPoints = entry.points != null ? String(entry.points) : ''
+      let initialRows = []
+      if (Array.isArray(latest?.entries) && latest.entries.length > 0) {
+        initialRows = latest.entries.map((entry, idx) => {
+          const cand = cands.find(c => c.id === (entry.studentId || entry.candidateId) || c.code === (entry.code || entry.codeLetter))
+          const sId = entry.studentId || entry.candidateId || cand?.id || ''
+          return {
+            place: entry.place || entry.label || getOrdinalLabel(idx),
+            studentId: sId,
+            points: entry.points != null ? String(entry.points) : '',
           }
-        } else if (latest) {
-          if (idx === 0 && latest.first) {
-            savedStudentId = latest.first.studentId || cand.id
-            savedPlace = latest.first.label || '1st Place'
-            savedPoints = latest.first.points != null ? String(latest.first.points) : ''
-          } else if (idx === 1 && latest.second) {
-            savedStudentId = latest.second.studentId || cand.id
-            savedPlace = latest.second.label || '2nd Place'
-            savedPoints = latest.second.points != null ? String(latest.second.points) : ''
-          } else if (idx === 2 && latest.third) {
-            savedStudentId = latest.third.studentId || cand.id
-            savedPlace = latest.third.label || '3rd Place'
-            savedPoints = latest.third.points != null ? String(latest.third.points) : ''
-          }
-        }
+        })
+      } else {
+        initialRows = cands.map((cand, idx) => {
+          let savedStudentId = cand.id
+          let savedPlace = getOrdinalLabel(idx)
+          let savedPoints = ''
 
-        return {
-          place: savedPlace,
-          studentId: savedStudentId,
-          points: savedPoints,
-        }
-      })
+          if (latest) {
+            if (idx === 0 && latest.first) {
+              savedStudentId = latest.first.studentId || cand.id
+              savedPlace = latest.first.label || '1st Place'
+              savedPoints = latest.first.points != null ? String(latest.first.points) : ''
+            } else if (idx === 1 && latest.second) {
+              savedStudentId = latest.second.studentId || cand.id
+              savedPlace = latest.second.label || '2nd Place'
+              savedPoints = latest.second.points != null ? String(latest.second.points) : ''
+            } else if (idx === 2 && latest.third) {
+              savedStudentId = latest.third.studentId || cand.id
+              savedPlace = latest.third.label || '3rd Place'
+              savedPoints = latest.third.points != null ? String(latest.third.points) : ''
+            }
+          }
+
+          return {
+            place: savedPlace,
+            studentId: savedStudentId,
+            points: savedPoints,
+          }
+        })
+      }
       setEntryRows(initialRows)
     }
     setEditError('')
