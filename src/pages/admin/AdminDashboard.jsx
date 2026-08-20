@@ -87,7 +87,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8]">Dashboard</h1>
-          <p className="text-[#4EBA16] dark:text-[#8ED06C] text-sm mt-0.5">Overview of the festival site</p>
+          <p className="text-[#3D6B4C] dark:text-[#8ED06C] text-sm mt-0.5">Overview of the festival site</p>
         </div>
         <ThemeToggle />
       </div>
@@ -97,15 +97,15 @@ export default function AdminDashboard() {
         {stats.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="bg-white dark:bg-[#0B2A17] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(17,95,50,0.06)] dark:shadow-none border border-[#115F32]/12 dark:border-[#71C247]/25 transition"
+            className="bg-white dark:bg-[#0B2A17] rounded-2xl p-4 sm:p-5 shadow-[0_4px_16px_rgba(17,95,50,0.04)] dark:shadow-none border border-[#115F32]/14 dark:border-[#71C247]/25 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#D4FFB8] dark:bg-[#123D22] flex items-center justify-center shrink-0 border border-[#115F32]/15 dark:border-[#71C247]/20">
-                <Icon size={20} className="sm:w-[22px] sm:h-[22px] text-[#115F32] dark:text-[#71C247]" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#F1F8EE] dark:bg-[#123D22] flex items-center justify-center shrink-0 border border-[#115F32]/12 dark:border-[#71C247]/20">
+                <Icon size={20} className="sm:w-[22px] sm:h-[22px] text-[#228C22] dark:text-[#71C247]" />
               </div>
               <div className="min-w-0">
                 <p className="text-2xl sm:text-3xl font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8] leading-none">{value}</p>
-                <p className="text-[11px] sm:text-xs text-[#4EBA16] dark:text-[#8ED06C] mt-1 truncate">{label}</p>
+                <p className="text-[11px] sm:text-xs text-[#4B6F58] dark:text-[#8ED06C] mt-1 truncate">{label}</p>
               </div>
             </div>
           </div>
@@ -113,24 +113,24 @@ export default function AdminDashboard() {
       </div>
 
       {/* Team Points Status */}
-      <div className="bg-white dark:bg-[#0B2A17] rounded-2xl shadow-[0_4px_20px_rgba(17,95,50,0.06)] dark:shadow-none border border-[#115F32]/12 dark:border-[#71C247]/25 overflow-hidden mb-8">
+      <div className="bg-white dark:bg-[#0B2A17] rounded-2xl shadow-[0_4px_16px_rgba(17,95,50,0.04)] dark:shadow-none border border-[#115F32]/14 dark:border-[#71C247]/25 overflow-hidden mb-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[#115F32]/12 dark:border-[#71C247]/20 bg-[#F7FBF5] dark:bg-[#0B2A17]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[#115F32]/14 dark:border-[#71C247]/20 bg-[#F6FAF4] dark:bg-[#0B2A17]">
           <div>
             <div className="flex items-center gap-2.5">
-              <Sparkles size={20} className="text-[#115F32] dark:text-[#71C247]" />
+              <Sparkles size={20} className="text-[#228C22] dark:text-[#71C247]" />
               <h2 className="font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8] text-base sm:text-lg">
                 Team Points Status (After {teamTotalPubCount} results)
               </h2>
             </div>
-            <p className="text-[#4EBA16] dark:text-[#8ED06C] text-xs sm:text-sm mt-0.5">A summary of total points scored by each team.</p>
+            <p className="text-[#52705D] dark:text-[#8ED06C] text-xs sm:text-sm mt-0.5">A summary of total points scored by each team.</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               onClick={refresh}
               disabled={refreshing}
-              className="flex items-center gap-2 bg-[#228C22] hover:bg-[#115F32] text-white dark:text-[#D4FFB8] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60 border border-transparent dark:border-[#71C247]/30"
+              className="flex items-center gap-2 bg-[#228C22] hover:bg-[#115F32] text-white dark:text-[#D4FFB8] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60 border border-transparent dark:border-[#71C247]/30 shadow-sm"
             >
               <RefreshCw size={15} className={`${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
             <button
               onClick={loadTeamPoints}
               disabled={calculatingTeam}
-              className="flex items-center gap-2 bg-white hover:bg-[#F7FBF5] dark:bg-[#123D22] dark:hover:bg-[#115F32] text-[#115F32] dark:text-[#D4FFB8] border border-[#115F32]/20 dark:border-[#228C22] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
+              className="flex items-center gap-2 bg-white hover:bg-[#F1F8EE] dark:bg-[#123D22] dark:hover:bg-[#115F32] text-[#115F32] dark:text-[#D4FFB8] border border-[#115F32]/18 dark:border-[#228C22] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
             >
               <Calculator size={15} className={`${calculatingTeam ? 'animate-spin' : ''}`} />
               Calculate (After {teamTotalPubCount} results)
@@ -149,12 +149,12 @@ export default function AdminDashboard() {
         {/* Team Cards List */}
         <div className="p-4 sm:p-5 flex flex-col gap-3">
           {teamData.length === 0 && (
-            <p className="text-[#4EBA16] dark:text-[#8ED06C] text-sm text-center py-8">No teams yet.</p>
+            <p className="text-[#52705D] dark:text-[#8ED06C] text-sm text-center py-8">No teams yet.</p>
           )}
           {teamData.map((team) => (
             <div
               key={team.id}
-              className="bg-[#F9FCF8] dark:bg-[#123D22] rounded-2xl border border-[#115F32]/10 dark:border-[#71C247]/25 p-4 shadow-none flex items-center justify-between gap-4 hover:border-[#115F32]/25 dark:hover:border-[#71C247]/50 transition"
+              className="bg-[#F1F8EE] dark:bg-[#123D22] rounded-2xl border border-[#115F32]/12 dark:border-[#71C247]/25 p-4 shadow-none flex items-center justify-between gap-4 hover:border-[#115F32]/25 dark:hover:border-[#71C247]/50 transition"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <span
@@ -162,43 +162,43 @@ export default function AdminDashboard() {
                   style={{ backgroundColor: team.color || '#2872A1' }}
                 />
                 <span
-                  className="font-poppins font-bold text-sm sm:text-base truncate text-[#115F32] dark:text-[#D4FFB8]"
+                  className="font-poppins font-bold text-sm sm:text-base truncate text-[#173D28] dark:text-[#D4FFB8]"
                 >
                   {team.name}
                 </span>
               </div>
               <div className="flex items-baseline gap-1 shrink-0">
                 <span className="text-[#228C22] dark:text-[#71C247] font-extrabold text-base sm:text-lg">{team.totalPoints || 0}</span>
-                <span className="text-[#4EBA16] dark:text-[#8ED06C] text-xs font-semibold">pts</span>
+                <span className="text-[#52705D] dark:text-[#8ED06C] text-xs font-semibold">pts</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Card Footer with Result Counters */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-t border-[#115F32]/12 dark:border-[#71C247]/20 bg-[#F7FBF5] dark:bg-[#061A0D]/50 text-[#4EBA16] dark:text-[#8ED06C] text-xs font-medium">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-t border-[#115F32]/14 dark:border-[#71C247]/20 bg-[#F6FAF4] dark:bg-[#061A0D]/50 text-[#52705D] dark:text-[#8ED06C] text-xs font-medium">
           <span>Total Published Results: <strong className="text-[#115F32] dark:text-[#D4FFB8] font-bold">{teamTotalPubCount}</strong></span>
           <span>After Published Results: <strong className="text-[#115F32] dark:text-[#D4FFB8] font-bold">{teamAfterPubCount}</strong></span>
         </div>
       </div>
 
       {/* Individual Points Status */}
-      <div className="bg-white dark:bg-[#0B2A17] rounded-2xl shadow-[0_4px_20px_rgba(17,95,50,0.06)] dark:shadow-none border border-[#115F32]/12 dark:border-[#71C247]/25 overflow-hidden">
+      <div className="bg-white dark:bg-[#0B2A17] rounded-2xl shadow-[0_4px_16px_rgba(17,95,50,0.04)] dark:shadow-none border border-[#115F32]/14 dark:border-[#71C247]/25 overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[#115F32]/12 dark:border-[#71C247]/20 bg-[#F7FBF5] dark:bg-[#0B2A17]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[#115F32]/14 dark:border-[#71C247]/20 bg-[#F6FAF4] dark:bg-[#0B2A17]">
           <div>
             <div className="flex items-center gap-2.5">
-              <Award size={20} className="text-[#115F32] dark:text-[#71C247]" />
+              <Award size={20} className="text-[#228C22] dark:text-[#71C247]" />
               <h2 className="font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8] text-base sm:text-lg">Individual Points Status</h2>
             </div>
-            <p className="text-[#4EBA16] dark:text-[#8ED06C] text-xs sm:text-sm mt-0.5">A leaderboard showing top 10 positions in each category.</p>
+            <p className="text-[#52705D] dark:text-[#8ED06C] text-xs sm:text-sm mt-0.5">A leaderboard showing top 10 positions in each category.</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               onClick={refresh}
               disabled={refreshing}
-              className="flex items-center gap-2 bg-[#228C22] hover:bg-[#115F32] text-white dark:text-[#D4FFB8] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60 border border-transparent dark:border-[#71C247]/30"
+              className="flex items-center gap-2 bg-[#228C22] hover:bg-[#115F32] text-white dark:text-[#D4FFB8] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60 border border-transparent dark:border-[#71C247]/30 shadow-sm"
             >
               <RefreshCw size={15} className={`${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
             <button
               onClick={loadIndividualPoints}
               disabled={calculatingInd}
-              className="flex items-center gap-2 bg-white hover:bg-[#F7FBF5] dark:bg-[#123D22] dark:hover:bg-[#115F32] text-[#115F32] dark:text-[#D4FFB8] border border-[#115F32]/20 dark:border-[#228C22] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
+              className="flex items-center gap-2 bg-white hover:bg-[#F1F8EE] dark:bg-[#123D22] dark:hover:bg-[#115F32] text-[#115F32] dark:text-[#D4FFB8] border border-[#115F32]/18 dark:border-[#228C22] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-60"
             >
               <Calculator size={15} className={`${calculatingInd ? 'animate-spin' : ''}`} />
               Calculate (After {totalPubCount} results)
@@ -215,15 +215,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Category Selector Bar */}
-        <div className="px-4 sm:px-5 py-3 border-b border-[#115F32]/12 dark:border-[#71C247]/20 bg-[#F7FBF5] dark:bg-[#061A0D]/50 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+        <div className="px-4 sm:px-5 py-3 border-b border-[#115F32]/14 dark:border-[#71C247]/20 bg-[#F6FAF4] dark:bg-[#061A0D]/50 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
           {eligibleCats.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCat(cat)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                 selectedCat === cat
-                  ? 'bg-[#D4FFB8] text-[#115F32] border border-[#115F32]/20 shadow-none dark:bg-[#228C22] dark:text-[#D4FFB8] dark:border-[#71C247]/40'
-                  : 'bg-transparent text-[#4EBA16] hover:bg-[#F9FCF8] hover:text-[#115F32] border border-[#115F32]/10 dark:bg-[#123D22] dark:text-[#D4FFB8] dark:hover:bg-[#228C22]/50 dark:border-[#71C247]/20'
+                  ? 'bg-[#F1F8EE] text-[#115F32] border border-[#115F32]/18 shadow-none dark:bg-[#228C22] dark:text-[#D4FFB8] dark:border-[#71C247]/40'
+                  : 'bg-transparent text-[#52705D] hover:bg-[#F1F8EE] hover:text-[#115F32] border border-[#115F32]/12 dark:bg-[#123D22] dark:text-[#D4FFB8] dark:hover:bg-[#228C22]/50 dark:border-[#71C247]/20'
               }`}
             >
               {cat}
@@ -232,13 +232,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Leaderboard Rows */}
-        <div className="divide-y divide-[#115F32]/10 dark:divide-[#71C247]/15">
+        <div className="divide-y divide-[#115F32]/12 dark:divide-[#71C247]/15">
           {(!indData[selectedCat] || indData[selectedCat].length === 0) ? (
-            <p className="text-[#4EBA16] dark:text-[#8ED06C] text-sm text-center py-8">No individual points recorded for {selectedCat} yet.</p>
+            <p className="text-[#52705D] dark:text-[#8ED06C] text-sm text-center py-8">No individual points recorded for {selectedCat} yet.</p>
           ) : (
             indData[selectedCat].map((student) => (
-              <div key={student.id} className="flex items-center gap-3 px-4 sm:px-5 py-3.5 hover:bg-[#F9FCF8] dark:hover:bg-[#123D22]/40 transition">
-                <span className="text-[#4EBA16] dark:text-[#8ED06C] text-xs font-bold w-5 shrink-0">#{student.rank}</span>
+              <div key={student.id} className="flex items-center gap-3 px-4 sm:px-5 py-3.5 hover:bg-[#F1F8EE] dark:hover:bg-[#123D22]/40 transition">
+                <span className="text-[#52705D] dark:text-[#8ED06C] text-xs font-bold w-5 shrink-0">#{student.rank}</span>
                 <div
                   className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0 shadow-sm"
                   style={{ background: student.teamColor || '#2872A1' }}
@@ -246,18 +246,18 @@ export default function AdminDashboard() {
                   {student.chestNo || student.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[#115F32] dark:text-[#D4FFB8] font-medium text-sm sm:text-base truncate">
+                  <p className="text-[#173D28] dark:text-[#D4FFB8] font-medium text-sm sm:text-base truncate">
                     {student.name}
                   </p>
-                  <div className="flex items-center gap-2 mt-0.5 text-[11px] sm:text-xs text-[#4EBA16] dark:text-[#8ED06C]">
-                    <span className="truncate font-medium text-[#4EBA16] dark:text-[#8ED06C]">{student.team}</span>
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] sm:text-xs text-[#52705D] dark:text-[#8ED06C]">
+                    <span className="truncate font-medium text-[#52705D] dark:text-[#8ED06C]">{student.team}</span>
                     <span>•</span>
-                    <span className="bg-[#E4F7DA] text-[#115F32] border border-[#115F32]/15 dark:bg-[#123D22] dark:text-[#D4FFB8] dark:border-[#71C247]/25 px-1.5 py-0.5 rounded text-[10px] font-semibold">{student.category}</span>
+                    <span className="bg-[#F1F8EE] text-[#173D28] border border-[#115F32]/14 dark:bg-[#123D22] dark:text-[#D4FFB8] dark:border-[#71C247]/25 px-1.5 py-0.5 rounded text-[10px] font-semibold">{student.category}</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-[#228C22] dark:text-[#71C247] font-bold text-sm sm:text-base">{student.totalPoints}</span>
-                  <span className="text-[#4EBA16] dark:text-[#8ED06C] text-[10px] sm:text-xs ml-1">pts</span>
+                  <span className="text-[#52705D] dark:text-[#8ED06C] text-[10px] sm:text-xs ml-1">pts</span>
                 </div>
               </div>
             ))
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card Footer with Result Counters */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-t border-[#115F32]/12 dark:border-[#71C247]/20 bg-[#F7FBF5] dark:bg-[#061A0D]/50 text-[#4EBA16] dark:text-[#8ED06C] text-xs font-medium">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-t border-[#115F32]/14 dark:border-[#71C247]/20 bg-[#F6FAF4] dark:bg-[#061A0D]/50 text-[#52705D] dark:text-[#8ED06C] text-xs font-medium">
           <span>Total Published Results: <strong className="text-[#115F32] dark:text-[#D4FFB8] font-bold">{totalPubCount}</strong></span>
           <span>After Published Results: <strong className="text-[#115F32] dark:text-[#D4FFB8] font-bold">{afterPubCount}</strong></span>
         </div>
