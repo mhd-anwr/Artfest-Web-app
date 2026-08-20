@@ -300,23 +300,27 @@ export const clearStudentSession = async (studentId, token) => {
 
 const COMMON_STUDENT_PASSWORD = 'israfest2026'
 
-export const getStudentByCredentials = async (name, password) => {
-  const trimmed = name.trim()
+export const getStudentByCredentials = async (chestNo, password) => {
+  const trimmed = String(chestNo || '').trim()
+  if (!trimmed) return { error: 'not_found' }
+
   let { data: students } = await supabase
     .from('students')
-    .select('id, name')
-    .ilike('name', trimmed)
+    .select('id, name, chestNo')
+    .ilike('chestNo', trimmed)
     .limit(1)
+
   if (!students || students.length === 0) {
-    const { data: fuzzy } = await supabase
+    const { data: exact } = await supabase
       .from('students')
-      .select('id, name')
-      .ilike('name', `%${trimmed}%`)
+      .select('id, name, chestNo')
+      .eq('chestNo', trimmed)
       .limit(1)
-    students = fuzzy
+    students = exact
   }
+
   if (!students || students.length === 0) {
-    console.warn('No student found with name:', trimmed)
+    console.warn('No participant found with chest number:', trimmed)
     return { error: 'not_found' }
   }
 
@@ -328,7 +332,7 @@ export const getStudentByCredentials = async (name, password) => {
     .maybeSingle()
 
   if (credErr) {
-    console.warn('Credential lookup error for', student.name, credErr)
+    console.warn('Credential lookup error for chestNo:', student.chestNo, credErr)
     return { error: 'server_error' }
   }
 
@@ -336,10 +340,10 @@ export const getStudentByCredentials = async (name, password) => {
 
   if (!validPassword) {
     if (!cred) {
-      console.warn('No credentials record exists for', student.name)
+      console.warn('No credentials record exists for chestNo:', student.chestNo)
       return { error: 'no_credentials', student }
     }
-    console.warn('Wrong password for', student.name)
+    console.warn('Wrong password for chestNo:', student.chestNo)
     return { error: 'wrong_password' }
   }
 
