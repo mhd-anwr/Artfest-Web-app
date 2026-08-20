@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck, ArrowLeft, Check, AlertCircle } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import ThemeToggle from '../../components/ThemeToggle'
-import { getProgrammes, getStudents, getCategories, getCodeAssignments, saveCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { getProgrammes, getStudents, getCategories, getTeams, getCodeAssignments, saveCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
 import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
 
 const MAX_CARDS = 60
@@ -54,6 +54,7 @@ export default function AdminLots() {
   // Assignment Workflow state
   const [programmes, setProgrammes] = useState([])
   const [students, setStudents] = useState([])
+  const [teams, setTeams] = useState([])
   const [categories, setCategories] = useState(PROGRAMME_CATEGORIES)
   const [selectedCat, setSelectedCat] = useState('')
   const [selectedProg, setSelectedProg] = useState(null)
@@ -69,8 +70,26 @@ export default function AdminLots() {
   useEffect(() => {
     getProgrammes().then(setProgrammes).catch(err => console.error(err))
     getStudents().then(setStudents).catch(err => console.error(err))
+    getTeams().then(setTeams).catch(err => console.error(err))
     getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error(err))
   }, [])
+
+  const teamMap = {}
+  teams.forEach(t => {
+    if (t.id) teamMap[t.id] = t
+    if (t.name) teamMap[t.name] = t
+  })
+
+  const getTeamInfo = (cand) => {
+    const raw = typeof cand === 'object' ? (cand.team || cand.team_id || cand.teamId) : cand
+    if (!raw) return { name: 'No Team', color: null }
+    const found = teamMap[raw] || teams.find(t => t.id === raw || t.name === raw)
+    if (found && found.name) return { name: found.name, color: found.color || null }
+    if (typeof raw === 'string' && (raw.startsWith('team_') || raw.startsWith('team-'))) {
+      return { name: 'No Team', color: null }
+    }
+    return { name: raw || 'No Team', color: null }
+  }
 
   const pickMode = (id) => {
     setMode(id)
@@ -424,6 +443,7 @@ export default function AdminLots() {
                 const currentCode = assignmentsMap[cand.id] || ''
                 const letterCount = Math.max(26, getProgCandidates(selectedProg).length)
                 const codeOptions = Array.from({ length: letterCount }, (_, i) => String.fromCharCode(65 + i))
+                const teamInfo = getTeamInfo(cand)
 
                 return (
                   <div key={cand.id} className="p-3.5 sm:p-4 rounded-xl border border-secondary/30 bg-black/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -432,7 +452,12 @@ export default function AdminLots() {
                         {cand.chestNo ? <span className="text-accent font-extrabold mr-2">#{cand.chestNo}</span> : null}
                         {cand.name}
                       </p>
-                      {cand.team ? <p className="text-mutedText text-xs mt-0.5">{cand.team}</p> : null}
+                      <p className="text-mutedText text-xs mt-0.5 flex items-center gap-1.5 font-medium">
+                        {teamInfo.color && (
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: teamInfo.color }} />
+                        )}
+                        <span>{teamInfo.name}</span>
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
