@@ -55,7 +55,12 @@ export default function AdminLayout() {
         </button>
         <div className="flex items-center gap-2.5">
           <Link to="/" className="flex items-center select-none">
-            <img src="/rendezvous-logo.png" alt="Rendezvous'26" className="h-7 w-auto object-contain drop-shadow-sm" />
+            <img
+              src="/rendezvous-logo.png"
+              alt="Rendezvous'26"
+              className="h-8 w-auto object-contain"
+              style={{ filter: 'none', opacity: 1, mixBlendMode: 'normal', background: 'transparent' }}
+            />
           </Link>
         </div>
       </div>
@@ -77,7 +82,8 @@ export default function AdminLayout() {
             <img
               src="/rendezvous-logo.png"
               alt="Rendezvous'26"
-              className="h-11 sm:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm transition-transform hover:scale-105"
+              className="h-12 sm:h-14 w-auto max-w-[240px] object-contain"
+              style={{ filter: 'none', opacity: 1, mixBlendMode: 'normal', background: 'transparent' }}
             />
           </Link>
           <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden absolute right-4 top-6 p-1.5 text-white/80 hover:text-white transition">
