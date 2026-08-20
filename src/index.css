@@ -48,6 +48,10 @@ html:not(.dark):not([data-theme='dark']) main {
   opacity: 1;
 }
 
+html:not(.dark):not([data-theme='dark']) .starfield {
+  display: none !important;
+}
+
 html:not(.dark):not([data-theme='dark']) h1,
 html:not(.dark):not([data-theme='dark']) h2,
 html:not(.dark):not([data-theme='dark']) h3,
