@@ -340,25 +340,27 @@ export default function Home() {
             aboutReveal.ref(el)
           }}
           id="about"
-          className={`mb-12 text-center scroll-mt-24 reveal ${aboutReveal.visible ? 'reveal-visible' : ''}`}
+          className={`mb-16 scroll-mt-24 reveal ${aboutReveal.visible ? 'reveal-visible' : ''}`}
         >
-          <span className="inline-block text-accent text-xs md:text-sm font-semibold uppercase tracking-[0.28em] border border-accent/50 rounded-full px-4 py-1.5 mb-5">
-            About Fest
-          </span>
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-mainText mb-6">
-            26 Years of Legacy &amp; Vibe
-          </h3>
-          <div className="max-w-2xl mx-auto space-y-5 px-2 sm:px-0">
-            <p className="text-mutedText text-sm sm:text-base italic leading-loose">
+          {/* Main Title & Subtitle */}
+          <div className="text-center mb-8 sm:mb-10 px-4">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-[#115F32] dark:text-[#D4FFB8] tracking-tight mb-2 sm:mb-3">
+              Rendezvous’26
+            </h2>
+            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-[#142E1D] dark:text-[#8ED06C] tracking-wide">
+              Jamia Madeenathunnoor Life Festival
+            </p>
+          </div>
+
+          {/* Description Block */}
+          <div className="max-w-4xl lg:max-w-5xl mx-auto px-5 sm:px-8">
+            <p className="text-base sm:text-lg md:text-xl font-normal text-[#1C3324] dark:text-[#D4FFB8]/90 leading-relaxed sm:leading-loose text-left">
               Rendezvous'26, the 26th edition of Jamia Madeenathunnoor's Life Festival, stands as a landmark moment in the institution's long-standing commitment to shaping well-rounded students. What began as a purely artistic gathering has, over time, grown into a dynamic space where academic achievement and creative talent come together. The festival continues its mission to build a thoughtful, ethical appreciation for the arts — recognizing their essential part in shaping character, personal growth, and intellectual maturity. Across 26 remarkable years, Rendezvous has left its mark on generations of students, refining their talents with a strong sense of purpose and preparing them to carry its values into the world beyond campus.
             </p>
-            {/* <p className="text-mutedText text-sm sm:text-base italic leading-loose">
-              With real-time score tracking, downloadable result posters, and a spotlight gallery,
-              the Art Fest platform keeps everyone connected — from competitors checking their
-              results to audiences cheering for their favorite teams.
-            </p> */}
           </div>
-          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+
+          {/* Action Links */}
+          <div className="mt-8 sm:mt-10 flex items-center justify-center gap-3 flex-wrap">
             <a
               href="https://www.youtube.com/@isra_media"
               target="_blank"
