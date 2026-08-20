@@ -11,19 +11,8 @@
     rel="stylesheet" />
   <script>
     (function () {
-      try {
-        var t = localStorage.getItem('artfest-theme') || localStorage.getItem('theme');
-        if (t === 'light') {
-          document.documentElement.removeAttribute('data-theme');
-          document.documentElement.classList.remove('dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          document.documentElement.classList.add('dark');
-        }
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.classList.add('dark');
-      }
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark');
     })()
   </script>
   <title>ISRA Rendezvous'26</title>
