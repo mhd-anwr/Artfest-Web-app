@@ -55,9 +55,7 @@ export default function AdminLayout() {
         </button>
         <div className="flex items-center gap-2.5">
           <Link to="/" className="flex items-center select-none">
-            <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm flex items-center justify-center border border-white/20">
-              <img src="/rendezvous-logo.png" alt="Rendezvous'26" className="h-6 w-auto object-contain" />
-            </div>
+            <img src="/rendezvous-logo.png" alt="Rendezvous'26" className="h-7 w-auto object-contain drop-shadow-sm" />
           </Link>
         </div>
       </div>
@@ -74,17 +72,15 @@ export default function AdminLayout() {
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between px-5 py-5">
-          <Link to="/" className="flex items-center select-none">
-            <div className="bg-white px-3.5 py-2 rounded-2xl shadow-sm flex items-center justify-center border border-white/20">
-              <img
-                src="/rendezvous-logo.png"
-                alt="Rendezvous'26"
-                className="h-8 sm:h-9 w-auto max-w-[190px] object-contain"
-              />
-            </div>
+        <div className="relative flex items-center justify-center pt-6 pb-4 px-6">
+          <Link to="/" className="flex items-center justify-center select-none w-full">
+            <img
+              src="/rendezvous-logo.png"
+              alt="Rendezvous'26"
+              className="h-11 sm:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm transition-transform hover:scale-105"
+            />
           </Link>
-          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1.5 text-white/80 hover:text-white transition">
+          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden absolute right-4 top-6 p-1.5 text-white/80 hover:text-white transition">
             <X size={22} />
           </button>
         </div>
