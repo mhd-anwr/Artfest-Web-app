@@ -67,9 +67,9 @@ body {
   --card-white: #FFFFFF;
   --card-dark: #0D2B17;
   --text-main: #115F32;
-  --text-body: #142E1D;
-  --text-muted: #275235;
-  --text-light: #3D6C4C;
+  --text-body: #115F32;
+  --text-muted: #115F32;
+  --text-light: #228C22;
   --accent-purple: #115F32;
   --accent-purple-deep: #228C22;
   --accent-purple-soft: #D4FFB8;
@@ -92,7 +92,7 @@ body {
   --secondary: 228 247 218;       /* #E4F7DA */
   --accent: 34 140 34;            /* #228C22 */
   --main-text: 17 95 50;          /* #115F32 */
-  --muted-text: 39 82 53;         /* #275235 */
+  --muted-text: 17 95 50;         /* #115F32 */
   --success: 78 186 22;           /* #4EBA16 */
   --card: 255 255 255;            /* #FFFFFF */
   --ocean-tint: 212 255 184;      /* #D4FFB8 */

@@ -334,6 +334,7 @@ export default function Home() {
         )}
 
         {/* About the Fest */}
+        {/* About the Fest */}
         <div
           ref={(el) => {
             aboutRef.current = el
@@ -354,7 +355,7 @@ export default function Home() {
 
           {/* Description Block */}
           <div className="max-w-4xl lg:max-w-5xl mx-auto px-5 sm:px-8">
-            <p className="text-base sm:text-lg md:text-xl font-normal text-[#174D2A] dark:text-[#D4FFB8] opacity-100 not-italic leading-relaxed sm:leading-loose text-left">
+            <p className="text-base sm:text-lg md:text-xl font-normal text-[#115F32] dark:text-[#D4FFB8] opacity-100 not-italic leading-relaxed sm:leading-loose text-left">
               Rendezvous'26, the 26th edition of Jamia Madeenathunnoor's Life Festival, stands as a landmark moment in the institution's long-standing commitment to shaping well-rounded students. What began as a purely artistic gathering has, over time, grown into a dynamic space where academic achievement and creative talent come together. The festival continues its mission to build a thoughtful, ethical appreciation for the arts — recognizing their essential part in shaping character, personal growth, and intellectual maturity. Across 26 remarkable years, Rendezvous has left its mark on generations of students, refining their talents with a strong sense of purpose and preparing them to carry its values into the world beyond campus.
             </p>
           </div>
@@ -386,13 +387,13 @@ export default function Home() {
           ref={teamReveal.ref}
           className={`mb-12 text-center reveal ${teamReveal.visible ? 'reveal-visible' : ''}`}
         >
-          <span className="inline-block text-[#115F32] dark:text-[#8ED06C] text-xs md:text-sm font-semibold uppercase tracking-[0.28em] border border-[#115F32]/30 dark:border-[#8ED06C]/40 rounded-full px-4 py-1.5 mb-5">
+          <span className="inline-block text-[#228C22] dark:text-[#8ED06C] text-xs md:text-sm font-semibold uppercase tracking-[0.28em] border border-[#228C22]/50 dark:border-[#8ED06C]/40 rounded-full px-4 py-1.5 mb-5 opacity-100">
             Our Team
           </span>
-          <h3 className="corvion-name text-3xl sm:text-4xl md:text-5xl mb-4 text-[#115F32] dark:text-[#D4FFB8]">
+          <h3 className="corvion-name text-3xl sm:text-4xl md:text-5xl mb-4 text-[#115F32] dark:text-[#D4FFB8] opacity-100">
             Corvion
           </h3>
-          <p className="max-w-2xl mx-auto text-[#174D2A] dark:text-[#8ED06C] text-sm sm:text-base leading-loose mb-12 px-2">
+          <p className="max-w-2xl mx-auto text-[#115F32] dark:text-[#8ED06C] text-sm sm:text-base leading-loose mb-12 px-2 opacity-100">
             A passionate crew of organizers, coordinators, and volunteers who bring the festival
             to life — from Stage lights to score sheets.
           </p>
