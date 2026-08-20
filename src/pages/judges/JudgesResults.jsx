@@ -343,9 +343,9 @@ export default function JudgesResults() {
         let savedPoints = ''
 
         if (Array.isArray(latest?.entries) && latest.entries.length > 0) {
-          const entry = latest.entries.find(e => e.studentId === cand.id || e.code === cand.code || e.candidateNo === idx + 1) || latest.entries[idx]
+          const entry = latest.entries.find(e => (e.studentId && e.studentId === cand.id) || (e.candidateId && e.candidateId === cand.id) || (e.code && e.code === cand.code) || (e.codeLetter && e.codeLetter === cand.code) || e.candidateNo === idx + 1) || latest.entries[idx]
           if (entry) {
-            savedStudentId = entry.studentId || cand.id
+            savedStudentId = entry.studentId || entry.candidateId || cand.id
             savedPlace = entry.place || entry.label || getOrdinalLabel(idx)
             savedPoints = entry.points != null ? String(entry.points) : ''
           }
@@ -408,8 +408,10 @@ export default function JudgesResults() {
       const code = cand ? cand.code : (studentId?.startsWith('anon_') ? studentId.split('_').pop() : String.fromCharCode(65 + (idx % 26)))
 
       return {
+        candidateId: studentId,
         studentId: studentId,
         name: s?.name || cand?.name || `Performance ${code}`,
+        codeLetter: code,
         code: code,
         candidateNo: idx + 1,
         place: row.place ? row.place.trim() : getOrdinalLabel(idx),

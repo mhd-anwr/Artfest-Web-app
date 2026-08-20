@@ -160,15 +160,17 @@ export default function AdminPrint() {
         if (Array.isArray(res.entries) && res.entries.length > 0) {
           res.entries.forEach((entry, idx) => {
             if (!entry) return
-            const student = students.find(s => s.id === entry.studentId)
+            const sId = entry.studentId || entry.candidateId
+            const student = students.find(s => s.id === sId)
             if (student) addedStudentIds.add(student.id)
-            const isTop3 = (entry.place && (entry.place.includes('1st') || entry.place.includes('2nd') || entry.place.includes('3rd') || entry.place === '1' || entry.place === '2' || entry.place === '3')) || (idx < 3)
+            const placeStr = String(entry.place || entry.label || '')
+            const isTop3 = placeStr.includes('1st') || placeStr.includes('2nd') || placeStr.includes('3rd') || placeStr === '1' || placeStr === '2' || placeStr === '3' || (idx < 3)
             rows.push({
-              key: `res-${id}-${entry.studentId || idx}`,
+              key: `res-${id}-${sId || idx}`,
               chestNo: student?.chestNo || '',
               name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
               team: teamMap[student?.team] || student?.team || '',
-              code: entry.code || '',
+              code: entry.code || entry.codeLetter || '',
               grade: entry.grade || calcGrade(entry.points),
               price: isTop3 ? (entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : '3rd Place')) : '',
               point: entry.points != null ? entry.points : '',
