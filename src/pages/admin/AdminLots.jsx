@@ -450,8 +450,13 @@ export default function AdminLots() {
             <div className="flex flex-col gap-3 mb-6">
               {getProgCandidates(selectedProg).map((cand, idx) => {
                 const currentCode = assignmentsMap[cand.id] || ''
-                const letterCount = Math.max(26, getProgCandidates(selectedProg).length)
-                const codeOptions = Array.from({ length: letterCount }, (_, i) => String.fromCharCode(65 + i))
+                const allCandidates = getProgCandidates(selectedProg)
+                const candidateCount = Math.max(1, allCandidates.length)
+                const codeOptions = Array.from({ length: candidateCount }, (_, i) => String.fromCharCode(65 + i))
+                if (currentCode && !codeOptions.includes(currentCode)) {
+                  codeOptions.push(currentCode)
+                  codeOptions.sort()
+                }
                 const teamInfo = getTeamInfo(cand)
 
                 // Calculate letters taken by OTHER participants in this programme
