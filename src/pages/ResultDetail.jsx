@@ -74,7 +74,7 @@ export default function ResultDetail() {
               {(programme.participationType || programme.participation_type) ? ` · ${programme.participationType || programme.participation_type}` : ''}
             </p>
           </div>
-          <span className={`mt-1 inline-block text-xs px-3 py-1 rounded-full ${programme.isFinished ? 'bg-[#EDE7F6] text-[#5E35B1]' : 'bg-[#E8DCF4] text-[#676375]'}`}>
+          <span className={`mt-1 inline-block text-xs px-3 py-1 rounded-full ${programme.isFinished ? 'bg-[#D4FFB8] text-[#115F32]' : 'bg-[var(--card-lavender)] text-textMute'}`}>
             {programme.isFinished ? 'Finished' : 'Pending'}
           </span>
         </div>
@@ -87,7 +87,7 @@ export default function ResultDetail() {
       {programme.isFinished && result && (
         <div className="flex flex-col gap-4">
           <h3 className="text-base sm:text-lg font-display font-bold text-mainText flex items-center gap-2">
-            <Trophy size={18} color="#7C4DFF" /> Results
+            <Trophy size={18} color="#115F32" /> Results
           </h3>
           {placements.filter(p => p.data).map(({ label, data, color, medal }) => (
             <div key={label} className="postergen-card p-4 flex items-center gap-3 sm:gap-4">

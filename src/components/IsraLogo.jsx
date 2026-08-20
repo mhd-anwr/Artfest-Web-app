@@ -1,10 +1,10 @@
 import { useId } from 'react'
 
-const BG_START = 'rgb(124 77 255)' // --accent-purple #7C4DFF
-const BG_END = 'rgb(94 53 177)' // --accent-purple-deep #5E35B1
-const ACCENT = 'rgb(237 231 246)' // --accent-purple-soft #EDE7F6
-const TEXT_LIGHT = 'rgb(255 255 255)' // #FFFFFF
-const TEXT_MUTED = 'rgb(232 220 244)' // --card-lavender #E8DCF4
+const BG_START = '#115F32' // Primary Dark Green
+const BG_END = '#228C22' // Primary Green
+const ACCENT = '#D4FFB8' // Very Light Green
+const TEXT_LIGHT = '#FFFFFF' // #FFFFFF
+const TEXT_MUTED = '#8ED06C' // Light Green
 
 function Badge({ uid, children }) {
   return (
