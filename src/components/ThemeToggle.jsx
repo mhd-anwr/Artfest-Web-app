@@ -4,8 +4,10 @@ import { Moon, Sun } from 'lucide-react'
 const STORAGE_KEY = 'artfest-theme'
 
 const readTheme = () => {
-  if (typeof document === 'undefined') return 'light'
-  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+  if (typeof document === 'undefined') return 'dark'
+  const attr = document.documentElement.getAttribute('data-theme')
+  const hasDarkClass = document.documentElement.classList.contains('dark')
+  return (attr === 'dark' || hasDarkClass) ? 'dark' : 'light'
 }
 
 const applyTheme = (theme) => {
@@ -20,10 +22,20 @@ const applyTheme = (theme) => {
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState('light')
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('theme')
+        if (saved === 'light' || saved === 'dark') return saved
+      } catch (e) {}
+    }
+    return 'dark'
+  })
 
   useEffect(() => {
-    setTheme(readTheme())
+    const current = readTheme()
+    setTheme(current)
+    applyTheme(current)
   }, [])
 
   const toggle = () => {
@@ -32,6 +44,7 @@ export default function ThemeToggle() {
     applyTheme(next)
     try {
       localStorage.setItem(STORAGE_KEY, next)
+      localStorage.setItem('theme', next)
     } catch {}
   }
 
