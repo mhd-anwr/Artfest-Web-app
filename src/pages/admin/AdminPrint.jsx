@@ -153,23 +153,41 @@ export default function AdminPrint() {
       const res = allResults.find(r => r.id === id)
       const prog = res ? programmes.find(p => p.id === res.programmeId) : null
       const rows = []
-      const addRow = (placement) => {
-        if (!placement) return
-        const student = students.find(s => s.id === placement.studentId)
-        rows.push({
-          key: `res-${id}-${placement.studentId || rows.length}`,
-          chestNo: student?.chestNo || '',
-          name: placement.name || student?.name || '',
-          team: teamMap[student?.team] || student?.team || '',
-          grade: placement.grade || calcGrade(placement.points),
-          price: placement.prize || '',
-          point: placement.points ?? '',
-        })
-      }
       if (res) {
-        addRow(res.first)
-        addRow(res.second)
-        addRow(res.third)
+        if (Array.isArray(res.entries) && res.entries.length > 0) {
+          res.entries.forEach((entry, idx) => {
+            if (!entry) return
+            const student = students.find(s => s.id === entry.studentId)
+            rows.push({
+              key: `res-${id}-${entry.studentId || idx}`,
+              chestNo: student?.chestNo || '',
+              name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
+              team: teamMap[student?.team] || student?.team || '',
+              code: entry.code || '',
+              grade: entry.grade || calcGrade(entry.points),
+              price: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : ''),
+              point: entry.points != null ? entry.points : '',
+            })
+          })
+        } else {
+          const addRow = (placement, defaultPlace) => {
+            if (!placement) return
+            const student = students.find(s => s.id === placement.studentId)
+            rows.push({
+              key: `res-${id}-${placement.studentId || rows.length}`,
+              chestNo: student?.chestNo || '',
+              name: placement.name || student?.name || '',
+              team: teamMap[student?.team] || student?.team || '',
+              code: placement.code || '',
+              grade: placement.grade || calcGrade(placement.points),
+              price: placement.place || placement.label || placement.prize || defaultPlace,
+              point: placement.points ?? '',
+            })
+          }
+          addRow(res.first, '1st Place')
+          addRow(res.second, '2nd Place')
+          addRow(res.third, '3rd Place')
+        }
       }
       items.push({
         sheet: 'result',
@@ -280,7 +298,7 @@ export default function AdminPrint() {
             </tr>
           )}
           {item.sheet === 'result' && !item.warning && item.rows.map(row => (
-            <tr key={row.key}><td className="text-center">{row.chestNo}</td><td>{row.name}</td><td>{row.team}</td><td></td><td className="text-center">{row.grade}</td><td className="text-center">{row.price}</td><td className="text-center">{row.point}</td></tr>
+            <tr key={row.key}><td className="text-center">{row.chestNo}</td><td>{row.name}</td><td>{row.team}</td><td className="text-center">{row.code || ''}</td><td className="text-center">{row.grade}</td><td className="text-center">{row.price}</td><td className="text-center">{row.point}</td></tr>
           ))}
         </tbody>
       </table>

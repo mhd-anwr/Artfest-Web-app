@@ -541,7 +541,7 @@ export default function JudgesResults() {
               const prog = validProgrammeMap.get(result.programmeId)
               const isExpanded = expandedId === result.id
               const displayEntries = (result.entries && result.entries.length > 0)
-                ? result.entries
+                ? result.entries.slice(0, 3)
                 : [
                     result.first && { ...result.first, place: result.first.label || '1st Place' },
                     result.second && { ...result.second, place: result.second.label || '2nd Place' },

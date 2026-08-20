@@ -53,12 +53,14 @@ export default function AdminResults() {
   const buildPlacementRows = (result) => {
     const rows = []
     if (Array.isArray(result.entries) && result.entries.length > 0) {
-      result.entries.forEach((entry, idx) => {
+      // Normal Admin view shows ONLY top 3
+      const top3Entries = result.entries.slice(0, 3)
+      top3Entries.forEach((entry, idx) => {
         if (!entry) return
         const student = students.find(s => s.id === entry.studentId)
         rows.push({
           key: `${result.id}-entry-${idx}`,
-          label: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : `Candidate ${idx + 1}`),
+          label: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : ''),
           name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
           chestNo: student?.chestNo || '',
           team: teamMap[student?.team] || student?.team || '',
