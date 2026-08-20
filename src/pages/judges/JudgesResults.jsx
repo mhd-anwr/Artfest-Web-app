@@ -423,20 +423,10 @@ export default function JudgesResults() {
     const secondEntry = entries.find(e => e.place.toLowerCase().includes('2nd') || e.place === '2') || entries[1] || null
     const thirdEntry = entries.find(e => e.place.toLowerCase().includes('3rd') || e.place === '3') || entries[2] || null
 
-    const fullPayload = {
+    const payload = {
       programmeId: editProg.id,
       name: editProg.name,
       entries: entries,
-      first: firstEntry,
-      second: secondEntry,
-      third: thirdEntry,
-      updatedAt: new Date().toISOString(),
-      locked: true,
-    }
-
-    const legacyPayload = {
-      programmeId: editProg.id,
-      name: editProg.name,
       first: firstEntry,
       second: secondEntry,
       third: thirdEntry,
@@ -455,36 +445,24 @@ export default function JudgesResults() {
 
     let error = null
     if (existingRow) {
-      const res = await judgeClient.from('results').update(fullPayload).eq('id', existingRow.id)
+      const res = await judgeClient.from('results').update(payload).eq('id', existingRow.id)
       error = res.error
     } else {
       const res = await judgeClient.from('results').insert({
-        ...fullPayload,
+        ...payload,
         ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
       })
       error = res.error
     }
 
-    // Graceful fallback if 'entries' column is missing from Supabase schema cache
-    if (error && (error.message?.includes('entries') || error.code === 'PGRST204')) {
-      console.warn('entries column missing in results schema cache. Falling back to top 3 save:', error)
-      if (existingRow) {
-        const resFallback = await judgeClient.from('results').update(legacyPayload).eq('id', existingRow.id)
-        error = resFallback.error
-      } else {
-        const resFallback = await judgeClient.from('results').insert({
-          ...legacyPayload,
-          ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
-        })
-        error = resFallback.error
-      }
-      if (!error) {
-        toast('Saved top 3! Run add_entries_column_to_results.sql in Supabase to save all candidates.', 'warning')
-      }
-    }
-
     if (error) {
-      setEditError(error?.message || 'Failed to submit the result.')
+      if (error.message?.includes('entries') || error.code === 'PGRST204') {
+        const msg = 'Missing "entries" column in Supabase. Please run add_entries_column_to_results.sql in Supabase SQL Editor.'
+        setEditError(msg)
+        toast(msg, 'error')
+      } else {
+        setEditError(error?.message || 'Failed to submit the result.')
+      }
       setSaving(false)
       return
     }
