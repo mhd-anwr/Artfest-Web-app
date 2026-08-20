@@ -118,8 +118,8 @@ export default function Home() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-1 sm:gap-2 tracking-tight select-none focus:outline-none justify-self-start font-sora shrink-0"
           >
-            <span className="font-bold text-xl sm:text-3xl leading-none uppercase text-[#115F32] dark:text-white">ISRA</span>
-            <div className="flex flex-col text-[9px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider text-[#115F32] dark:text-[#D4FFB8] border-l-0 pl-0.5">
+            <span className="nav-brand-title font-bold text-xl sm:text-3xl leading-none uppercase">ISRA</span>
+            <div className="nav-brand-subtitle flex flex-col text-[9px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider border-l-0 pl-0.5">
               <span>LIFE</span>
               <span>FESTIVAL</span>
             </div>

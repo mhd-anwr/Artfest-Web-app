@@ -163,6 +163,29 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
+/* Navbar Brand Text High-Contrast Rules */
+.nav-brand-title {
+  color: #115F32 !important;
+  opacity: 1 !important;
+}
+
+.nav-brand-subtitle {
+  color: #115F32 !important;
+  opacity: 1 !important;
+}
+
+[data-theme='dark'] .nav-brand-title,
+.dark .nav-brand-title {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+[data-theme='dark'] .nav-brand-subtitle,
+.dark .nav-brand-subtitle {
+  color: #D4FFB8 !important;
+  opacity: 1 !important;
+}
+
 /* ── iOS Liquid Glass Mobile Navigation ── */
 .liquid-glass-vessel {
   position: relative;
