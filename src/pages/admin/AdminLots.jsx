@@ -224,7 +224,10 @@ export default function AdminLots() {
   const progsByCategory = {}
   categories.forEach(c => { progsByCategory[c] = [] })
   programmes.forEach(p => {
-    if (p.category && progsByCategory[p.category]) {
+    if (p.category) {
+      if (!progsByCategory[p.category]) {
+        progsByCategory[p.category] = []
+      }
       progsByCategory[p.category].push(p)
     }
   })
