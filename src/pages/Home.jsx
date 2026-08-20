@@ -190,7 +190,7 @@ export default function Home() {
               opacity: Math.max(1 - scrollY * 0.0022, 0.4)
             } : {}}
           >
-            ISRA life Festival 2026 — Tracked, Celebrated, Remembered
+            - Decoding Phytolore -
           </p>
           <div
             className="flex flex-col sm:flex-row gap-4"
@@ -350,16 +350,13 @@ export default function Home() {
           </h3>
           <div className="max-w-2xl mx-auto space-y-5 px-2 sm:px-0">
             <p className="text-mutedText text-sm sm:text-base italic leading-loose">
-              Campus Art Fest is an annual celebration of creativity and talent, bringing together
-              participants from all departments to showcase their skills in dance, music, art,
-              literary arts, and Stage performances. Our mission is to Track, Celebrate, and
-              Remember every moment of this vibrant festival.
+              Rendezvous'26, the 26th edition of Jamia Madeenathunnoor's Life Festival, stands as a landmark moment in the institution's long-standing commitment to shaping well-rounded students. What began as a purely artistic gathering has, over time, grown into a dynamic space where academic achievement and creative talent come together. The festival continues its mission to build a thoughtful, ethical appreciation for the arts — recognizing their essential part in shaping character, personal growth, and intellectual maturity. Across 26 remarkable years, Rendezvous has left its mark on generations of students, refining their talents with a strong sense of purpose and preparing them to carry its values into the world beyond campus.
             </p>
-            <p className="text-mutedText text-sm sm:text-base italic leading-loose">
+            {/* <p className="text-mutedText text-sm sm:text-base italic leading-loose">
               With real-time score tracking, downloadable result posters, and a spotlight gallery,
               the Art Fest platform keeps everyone connected — from competitors checking their
               results to audiences cheering for their favorite teams.
-            </p>
+            </p> */}
           </div>
           <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
             <a
