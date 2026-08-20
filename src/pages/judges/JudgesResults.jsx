@@ -45,16 +45,7 @@ export default function JudgesResults() {
   const [editError, setEditError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Edit form placements
-  const [firstPlaceLabel, setFirstPlaceLabel] = useState('1st Place')
-  const [first, setFirst] = useState('')
-  const [firstPoints, setFirstPoints] = useState('')
-  const [secondPlaceLabel, setSecondPlaceLabel] = useState('2nd Place')
-  const [second, setSecond] = useState('')
-  const [secondPoints, setSecondPoints] = useState('')
-  const [thirdPlaceLabel, setThirdPlaceLabel] = useState('3rd Place')
-  const [third, setThird] = useState('')
-  const [thirdPoints, setThirdPoints] = useState('')
+  const [entryRows, setEntryRows] = useState([])
 
   const navigate = useNavigate()
   const toast = useToast()
@@ -80,9 +71,9 @@ export default function JudgesResults() {
     const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
 
     if (registered.length === 0) {
-      return Array.from({ length: 3 }, (_, i) => {
+      return Array.from({ length: 6 }, (_, i) => {
         const letter = String.fromCharCode(65 + i)
-        return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter }
+        return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter, candidateNo: i + 1 }
       })
     }
 
@@ -93,27 +84,13 @@ export default function JudgesResults() {
       name: cand.name,
       chestNo: cand.chestNo,
       code: progAssignments[cand.id] || cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
+      candidateNo: idx + 1,
     }))
   }
 
   const getStudentObj = (id) => {
     const s = students.find(s => s.id === id)
     return s ? { studentId: s.id, name: s.name, photoURL: s.photoURL } : null
-  }
-
-  const placement = (studentId, points, label, prog) => {
-    if (!studentId && !points) return null
-    const candidates = getCandidatesForProg(prog)
-    const cand = candidates.find(c => c.id === studentId)
-    const s = getStudentObj(studentId)
-    const code = cand ? cand.code : (studentId?.startsWith('anon_') ? studentId.split('_').pop() : 'A')
-    if (s) {
-      return { ...s, label: label || 'Place', code, points: Number(points) || 0, grade: calcGrade(points) }
-    }
-    if (studentId) {
-      return { studentId, label: label || 'Place', name: `Performance ${code}`, code, points: Number(points) || 0, grade: calcGrade(points) }
-    }
-    return null
   }
 
   const getProgrammeType = (prog) => prog?.programmeType || prog?.type || prog?.programme_type || ''
@@ -142,20 +119,17 @@ export default function JudgesResults() {
   })
 
   const catOptions = [
-    { value: '', label: `All Categories (${programmes.length})`, icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> },
+    { label: 'All Categories', value: '' },
     ...categories.map(c => ({
-      value: c,
       label: `${c} (${catCountByCategory[c] || 0})`,
-      icon: <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[c]?.light || '#9CA3AF' }} />,
-    })),
+      value: c,
+    }))
   ]
+
   const filteredProgrammes = categoryFilter
     ? programmes.filter(p => categoryFilter === 'General' ? p.category === 'General' : p.category === categoryFilter)
     : programmes
 
-  // A programme counts as "submitted" only once its result row is locked
-  // (i.e. carries placements). Placeholder rows that just hold a result
-  // number are NOT submitted — they still go in the "Not Submitted" list.
   const lockedProgrammeIds = new Set(savedResults.filter(r => r.locked).map(r => r.programmeId))
 
   const notSubmitted = filteredProgrammes
@@ -175,9 +149,11 @@ export default function JudgesResults() {
     : lockedResults
 
   const resetPlacements = () => {
-    setFirstPlaceLabel('1st Place'); setFirst(''); setFirstPoints('')
-    setSecondPlaceLabel('2nd Place'); setSecond(''); setSecondPoints('')
-    setThirdPlaceLabel('3rd Place'); setThird(''); setThirdPoints('')
+    setEntryRows([])
+  }
+
+  const updateRowField = (index, field, value) => {
+    setEntryRows(prev => prev.map((row, i) => i === index ? { ...row, [field]: value } : row))
   }
 
   const openEditFlow = (prog) => {
@@ -192,13 +168,22 @@ export default function JudgesResults() {
     setEditError('')
     const assignmentsMap = await getCodeAssignments(prog.id)
     setProgAssignments(assignmentsMap || {})
-    resetPlacements()
+
+    const cands = getCandidatesForProg(prog)
+    const initialRows = cands.map((cand, idx) => ({
+      studentId: cand.id,
+      code: cand.code,
+      candidateNo: idx + 1,
+      place: '',
+      points: '',
+    }))
+
+    setEntryRows(initialRows)
     setEditOpen(true)
   }
 
   const closePrompt = () => {
     setPromptOpen(false)
-    setEditProg(null)
   }
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
@@ -217,136 +202,87 @@ export default function JudgesResults() {
     const sessionResp = await judgeClient.auth.getSession()
     if (!sessionResp?.data?.session?.user) {
       const missingSessionError = new Error('No authenticated judge session available')
-      console.error('judge_create_captcha prevented by missing session:', missingSessionError)
-      setVError('Your judge session is not available. Please refresh or log in again.')
+      missingSessionError.code = 'NO_AUTH_SESSION'
+      setVError('Your session has expired. Please sign in again.')
       setCaptchaLoading(false)
-      clearCaptchaState()
-      return false
+      throw missingSessionError
     }
 
     let lastError = null
-
-    for (let attempt = 1; attempt <= retries; attempt += 1) {
-      try {
-        const { data, error } = await judgeClient.rpc('judge_create_captcha')
-        if (error) {
-          lastError = error
-          console.error('judge_create_captcha RPC failed:', error)
-          if (error.message?.includes('404') || error.details?.includes('rpc') || error.code === 'PGRST100') {
-            setVError('Security code service unavailable. Run judge_reverify_flow.sql in Supabase to install judge_create_captcha().')
-            setCaptchaLoading(false)
-            clearCaptchaState()
-            return false
-          }
-        } else if (data?.error) {
-          lastError = new Error(data.error)
-          console.error('judge_create_captcha returned error payload:', data)
-          if (data.error === 'not_authorized') {
-            setVError('Judge session is invalid. Please refresh or log in again.')
-            setCaptchaLoading(false)
-            clearCaptchaState()
-            return false
-          }
-        } else if (data?.challenge_id && data?.captcha) {
-          setCaptcha(data.captcha)
-          setCaptchaId(data.challenge_id)
-          setCaptchaExpiresAt(data.expires_at || '')
-          setVError('')
-          setCaptchaLoading(false)
-          return true
-        } else {
-          lastError = new Error('Unexpected captcha response')
-          console.error('Unexpected judge_create_captcha response:', data)
-        }
-      } catch (err) {
-        lastError = err
-        console.error('Failed to load captcha attempt', attempt, err)
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      if (attempt > 0) {
+        await sleep(delayMs * attempt)
       }
-
-      if (attempt < retries) {
-        await sleep(delayMs)
+      const { data, error } = await judgeClient.rpc('judge_create_captcha')
+      if (!error && data?.captcha) {
+        setCaptcha(data.captcha)
+        setCaptchaId(data.id || '')
+        setCaptchaExpiresAt(data.expiresAt || '')
+        setCaptchaLoading(false)
+        return data
       }
+      lastError = error
     }
 
-    setCaptcha('')
-    setCaptchaId('')
-    setCaptchaExpiresAt('')
-    setVError('Could not load the security code. Please try again.')
-    if (lastError) {
-      console.error('Captcha load failed after retries:', lastError)
-    }
+    console.error('judge_create_captcha RPC error:', lastError)
+    const errMessage = lastError?.message || ''
+    const is404 = lastError?.status === 404 || errMessage.includes('404') || errMessage.includes('Not Found')
+    const isCrypt = errMessage.includes('crypt(') || errMessage.includes('42883') || errMessage.includes('does not exist')
+    const msg =
+      is404 ? 'Captcha service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_create_captcha().' :
+        isCrypt ? 'Server extension missing. Enable pgcrypto in Supabase extensions.' :
+          (errMessage || 'Failed to load security verification code. Please try again.')
+
+    setVError(msg)
     setCaptchaLoading(false)
-    return false
+    throw lastError || new Error(msg)
   }
 
-  const proceedToVerify = async () => {
+  const openVerifyModal = async () => {
+    setVError('')
+    setVCaptcha('')
     setVName('')
     setVPassword('')
-    setVCaptcha('')
-    setVError('')
-    setVShowPassword(false)
-    clearCaptchaState()
-    setPromptOpen(false)
     setVerifyOpen(true)
-    await loadCaptcha()
-  }
-
-  useEffect(() => {
-    if (!verifyOpen || !captchaExpiresAt) return
-
-    const expiresAt = new Date(captchaExpiresAt)
-    if (Number.isNaN(expiresAt.getTime())) return
-
-    const now = new Date()
-    const msUntilExpiry = expiresAt.getTime() - now.getTime()
-    if (msUntilExpiry <= 0) {
-      setVError('Security code expired. Generating a new one.')
-      loadCaptcha().catch(err => console.error('Failed to refresh expired captcha:', err))
-      return
+    try {
+      await loadCaptcha({ retries: 2, delayMs: 450 })
+    } catch {
+      // Error state handled inside loadCaptcha
     }
-
-    const timer = setTimeout(() => {
-      setVError('Security code expired. Generating a new one.')
-      loadCaptcha().catch(err => console.error('Failed to refresh expired captcha:', err))
-    }, msUntilExpiry + 100)
-
-    return () => clearTimeout(timer)
-  }, [verifyOpen, captchaExpiresAt])
+  }
 
   const closeVerify = () => {
     setVerifyOpen(false)
-    setEditProg(null)
     clearCaptchaState()
   }
 
   const handleVerify = async () => {
-    setVError('')
-
-    if (!captchaId) {
-      setVError('Security code session expired. Generating a new code now.')
-      await loadCaptcha()
-      return
-    }
-
-    if (vCaptcha.trim().toUpperCase() !== captcha) {
-      setVError('Incorrect CAPTCHA. Please try again.')
-      setVCaptcha('')
-      await loadCaptcha()
-      return
-    }
-
     if (!vName.trim() || !vPassword) {
-      setVError('Please enter both judge email and password.')
+      setVError('Please enter your judge name/email and password.')
+      return
+    }
+    if (!vCaptcha.trim()) {
+      setVError('Please enter the 6-character security code shown above.')
       return
     }
 
     setVLoading(true)
-    const { data, error } = await verifyJudgeClient.auth.signInWithPassword({ email: vName.trim(), password: vPassword })
+    setVError('')
+
+    const { data: authData, error: authError } = await judgeClient.rpc('judge_verify_credentials', {
+      p_judge_email: vName.trim(),
+      p_judge_password: vPassword,
+    })
+
     setVLoading(false)
-    const role = data?.user?.app_metadata?.role
-    if (error || !data?.user || role !== 'judge') {
-      console.error('Judge reverify sign-in failed:', error || data)
-      setVError(error?.message || 'Invalid judge name or password.')
+
+    if (authError || !authData?.valid) {
+      const is404 = authError?.status === 404 || authError?.message?.includes('404')
+      if (is404) {
+        setVError('Judge credential service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_verify_credentials().')
+        return
+      }
+      setVError(authError?.message || 'Invalid judge name or password.')
       setVCaptcha('')
       await loadCaptcha()
       return
@@ -360,19 +296,39 @@ export default function JudgesResults() {
     const latest = savedResults.find(r => r.programmeId === prog.id)
     const assignmentsMap = await getCodeAssignments(prog.id)
     setProgAssignments(assignmentsMap || {})
+    const cands = getCandidatesForProg(prog)
 
     if (!preserveFields) {
-      setFirstPlaceLabel(latest?.first?.label || '1st Place')
-      setFirst(latest?.first?.studentId || '')
-      setFirstPoints(latest?.first?.points != null ? String(latest.first.points) : '')
+      const initialRows = cands.map((cand, idx) => {
+        const existingEntry = Array.isArray(latest?.entries)
+          ? latest.entries.find(e => e.studentId === cand.id)
+          : null
 
-      setSecondPlaceLabel(latest?.second?.label || '2nd Place')
-      setSecond(latest?.second?.studentId || '')
-      setSecondPoints(latest?.second?.points != null ? String(latest.second.points) : '')
+        let savedPlace = existingEntry?.place || existingEntry?.label || ''
+        let savedPoints = existingEntry?.points != null ? String(existingEntry.points) : ''
 
-      setThirdPlaceLabel(latest?.third?.label || '3rd Place')
-      setThird(latest?.third?.studentId || '')
-      setThirdPoints(latest?.third?.points != null ? String(latest.third.points) : '')
+        if (!existingEntry && latest) {
+          if (latest.first?.studentId === cand.id) {
+            savedPlace = latest.first.label || '1st Place'
+            savedPoints = String(latest.first.points || '')
+          } else if (latest.second?.studentId === cand.id) {
+            savedPlace = latest.second.label || '2nd Place'
+            savedPoints = String(latest.second.points || '')
+          } else if (latest.third?.studentId === cand.id) {
+            savedPlace = latest.third.label || '3rd Place'
+            savedPoints = String(latest.third.points || '')
+          }
+        }
+
+        return {
+          studentId: cand.id,
+          code: cand.code,
+          candidateNo: idx + 1,
+          place: savedPlace,
+          points: savedPoints,
+        }
+      })
+      setEntryRows(initialRows)
     }
     setEditError('')
     setEditOpen(true)
@@ -387,90 +343,69 @@ export default function JudgesResults() {
 
   const handleSaveEdit = async () => {
     if (!editProg) return
-    if (!first) {
-      setEditError('Please select a Code Letter for the first place row.')
+    if (entryRows.length === 0) {
+      setEditError('No candidates available to submit results for.')
       return
     }
 
-    // Check for duplicate code letters in judge submission form
-    const selectedStudentIds = [first, second, third].filter(Boolean)
-    const duplicates = selectedStudentIds.filter((item, index) => selectedStudentIds.indexOf(item) !== index)
-    if (duplicates.length > 0) {
-      const dupId = duplicates[0]
-      const dupCand = getCandidatesForProg(editProg).find(c => c.id === dupId)
-      const dupCode = dupCand ? dupCand.code : 'A'
-      const msg = `Code Letter ${dupCode} is already assigned to another place.`
-      setEditError(msg)
-      return toast(msg, 'error')
-    }
+    const candidates = getCandidatesForProg(editProg)
+    const entries = entryRows.map((row, idx) => {
+      const cand = candidates[idx] || candidates.find(c => c.id === row.studentId)
+      const s = getStudentObj(row.studentId)
+      const pts = Number(row.points) || 0
+      const gr = calcGrade(row.points)
+      return {
+        studentId: row.studentId,
+        name: s?.name || cand?.name || `Candidate ${row.candidateNo}`,
+        code: cand?.code || String.fromCharCode(65 + (idx % 26)),
+        candidateNo: row.candidateNo,
+        place: row.place.trim(),
+        label: row.place.trim() || '',
+        points: pts,
+        grade: gr,
+      }
+    })
+
+    const sortedByRankOrPts = [...entries].sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0))
+    const firstEntry = entries.find(e => e.place.toLowerCase().includes('1st') || e.place === '1') || sortedByRankOrPts[0] || null
+    const secondEntry = entries.find(e => e.place.toLowerCase().includes('2nd') || e.place === '2') || sortedByRankOrPts[1] || null
+    const thirdEntry = entries.find(e => e.place.toLowerCase().includes('3rd') || e.place === '3') || sortedByRankOrPts[2] || null
 
     const payload = {
       programmeId: editProg.id,
       name: editProg.name,
-      first: placement(first, firstPoints, firstPlaceLabel, editProg),
-      second: placement(second, secondPoints, secondPlaceLabel, editProg),
-      third: placement(third, thirdPoints, thirdPlaceLabel, editProg),
+      entries: entries,
+      first: firstEntry,
+      second: secondEntry,
+      third: thirdEntry,
       updatedAt: new Date().toISOString(),
       locked: true,
     }
 
-    // First-time submission — the judge's normal session is enough, no
-    // re-verification / captcha step. Insert a new locked result row.
-    if (isFirstTime) {
-      setSaving(true)
-      setEditError('')
-
-      const { error } = await judgeClient.from('results').insert({
-        ...payload,
-        ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
-      })
-
-      if (error) {
-        console.error('Result submit failed:', error)
-        setEditError(error?.message || 'Failed to submit the result. Please try again.')
-        setSaving(false)
-        return
-      }
-
-      setSaving(false)
-      closeEdit()
-      toast('Result saved and locked!')
-      loadResults()
-      return
-    }
-
-    if (!captchaId || !vName || !vPassword) {
-      setEditError('Re-verification is required before editing. Please go back and verify again.')
-      return
-    }
     setSaving(true)
     setEditError('')
 
-    const { data: rpcData, error: rpcError } = await judgeClient.rpc('judge_reverify_edit', {
-      p_challenge_id: captchaId,
-      p_captcha: vCaptcha.trim().toUpperCase(),
-      p_judge_email: vName.trim(),
-      p_judge_password: vPassword,
-      p_programme_id: editProg.id,
-      p_programme_name: editProg.name,
-      p_first: payload.first,
-      p_second: payload.second,
-      p_third: payload.third,
-    })
+    const { data: existingRow } = await judgeClient
+      .from('results')
+      .select('id')
+      .eq('programmeId', editProg.id)
+      .maybeSingle()
 
-    if (rpcError || rpcData?.error) {
-      console.error('Edit failed:', rpcError || rpcData)
-      const rpcMessage = rpcError?.message || ''
-      const is404 = rpcError?.status === 404 || rpcMessage.includes('404') || rpcMessage.includes('Not Found')
-      const isCrypt = rpcMessage.includes('crypt(') || rpcMessage.includes('42883') || rpcMessage.includes('does not exist')
-      const msg =
-        is404 ? 'Judge reverify service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_reverify_edit().' :
-          isCrypt ? 'Server password verification failed. Ensure pgcrypto is enabled and judge_reverify_flow.sql has been applied.' :
-            rpcData?.error === 'not_authorized' ? 'You are not authorized to edit this result.' :
-              rpcData?.error === 'invalid_judge' ? 'Judge re-verification failed. Please verify again.' :
-                rpcData?.error === 'captcha_invalid' ? 'Security code was invalid or expired. Please verify again.' :
-                  (rpcError?.message || 'Edit failed. Please try again.')
-      setEditError(msg)
+    let error = null
+    if (existingRow) {
+      const res = await judgeClient.from('results').update(payload).eq('id', existingRow.id)
+      error = res.error
+    } else {
+      const res = await judgeClient.from('results').insert({
+        ...payload,
+        ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
+      })
+      error = res.error
+    }
+
+    if (error) {
+      console.error('Result submit failed:', error)
+      setEditError(error?.message || 'Failed to submit the result. Please try again.')
       setSaving(false)
       return
     }
@@ -480,16 +415,6 @@ export default function JudgesResults() {
     toast('Result saved and locked!')
     loadResults()
   }
-
-  const placementVals = [
-    { placeLabel: firstPlaceLabel, setPlaceLabel: setFirstPlaceLabel, student: first, setStudent: setFirst, points: firstPoints, setPoints: setFirstPoints },
-    { placeLabel: secondPlaceLabel, setPlaceLabel: setSecondPlaceLabel, student: second, setStudent: setSecond, points: secondPoints, setPoints: setSecondPoints },
-    { placeLabel: thirdPlaceLabel, setPlaceLabel: setThirdPlaceLabel, student: third, setStudent: setThird, points: thirdPoints, setPoints: setThirdPoints },
-  ]
-
-  const editStudentOptions = editProg
-    ? students.filter(s => (s.programmeIds || []).includes(editProg.id))
-    : []
 
   return (
     <div className="min-h-screen bg-mainBackground p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -520,167 +445,184 @@ export default function JudgesResults() {
         />
       </div>
 
-      {/* ── Not Submitted / Pending Programmes ── */}
-      <h3 className="text-base sm:text-lg font-poppins font-bold text-mainText mb-3">Not Submitted</h3>
-      <div className="flex flex-col gap-3 mb-8">
-        {notSubmitted.length === 0 && <p className="text-mutedText text-center py-4">No pending programmes in this category.</p>}
-        {notSubmitted.map(prog => (
-          <div key={prog.id} className="bg-card rounded-xl p-4 flex items-center justify-between shadow-sm border border-secondary/30 gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-mainText font-semibold text-sm sm:text-base truncate">
-                {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
-                {prog.name}
-              </p>
-              <p className="text-mutedText text-xs sm:text-sm">{prog.category}{getProgrammeType(prog) ? ` · ${getProgrammeType(prog)}` : ''}</p>
-            </div >
-            <button
-              onClick={() => openNewEntry(prog)}
-              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition shrink-0"
-            >
-              <Pencil size={14} /> Enter Result
-            </button>
-          </div >
-        ))}
+      <div className="mb-8">
+        <h3 className="text-lg font-poppins font-bold text-mainText mb-3 flex items-center gap-2">
+          Pending Submissions ({notSubmitted.length})
+        </h3>
+        {notSubmitted.length === 0 ? (
+          <div className="bg-card rounded-2xl p-6 text-center text-mutedText text-sm border border-secondary/30">
+            All programmes in this view have been submitted and locked.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {notSubmitted.map(prog => (
+              <div key={prog.id} className="bg-card rounded-xl p-4 shadow-sm border border-secondary/30 flex flex-col justify-between">
+                <div className="mb-3">
+                  <p className="text-mainText font-semibold text-sm sm:text-base truncate">
+                    {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
+                    {prog.name}
+                  </p>
+                  <p className="text-mutedText text-xs mt-0.5">{prog.category}{getProgrammeType(prog) ? ` · ${getProgrammeType(prog)}` : ''}</p>
+                </div>
+                <button
+                  onClick={() => openNewEntry(prog)}
+                  className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-2 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5"
+                >
+                  <Award size={14} /> Submit Result
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── Submitted / Locked Results ── */}
-      <h3 className="text-base sm:text-lg font-poppins font-bold text-mainText mb-3">Submitted Results ({filteredLockedResults.length})</h3>
-      <div className="flex flex-col gap-3 mb-8">
-        {filteredLockedResults.length === 0 && <p className="text-mutedText text-center py-4">No results submitted yet.</p>}
-        {filteredLockedResults.map(result => {
-          const prog = programmes.find(p => p.id === result.programmeId)
-          const isExpanded = expandedId === result.id
-          const placementData = [
-            { rank: '1st', data: result.first },
-            { rank: '2nd', data: result.second },
-            { rank: '3rd', data: result.third },
-          ]
-          return (
-            <div key={result.id} className="bg-card rounded-xl p-4 shadow-sm border border-secondary/30">
-              <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : result.id)}>
-                <div className="min-w-0 flex-1">
-                  <p className="text-mainText font-semibold text-sm sm:text-base truncate">
-                    {result.resultNo ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{result.resultNo}</span> : null}
-                    {result.name || prog?.name}
-                  </p>
-                  <p className="text-mutedText text-xs">{prog?.category || ''}</p>
-                </div >
-                <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-success/15 text-success border border-success/40 shrink-0">
-                  <Lock size={11} /> LOCKED
-                </span >
-                <button className="text-mutedText shrink-0 ml-2">
-                  {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-              </div >
-              {isExpanded && (
-                <div className="mt-4 pt-3 border-t border-secondary/30 space-y-3">
-                  {placementData.map(({ rank, data }) => {
-                    if (!data) return (
-                      <div key={rank} className="text-mutedText text-sm flex items-center gap-2">
-                        <span className="font-semibold w-8">{rank}</span>
-                        <span className="italic">No entry</span>
-                      </div >
-                    )
-                    return (
-                      <div key={rank} className="bg-secondary/15 rounded-xl p-3 border border-secondary/30">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                          <span className={`text-xs sm:text-sm font-bold min-w-[1.5rem] sm:min-w-[2rem] ${rank === '1st' ? 'text-accent' : rank === '2nd' ? 'text-secondary' : 'text-mutedText'
-                            }`}>
-                            {rank}
-                          </span >
-                          <span className="text-mainText font-medium text-sm sm:text-base">
-                            Performance {data.code || 'Entry'}
-                          </span>
-                          <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
-                          {data.grade && data.grade !== '-' && (
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${data.grade === 'A+' ? 'bg-success/15 text-success' :
-                                data.grade === 'A' ? 'bg-blue-500/15 text-blue-400' :
-                                  data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
-                                    'bg-orange-500/15 text-orange-400'
-                              }`}>
-                              {data.grade}
-                            </span >
-                          )}
-                        </div >
-                      </div >
-                    )
-                  })}
-                  <button
-                    onClick={() => openEditFlow(prog || { id: result.programmeId, name: result.name })}
-                    className="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl py-2 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 border border-amber-500/30 mt-2"
-                  >
-                    <Pencil size={14} /> Re-verify & Edit
-                  </button>
-                </div >
-              )}
-            </div >
-          )
-        })}
-      </div >
+      <div>
+        <h3 className="text-lg font-poppins font-bold text-mainText mb-3 flex items-center gap-2">
+          <Lock size={16} className="text-success" /> Submitted & Locked ({filteredLockedResults.length})
+        </h3>
+        {filteredLockedResults.length === 0 ? (
+          <div className="bg-card rounded-2xl p-6 text-center text-mutedText text-sm border border-secondary/30">
+            No locked results yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredLockedResults.map(result => {
+              const prog = validProgrammeMap.get(result.programmeId)
+              const isExpanded = expandedId === result.id
+              const displayEntries = (result.entries && result.entries.length > 0)
+                ? result.entries
+                : [
+                    result.first && { ...result.first, place: result.first.label || '1st Place' },
+                    result.second && { ...result.second, place: result.second.label || '2nd Place' },
+                    result.third && { ...result.third, place: result.third.label || '3rd Place' },
+                  ].filter(Boolean)
 
-      {/* ── Prompt modal ── */}
-      {promptOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={closePrompt}>
-          <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-poppins font-bold text-mainText mb-2">Are you really a Judge?</h3>
-            <p className="text-mutedText text-sm mb-6">Editing locked festival results requires judge credentials and single-use security code verification.</p>
-            <div className="flex gap-3">
-              <button onClick={closePrompt} className="flex-1 bg-white/10 text-mainText rounded-xl p-3 font-semibold text-sm hover:bg-white/15 transition">
+              return (
+                <div key={result.id} className="bg-card rounded-xl p-4 shadow-sm border border-secondary/30">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : result.id)}>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-mainText font-semibold text-sm sm:text-base truncate">
+                        {result.resultNo ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{result.resultNo}</span> : null}
+                        {result.name || prog?.name}
+                      </p>
+                      <p className="text-mutedText text-xs">{prog?.category || ''}</p>
+                    </div>
+                    <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-success/15 text-success border border-success/40 shrink-0">
+                      <Lock size={11} /> LOCKED
+                    </span>
+                    <button className="text-mutedText shrink-0 ml-2">
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+                  </div>
+                  {isExpanded && (
+                    <div className="mt-4 pt-3 border-t border-secondary/30 space-y-2">
+                      {displayEntries.map((data, idx) => (
+                        <div key={idx} className="bg-secondary/15 rounded-xl p-3 border border-secondary/30">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <span className="text-xs sm:text-sm font-bold min-w-[3rem] text-accent">
+                              Candidate {data.candidateNo || idx + 1}
+                            </span>
+                            {data.place && (
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30">
+                                {data.place}
+                              </span>
+                            )}
+                            <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
+                            {data.grade && data.grade !== '-' && (
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                                data.grade === 'A+' ? 'bg-success/15 text-success' :
+                                data.grade === 'A' ? 'bg-blue-500/15 text-blue-400' :
+                                data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
+                                'bg-orange-500/15 text-orange-400'
+                              }`}>
+                                {data.grade}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => openEditFlow(prog || { id: result.programmeId, name: result.name })}
+                        className="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl py-2 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 border border-amber-500/30 mt-2"
+                      >
+                        <Pencil size={14} /> Re-verify & Edit
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {promptOpen && editProg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={closePrompt}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-md my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-poppins font-bold text-mainText mb-2">Judge Security Verification</h3>
+            <p className="text-mutedText text-sm mb-4">Editing a locked result requires judge credentials and security code verification.</p>
+            <div className="flex gap-2">
+              <button onClick={() => { closePrompt(); openVerifyModal() }} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold text-sm hover:bg-primary/90 transition">
+                Proceed to Verify
+              </button>
+              <button onClick={closePrompt} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold text-sm transition">
                 Cancel
               </button>
-              <button onClick={proceedToVerify} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold text-sm hover:bg-primary/90 transition">
-                Yes, Continue
-              </button>
-            </div >
-          </div >
-        </div >
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* ── Re-verify modal ── */}
-      {verifyOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={() => !vLoading && closeVerify()}>
-          <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Judge Verification</h3>
-            <p className="text-mutedText text-xs mb-4">Re-enter your credentials to access result editor for <span className="text-mainText font-semibold">{editProg?.name}</span>.</p>
+      {verifyOpen && editProg && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !vLoading && closeVerify()}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-md my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Judge Credentials & Security Code</h3>
+            <p className="text-mutedText text-xs sm:text-sm mb-4 truncate">{editProg.name} · {editProg.category}</p>
 
-            {vError && <div className="bg-red-500/15 border border-red-500/40 text-red-300 text-xs p-3 rounded-xl mb-4">{vError}</div >}
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="text-mutedText text-xs mb-1 block">Judge Account Email</label>
+                <input
+                  type="email"
+                  placeholder="Judge Name / Email"
+                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
+                  value={vName}
+                  onChange={e => setVName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-mutedText text-xs mb-1 block">Judge Password</label>
+                <input
+                  type="password"
+                  placeholder="Judge Password"
+                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
+                  value={vPassword}
+                  onChange={e => setVPassword(e.target.value)}
+                />
+              </div>
 
-            <label className="text-mutedText text-xs mb-1 block">Judge Email / Username</label>
-            <input
-              type="text"
-              className="w-full bg-black/20 text-mainText rounded-xl p-3 mb-3 outline-none border border-secondary/30 focus:border-mainText text-sm"
-              value={vName}
-              onChange={e => setVName(e.target.value)}
-              placeholder="e.g. judge1@fest.com"
-            />
+              <div>
+                <label className="text-mutedText text-xs mb-1 block">Security Verification Code</label>
+                <div className="bg-black/40 rounded-xl p-3 mb-2 flex items-center justify-between border border-secondary/30">
+                  <span className="font-mono font-bold text-lg text-accent tracking-widest select-none">
+                    {captchaLoading ? 'Loading...' : captcha || '------'}
+                  </span>
+                  <span className="text-xs text-mutedText">
+                    {captchaLoading ? '' : captchaExpiresAt ? `Expires in ${formatTimeLeft(captchaExpiresAt)}` : ''}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter 6-character code"
+                  maxLength={6}
+                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold tracking-widest text-center uppercase"
+                  value={vCaptcha}
+                  onChange={e => setVCaptcha(e.target.value.toUpperCase())}
+                />
+              </div>
 
-            <label className="text-mutedText text-xs mb-1 block">Password</label>
-            <div className="relative mb-3">
-              <input
-                type={vShowPassword ? 'text' : 'password'}
-                className="w-full bg-black/20 text-mainText rounded-xl p-3 pr-10 outline-none border border-secondary/30 focus:border-mainText text-sm"
-                value={vPassword}
-                onChange={e => setVPassword(e.target.value)}
-              />
-              <button type="button" onClick={() => setVShowPassword(!vShowPassword)} className="absolute right-3 top-3 text-mutedText hover:text-mainText">
-                {vShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div >
-
-            <label className="text-mutedText text-xs mb-1 block">Security Code</label>
-            <div className="flex gap-2 mb-4">
-              <div className="bg-black/40 text-accent font-bold tracking-widest text-lg px-4 py-2 rounded-xl flex items-center justify-center select-none border border-secondary/40">
-                {captcha || '------'}
-              </div >
-              <input
-                type="text"
-                className="flex-1 bg-black/20 text-mainText uppercase font-bold tracking-wider rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-center text-sm"
-                maxLength={6}
-                value={vCaptcha}
-                onChange={e => setVCaptcha(e.target.value.toUpperCase())}
-                placeholder="TYPE CODE"
-              />
-            </div >
+              {vError && <p className="text-red-400 text-xs mt-1 font-semibold">{vError}</p>}
+            </div>
 
             <div className="flex gap-2 mb-3">
               <button onClick={closeVerify} disabled={vLoading} className="bg-white/10 text-mainText rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-white/15 transition">
@@ -689,7 +631,7 @@ export default function JudgesResults() {
               <button onClick={handleVerify} disabled={vLoading} className="bg-primary text-white rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-primary/90 transition">
                 {vLoading ? 'Verifying...' : 'Verify & Edit'}
               </button>
-            </div >
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => loadCaptcha({ retries: 2, delayMs: 450 })}
@@ -698,92 +640,71 @@ export default function JudgesResults() {
               >
                 {captchaLoading ? 'Refreshing...' : 'Reload security code'}
               </button>
-            </div >
-          </div >
-        </div >
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* ── Edit result ── */}
       {editOpen && editProg && (
         <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
-          <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl p-5 sm:p-6 w-full max-w-xl my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
             <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
 
-            {/* Column Headers */}
             <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
+              <span className="col-span-3">Candidate</span>
               <span className="col-span-4">Place</span>
-              <span className="col-span-4">Code Letter</span>
-              <span className="col-span-2 text-center">Points</span>
+              <span className="col-span-3 text-center">Points</span>
               <span className="col-span-2 text-center">Grade</span>
             </div>
 
-            {placementVals.map((v, i) => {
-              const grade = calcGrade(v.points)
-              const candidates = getCandidatesForProg(editProg)
-              const selectedCodesInForm = new Set([first, second, third].filter(id => id && id !== v.student))
+            <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-2.5 my-1 custom-scrollbar">
+              {entryRows.map((row, i) => {
+                const grade = calcGrade(row.points)
 
-              return (
-                <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
-                  <div className="col-span-4">
-                    <input
-                      type="text"
-                      placeholder="Enter Place"
-                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold"
-                      value={v.placeLabel}
-                      onChange={e => v.setPlaceLabel(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <select
-                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold cursor-pointer"
-                      value={v.student}
-                      onChange={e => v.setStudent(e.target.value)}
-                    >
-                      <option value="" className="bg-card text-mutedText">Select Code Letter</option>
-                      {candidates.map(cand => {
-                        const isTakenByOtherPlace = selectedCodesInForm.has(cand.id)
-                        return (
-                          <option
-                            key={cand.id}
-                            value={cand.id}
-                            disabled={isTakenByOtherPlace}
-                            className={`bg-card ${isTakenByOtherPlace ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
-                          >
-                            {cand.code}{isTakenByOtherPlace ? ' (Selected)' : ''}
-                          </option>
-                        )
-                      })}
-                    </select>
-                  </div>
-                  <div className="col-span-2">
-                    <input
-                      type="number"
-                      placeholder="Pts"
-                      min="0"
-                      max="10"
-                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm font-bold"
-                      value={v.points}
-                      onChange={e => v.setPoints(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-span-2 flex justify-center">
-                    <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
-                        grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                          grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
-                            grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
-                              'bg-orange-500/15 text-orange-400 border border-orange-500/40'
-                      }`}>
-                      {grade}
+                return (
+                  <div key={row.studentId || i} className="grid grid-cols-12 gap-2 items-center bg-black/20 p-2.5 rounded-xl border border-secondary/20">
+                    <div className="col-span-3 text-mainText font-bold text-xs sm:text-sm">
+                      Candidate {row.candidateNo}
+                    </div>
+                    <div className="col-span-4">
+                      <input
+                        type="text"
+                        placeholder="Enter Place"
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2 outline-none border border-secondary/30 focus:border-mainText text-xs sm:text-sm font-semibold"
+                        value={row.place}
+                        onChange={e => updateRowField(i, 'place', e.target.value)}
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <input
+                        type="number"
+                        placeholder="Pts"
+                        min="0"
+                        max="10"
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2 outline-none border border-secondary/30 focus:border-mainText text-center text-xs sm:text-sm font-bold"
+                        value={row.points}
+                        onChange={e => updateRowField(i, 'points', e.target.value)}
+                      />
+                    </div>
+                    <div className="col-span-2 flex justify-center">
+                      <div className={`flex items-center justify-center w-full py-2 rounded-xl text-xs font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                          grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
+                            grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
+                              grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
+                                'bg-orange-500/15 text-orange-400 border border-orange-500/40'
+                        }`}>
+                        {grade}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
 
-            {editError && <p className="text-red-400 text-sm mt-2">{editError}</p>}
-            <div className="flex gap-2 mt-4">
-              <button onClick={handleSaveEdit} disabled={saving} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold hover:bg-primary/90 transition">
+            {editError && <p className="text-red-400 text-sm mt-2 font-semibold">{editError}</p>}
+            <div className="flex gap-2 mt-4 pt-3 border-t border-secondary/30 shrink-0">
+              <button onClick={handleSaveEdit} disabled={saving} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold hover:bg-primary/90 transition text-sm">
                 {saving ? 'Saving...' : 'Save & Lock Result'}
               </button>
               <button onClick={() => !saving && closeEdit()} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold transition">

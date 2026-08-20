@@ -52,13 +52,29 @@ export default function AdminResults() {
 
   const buildPlacementRows = (result) => {
     const rows = []
+    if (Array.isArray(result.entries) && result.entries.length > 0) {
+      result.entries.forEach((entry, idx) => {
+        if (!entry) return
+        const student = students.find(s => s.id === entry.studentId)
+        rows.push({
+          key: `${result.id}-entry-${idx}`,
+          label: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : `Candidate ${idx + 1}`),
+          name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
+          chestNo: student?.chestNo || '',
+          team: teamMap[student?.team] || student?.team || '',
+          points: entry.points || 0,
+          grade: entry.grade || '-',
+        })
+      })
+      return rows
+    }
     const addPlacement = (key, placement) => {
       if (!placement) return
       const student = students.find(s => s.id === placement.studentId)
       rows.push({
         key: `${result.id}-${key}`,
-        label: key === 'first' ? '1st' : key === 'second' ? '2nd' : '3rd',
-        name: placement.name,
+        label: placement.label || (key === 'first' ? '1st Place' : key === 'second' ? '2nd Place' : '3rd Place'),
+        name: student?.name || placement.name,
         chestNo: student?.chestNo || '',
         team: teamMap[student?.team] || student?.team || '',
         points: placement.points || 0,

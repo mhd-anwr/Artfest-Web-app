@@ -205,9 +205,17 @@ export async function getStudentPoints(studentId) {
   const studentResults = await getStudentResults(studentId)
   let total = 0
   for (const r of studentResults) {
-    if (r.first?.studentId === studentId) total += (r.first.points || 0)
-    if (r.second?.studentId === studentId) total += (r.second.points || 0)
-    if (r.third?.studentId === studentId) total += (r.third.points || 0)
+    if (Array.isArray(r.entries) && r.entries.length > 0) {
+      for (const entry of r.entries) {
+        if (entry?.studentId === studentId) {
+          total += (Number(entry.points) || 0)
+        }
+      }
+    } else {
+      if (r.first?.studentId === studentId) total += (Number(r.first.points) || 0)
+      if (r.second?.studentId === studentId) total += (Number(r.second.points) || 0)
+      if (r.third?.studentId === studentId) total += (Number(r.third.points) || 0)
+    }
   }
   return total
 }
@@ -392,11 +400,13 @@ export const getTeamCategoryPoints = async () => {
 
       const catName = prog.category === 'General' ? 'General Cat-A' : prog.category
 
-      const placements = [
-        result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
-        result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
-        result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
-      ]
+      const placements = Array.isArray(result.entries) && result.entries.length > 0
+        ? result.entries.map(e => ({ studentId: e.studentId, points: Number(e.points) || 0 }))
+        : [
+            result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
+            result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
+            result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
+          ]
 
       for (const p of placements) {
         if (!p?.studentId) continue
@@ -467,11 +477,13 @@ export const getIndividualCategoryPoints = async () => {
 
     afterPublishedResults += 1
 
-    const placements = [
-      result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
-      result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
-      result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
-    ]
+    const placements = Array.isArray(result.entries) && result.entries.length > 0
+      ? result.entries.map(e => ({ studentId: e.studentId, points: Number(e.points) || 0 }))
+      : [
+          result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
+          result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
+          result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
+        ]
 
     for (const p of placements) {
       if (!p?.studentId) continue
