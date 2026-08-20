@@ -161,19 +161,30 @@ export default function AdminPrint() {
           res.entries.forEach((entry, idx) => {
             if (!entry) return
             const sId = entry.studentId || entry.candidateId
-            const student = students.find(s => s.id === sId)
+            let student = students.find(s => s.id === sId)
+            if (!student && (entry.code || entry.codeLetter)) {
+              const codeVal = entry.code || entry.codeLetter
+              student = registeredStudents.find(s => s.code === codeVal)
+            }
+            if (!student && entry.name) {
+              student = registeredStudents.find(s => s.name === entry.name)
+            }
             if (student) addedStudentIds.add(student.id)
-            const placeStr = String(entry.place || entry.label || '')
-            const isTop3 = placeStr.includes('1st') || placeStr.includes('2nd') || placeStr.includes('3rd') || placeStr === '1' || placeStr === '2' || placeStr === '3' || (idx < 3)
+
+            const codeVal = entry.code || entry.codeLetter || ''
+            const ptsVal = entry.points !== undefined && entry.points !== null ? entry.points : (entry.point !== undefined ? entry.point : '')
+            const gradeVal = entry.grade || (ptsVal !== '' ? calcGrade(ptsVal) : '-')
+            const placeVal = entry.place || entry.label || entry.prize || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : '')
+
             rows.push({
               key: `res-${id}-${sId || idx}`,
               chestNo: student?.chestNo || '',
               name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
               team: teamMap[student?.team] || student?.team || '',
-              code: entry.code || entry.codeLetter || '',
-              grade: entry.grade || calcGrade(entry.points),
-              price: isTop3 ? (entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : '3rd Place')) : '',
-              point: entry.points != null ? entry.points : '',
+              code: codeVal,
+              grade: gradeVal,
+              price: placeVal,
+              point: ptsVal,
             })
           })
 
@@ -197,15 +208,17 @@ export default function AdminPrint() {
             if (!placement) return
             const student = students.find(s => s.id === placement.studentId)
             if (student) addedStudentIds.add(student.id)
+            const ptsVal = placement.points ?? ''
+            const gradeVal = placement.grade || (ptsVal !== '' ? calcGrade(ptsVal) : '-')
             rows.push({
               key: `res-${id}-${placement.studentId || rows.length}`,
               chestNo: student?.chestNo || '',
               name: placement.name || student?.name || '',
               team: teamMap[student?.team] || student?.team || '',
               code: placement.code || '',
-              grade: placement.grade || calcGrade(placement.points),
+              grade: gradeVal,
               price: placement.place || placement.label || placement.prize || defaultPlace,
-              point: placement.points ?? '',
+              point: ptsVal,
             })
           }
           addRow(res.first, '1st Place')
