@@ -150,10 +150,10 @@ export default function Home() {
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
           <div className="mb-4 flex justify-center w-full">
-            <img
-              src="/rendezvous-hero-logo.png"
-              alt="ISRA Rendezvous'26 logo"
-              className="hero-logo-img w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl h-auto object-contain select-none"
+            <div
+              role="img"
+              aria-label="ISRA Rendezvous'26 logo"
+              className="hero-logo-mask w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl h-16 sm:h-24 md:h-32 lg:h-40 select-none"
             />
           </div>
           <p className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl">

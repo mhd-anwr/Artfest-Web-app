@@ -643,15 +643,23 @@ body {
   color: #D4FFB8 !important;
 }
 
-/* Hero Logo Image Theme Visibility */
-.hero-logo-img {
-  filter: none;
-  transition: filter 0.2s ease;
+/* Hero Logo CSS Mask Styling (Festival Green Tint in Light & Dark mode) */
+.hero-logo-mask {
+  mask-image: url('/rendezvous-hero-logo.png');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/rendezvous-hero-logo.png');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  background-color: #115F32;
+  transition: background-color 0.2s ease;
 }
 
-[data-theme='dark'] .hero-logo-img,
-.dark .hero-logo-img {
-  filter: brightness(0) invert(1);
+[data-theme='dark'] .hero-logo-mask,
+.dark .hero-logo-mask {
+  background-color: #8ED06C;
 }
 
 [data-theme='dark'] .team-name-subtext,
