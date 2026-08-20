@@ -99,16 +99,16 @@ export default function AdminLayout() {
               end={end}
               onClick={closeDrawer}
               className={({ isActive }) =>
-                `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white/15 dark:bg-purple/20 border border-white/20 dark:border-purple/30 shadow-inner admin-nav-item-active font-bold'
-                    : 'text-white/70 dark:text-slate-600 hover:text-white dark:hover:text-slate-950 border border-transparent'
+                    ? 'admin-nav-item-active'
+                    : 'admin-nav-item'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'text-white/60 dark:text-slate-500 group-hover:text-white dark:group-hover:text-slate-950 shrink-0'} />
+                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'admin-nav-icon shrink-0'} />
                   <span className={isActive ? 'flex-1 truncate admin-nav-item-active font-bold' : 'flex-1 truncate'}>{label}</span>
                   <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'admin-nav-dot-active' : 'bg-transparent'}`} />
                 </>
@@ -118,15 +118,15 @@ export default function AdminLayout() {
         </nav>
 
         {/* Admin user */}
-        <div className="border-t border-white/10 dark:border-black/10 p-4">
+        <div className="border-t border-white/10 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-accent/25 text-accent flex items-center justify-center font-bold text-sm shrink-0">
+            <div className="w-9 h-9 rounded-full bg-[#228C22] text-[#D4FFB8] flex items-center justify-center font-bold text-sm shrink-0 border border-[#8ED06C]/40">
               {(adminEmail || 'A').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white dark:text-slate-950 truncate">{adminEmail || 'Admin'}</p>
+              <p className="text-sm font-semibold admin-user-text truncate">{adminEmail || 'Admin'}</p>
             </div>
-            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-white/70 dark:text-slate-600 hover:text-red-400 dark:hover:text-red-600 hover:bg-white/10 dark:hover:bg-black/10 transition">
+            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg admin-logout-btn">
               <LogOut size={18} />
             </button>
           </div>
