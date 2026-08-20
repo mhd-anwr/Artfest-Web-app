@@ -40,25 +40,24 @@ body {
   min-height: 100vh;
 }
 
-/* Light Theme Global Dark Green Typography Rules */
-:root:not([data-theme='dark']) body,
-body:not(.dark):not([data-theme='dark']) {
+/* Light Theme Global Dark Green Typography Rules (Applies STRICTLY when HTML is not in Dark Mode) */
+html:not(.dark):not([data-theme='dark']) body {
   color: #115F32;
   opacity: 1;
 }
 
-body:not(.dark):not([data-theme='dark']) h1,
-body:not(.dark):not([data-theme='dark']) h2,
-body:not(.dark):not([data-theme='dark']) h3,
-body:not(.dark):not([data-theme='dark']) h4,
-body:not(.dark):not([data-theme='dark']) h5,
-body:not(.dark):not([data-theme='dark']) h6 {
+html:not(.dark):not([data-theme='dark']) h1,
+html:not(.dark):not([data-theme='dark']) h2,
+html:not(.dark):not([data-theme='dark']) h3,
+html:not(.dark):not([data-theme='dark']) h4,
+html:not(.dark):not([data-theme='dark']) h5,
+html:not(.dark):not([data-theme='dark']) h6 {
   color: #115F32;
   opacity: 1;
   filter: none;
 }
 
-body:not(.dark):not([data-theme='dark']) p {
+html:not(.dark):not([data-theme='dark']) p {
   color: #115F32;
   opacity: 1;
   filter: none;
@@ -749,10 +748,65 @@ header .nav-brand-subtitle span {
   background-color: rgba(142, 208, 108, 0.15) !important;
 }
 
-/* Dark Theme Team Name High-Contrast Overrides */
+/* Dark Theme High-Contrast Overrides for Admin Layout & Dashboard */
 [data-theme='dark'] .team-name-text,
-.dark .team-name-text {
+.dark .team-name-text,
+html.dark .team-name-text,
+html[data-theme='dark'] .team-name-text {
   color: #D4FFB8 !important;
+  opacity: 1 !important;
+}
+
+[data-theme='dark'] .team-name-subtext,
+.dark .team-name-subtext,
+html.dark .team-name-subtext,
+html[data-theme='dark'] .team-name-subtext {
+  color: #8ED06C !important;
+  opacity: 1 !important;
+}
+
+html.dark body,
+html[data-theme='dark'] body,
+html.dark main,
+html[data-theme='dark'] main {
+  background-color: #061A0D !important;
+  color: #D4FFB8 !important;
+}
+
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
+html[data-theme='dark'] h1, html[data-theme='dark'] h2, html[data-theme='dark'] h3, html[data-theme='dark'] h4, html[data-theme='dark'] h5, html[data-theme='dark'] h6 {
+  color: #D4FFB8 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html.dark p,
+html[data-theme='dark'] p {
+  color: #D4FFB8 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html.dark .admin-sidebar,
+html[data-theme='dark'] .admin-sidebar {
+  background-color: #115F32 !important;
+  border-right: 1px solid rgba(34, 140, 34, 0.4) !important;
+}
+
+html.dark .admin-sidebar span,
+html[data-theme='dark'] .admin-sidebar span,
+html.dark .admin-user-text,
+html[data-theme='dark'] .admin-user-text {
+  color: #D4FFB8 !important;
+  opacity: 1 !important;
+}
+
+html.dark .admin-sidebar svg,
+html[data-theme='dark'] .admin-sidebar svg,
+html.dark .admin-logout-btn,
+html[data-theme='dark'] .admin-logout-btn {
+  color: #8ED06C !important;
+  opacity: 1 !important;
 }
 
 /* Hero Logo CSS Mask Styling (Festival Green Tint in Light & Dark mode) */
