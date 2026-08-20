@@ -103,45 +103,45 @@ body {
   color-scheme: dark;
 
   /* Festival Color Tokens */
-  --color-primary-dark: #115F32;
-  --color-primary: #228C22;
+  --color-primary-dark: #0A2814;
+  --color-primary: #115F32;       /* Main/Primary Brand Color */
   --color-bright: #4EBA16;
   --color-fresh: #71C247;
   --color-light: #8ED06C;
   --color-very-light: #D4FFB8;
 
-  --bg-page: #06190B;
-  --bg-section-fill: #0B2412;
-  --card-background: #0E2F19;
-  --card-lavender: #0E2F19;
-  --card-white: #0E2F19;
-  --card-dark: #06190B;
-  --text-main: #D4FFB8;
+  --bg-page: #040E06;             /* Very dark green / near-black */
+  --bg-section-fill: #081B0E;
+  --card-background: #0B2412;     /* Brand surface container */
+  --card-lavender: #0D331A;
+  --card-white: #0B2412;
+  --card-dark: #040E06;
+  --text-main: #D4FFB8;           /* High contrast text on dark surfaces */
   --text-body: #D4FFB8;
   --text-muted: #8ED06C;
   --text-light: #71C247;
-  --accent-purple: #4EBA16;
-  --accent-purple-deep: #228C22;
+  --accent-purple: #115F32;       /* Main Brand Green */
+  --accent-purple-deep: #228C22;  /* Active/Interactive Accent */
   --accent-purple-soft: rgba(34, 140, 34, 0.25);
-  --border-subtle: rgba(34, 140, 34, 0.35);
-  --btn-result-navy: #228C22;
-  --btn-navy-hover: #4EBA16;
-  --hero-glow: radial-gradient(circle at 50% 0%, #0d381c 0%, #06190b 80%);
-  --cta-gradient: linear-gradient(135deg, #228c22 0%, #4eba16 100%);
-  --lot-card-front-bg: #0E2F19;
-  --lot-card-back-bg: #06190B;
+  --border-subtle: rgba(142, 208, 108, 0.30);
+  --btn-result-navy: #115F32;     /* Main Brand Button */
+  --btn-navy-hover: #228C22;      /* Button Hover Accent */
+  --hero-glow: radial-gradient(circle at 50% 0%, #115f32 0%, #040e06 80%);
+  --cta-gradient: linear-gradient(135deg, #115f32 0%, #228c22 100%);
+  --lot-card-front-bg: #0B2412;
+  --lot-card-back-bg: #040E06;
   --lot-card-front-text: #D4FFB8;
   --lot-card-back-text: #D4FFB8;
 
-  --main-background: 6 25 11;     /* #06190B */
-  --primary: 34 140 34;           /* #228C22 */
-  --secondary: 14 47 25;          /* #0E2F19 */
-  --accent: 78 186 22;            /* #4EBA16 */
-  --main-text: 212 255 184;       /* #D4FFB8 */
-  --muted-text: 142 208 108;      /* #8ED06C */
-  --success: 78 186 22;
-  --card: 14 47 25;               /* #0E2F19 */
-  --ocean-tint: 11 36 18;         /* #0B2412 */
+  --main-background: 4 14 6;      /* #040E06 Very Dark Green / Near-Black */
+  --primary: 17 95 50;            /* #115F32 MAIN / PRIMARY BRAND COLOR */
+  --secondary: 34 140 34;         /* #228C22 Active Accent */
+  --accent: 78 186 22;            /* #4EBA16 Bright Highlight */
+  --main-text: 212 255 184;       /* #D4FFB8 High Contrast Text */
+  --muted-text: 142 208 108;      /* #8ED06C Muted Text */
+  --success: 78 186 22;           /* #4EBA16 */
+  --card: 11 36 18;               /* #0B2412 Dark Green Surface */
+  --ocean-tint: 8 27 14;          /* #081B0E Dark Section Fill */
 }
 
 /* ── Reusable design-system component classes ── */

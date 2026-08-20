@@ -596,7 +596,7 @@ export default function JudgesResults() {
                             {data.grade && data.grade !== '-' && (
                               <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                                 data.grade === 'A+' ? 'bg-success/15 text-success' :
-                                data.grade === 'A' ? 'bg-blue-500/15 text-blue-400' :
+                                data.grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247]' :
                                 data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
                                 'bg-orange-500/15 text-orange-400'
                               }`}>
@@ -784,7 +784,7 @@ export default function JudgesResults() {
                     <div className="col-span-2 flex justify-center">
                       <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
                           grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                            grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
+                            grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
                               grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
                                 'bg-orange-500/15 text-orange-400 border border-orange-500/40'
                         }`}>

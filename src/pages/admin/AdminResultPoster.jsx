@@ -6,12 +6,12 @@ import { getAllResults, getProgrammes, getStudents, getTeams } from '../../supab
 const STORAGE_KEY = 'result_posters'
 
 const posterStyle = {
-  container: 'bg-gradient-to-br from-fuchsia-700 via-violet-700 to-amber-500 rounded-3xl p-6 text-white',
+  container: 'bg-gradient-to-br from-[#115F32] via-[#228C22] to-[#4EBA16] rounded-3xl p-6 text-white shadow-xl',
   title: 'text-3xl font-extrabold text-white',
-  subtitle: 'text-sm text-amber-100 mt-2',
+  subtitle: 'text-sm text-[#D4FFB8] mt-2 font-medium',
   row: 'bg-white/15 rounded-2xl border border-white/30 p-3 mb-3 backdrop-blur',
   team: 'text-white font-semibold',
-  points: 'text-amber-100 text-sm',
+  points: 'text-[#D4FFB8] text-sm font-bold',
   badge: 'text-white font-bold drop-shadow',
 }
 
