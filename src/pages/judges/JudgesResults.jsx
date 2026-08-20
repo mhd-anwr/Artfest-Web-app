@@ -17,6 +17,13 @@ function calcGrade(points) {
   return '-'
 }
 
+function getOrdinalLabel(index) {
+  const n = index + 1
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return `${n}${(s[(v - 20) % 10] || s[v] || s[0])} Place`
+}
+
 export default function JudgesResults() {
   const [programmes, setProgrammes] = useState([])
   const [students, setStudents] = useState([])
@@ -26,7 +33,6 @@ export default function JudgesResults() {
   const [expandedId, setExpandedId] = useState(null)
   const [progAssignments, setProgAssignments] = useState({})
 
-  // Edit flow state
   const [editProg, setEditProg] = useState(null)
   const [isFirstTime, setIsFirstTime] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
@@ -34,7 +40,6 @@ export default function JudgesResults() {
   const [editOpen, setEditOpen] = useState(false)
   const [vName, setVName] = useState('')
   const [vPassword, setVPassword] = useState('')
-  const [vShowPassword, setVShowPassword] = useState(false)
   const [captcha, setCaptcha] = useState('')
   const [captchaId, setCaptchaId] = useState('')
   const [captchaExpiresAt, setCaptchaExpiresAt] = useState('')
@@ -171,10 +176,8 @@ export default function JudgesResults() {
 
     const cands = getCandidatesForProg(prog)
     const initialRows = cands.map((cand, idx) => ({
-      studentId: cand.id,
-      code: cand.code,
-      candidateNo: idx + 1,
-      place: '',
+      place: getOrdinalLabel(idx),
+      studentId: '',
       points: '',
     }))
 
@@ -186,7 +189,12 @@ export default function JudgesResults() {
     setPromptOpen(false)
   }
 
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+  const formatTimeLeft = (dateStr) => {
+    const diff = new Date(dateStr) - new Date()
+    const mins = Math.floor(diff / 60000)
+    const secs = Math.floor((diff % 60000) / 1000)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const clearCaptchaState = () => {
     setCaptcha('')
@@ -201,18 +209,14 @@ export default function JudgesResults() {
 
     const sessionResp = await judgeClient.auth.getSession()
     if (!sessionResp?.data?.session?.user) {
-      const missingSessionError = new Error('No authenticated judge session available')
-      missingSessionError.code = 'NO_AUTH_SESSION'
       setVError('Your session has expired. Please sign in again.')
       setCaptchaLoading(false)
-      throw missingSessionError
+      throw new Error('No session')
     }
 
     let lastError = null
     for (let attempt = 0; attempt <= retries; attempt++) {
-      if (attempt > 0) {
-        await sleep(delayMs * attempt)
-      }
+      if (attempt > 0) await new Promise(res => setTimeout(res, delayMs * attempt))
       const { data, error } = await judgeClient.rpc('judge_create_captcha')
       if (!error && data?.captcha) {
         setCaptcha(data.captcha)
@@ -224,18 +228,9 @@ export default function JudgesResults() {
       lastError = error
     }
 
-    console.error('judge_create_captcha RPC error:', lastError)
-    const errMessage = lastError?.message || ''
-    const is404 = lastError?.status === 404 || errMessage.includes('404') || errMessage.includes('Not Found')
-    const isCrypt = errMessage.includes('crypt(') || errMessage.includes('42883') || errMessage.includes('does not exist')
-    const msg =
-      is404 ? 'Captcha service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_create_captcha().' :
-        isCrypt ? 'Server extension missing. Enable pgcrypto in Supabase extensions.' :
-          (errMessage || 'Failed to load security verification code. Please try again.')
-
-    setVError(msg)
+    setVError('Captcha service unavailable.')
     setCaptchaLoading(false)
-    throw lastError || new Error(msg)
+    throw lastError
   }
 
   const openVerifyModal = async () => {
@@ -244,11 +239,7 @@ export default function JudgesResults() {
     setVName('')
     setVPassword('')
     setVerifyOpen(true)
-    try {
-      await loadCaptcha({ retries: 2, delayMs: 450 })
-    } catch {
-      // Error state handled inside loadCaptcha
-    }
+    try { await loadCaptcha() } catch {}
   }
 
   const closeVerify = () => {
@@ -262,7 +253,7 @@ export default function JudgesResults() {
       return
     }
     if (!vCaptcha.trim()) {
-      setVError('Please enter the 6-character security code shown above.')
+      setVError('Please enter the security code.')
       return
     }
 
@@ -277,11 +268,6 @@ export default function JudgesResults() {
     setVLoading(false)
 
     if (authError || !authData?.valid) {
-      const is404 = authError?.status === 404 || authError?.message?.includes('404')
-      if (is404) {
-        setVError('Judge credential service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_verify_credentials().')
-        return
-      }
       setVError(authError?.message || 'Invalid judge name or password.')
       setVCaptcha('')
       await loadCaptcha()
@@ -300,31 +286,34 @@ export default function JudgesResults() {
 
     if (!preserveFields) {
       const initialRows = cands.map((cand, idx) => {
-        const existingEntry = Array.isArray(latest?.entries)
-          ? latest.entries.find(e => e.studentId === cand.id)
-          : null
+        let savedStudentId = ''
+        let savedPlace = getOrdinalLabel(idx)
+        let savedPoints = ''
 
-        let savedPlace = existingEntry?.place || existingEntry?.label || ''
-        let savedPoints = existingEntry?.points != null ? String(existingEntry.points) : ''
-
-        if (!existingEntry && latest) {
-          if (latest.first?.studentId === cand.id) {
+        if (Array.isArray(latest?.entries) && latest.entries[idx]) {
+          const entry = latest.entries[idx]
+          savedStudentId = entry.studentId || ''
+          savedPlace = entry.place || entry.label || getOrdinalLabel(idx)
+          savedPoints = entry.points != null ? String(entry.points) : ''
+        } else if (latest) {
+          if (idx === 0 && latest.first) {
+            savedStudentId = latest.first.studentId || ''
             savedPlace = latest.first.label || '1st Place'
-            savedPoints = String(latest.first.points || '')
-          } else if (latest.second?.studentId === cand.id) {
+            savedPoints = latest.first.points != null ? String(latest.first.points) : ''
+          } else if (idx === 1 && latest.second) {
+            savedStudentId = latest.second.studentId || ''
             savedPlace = latest.second.label || '2nd Place'
-            savedPoints = String(latest.second.points || '')
-          } else if (latest.third?.studentId === cand.id) {
+            savedPoints = latest.second.points != null ? String(latest.second.points) : ''
+          } else if (idx === 2 && latest.third) {
+            savedStudentId = latest.third.studentId || ''
             savedPlace = latest.third.label || '3rd Place'
-            savedPoints = String(latest.third.points || '')
+            savedPoints = latest.third.points != null ? String(latest.third.points) : ''
           }
         }
 
         return {
-          studentId: cand.id,
-          code: cand.code,
-          candidateNo: idx + 1,
           place: savedPlace,
+          studentId: savedStudentId,
           points: savedPoints,
         }
       })
@@ -343,33 +332,42 @@ export default function JudgesResults() {
 
   const handleSaveEdit = async () => {
     if (!editProg) return
-    if (entryRows.length === 0) {
-      setEditError('No candidates available to submit results for.')
-      return
+
+    const selectedStudentIds = entryRows.map(r => r.studentId).filter(Boolean)
+    const duplicates = selectedStudentIds.filter((item, index) => selectedStudentIds.indexOf(item) !== index)
+    if (duplicates.length > 0) {
+      const dupId = duplicates[0]
+      const dupCand = getCandidatesForProg(editProg).find(c => c.id === dupId)
+      const dupCode = dupCand ? dupCand.code : 'A'
+      const msg = `Code Letter ${dupCode} is already assigned to another place.`
+      setEditError(msg)
+      return toast(msg, 'error')
     }
 
     const candidates = getCandidatesForProg(editProg)
     const entries = entryRows.map((row, idx) => {
-      const cand = candidates[idx] || candidates.find(c => c.id === row.studentId)
+      if (!row.studentId && !row.points) return null
+      const cand = candidates.find(c => c.id === row.studentId)
       const s = getStudentObj(row.studentId)
       const pts = Number(row.points) || 0
       const gr = calcGrade(row.points)
+      const code = cand ? cand.code : (row.studentId?.startsWith('anon_') ? row.studentId.split('_').pop() : String.fromCharCode(65 + (idx % 26)))
+
       return {
         studentId: row.studentId,
-        name: s?.name || cand?.name || `Candidate ${row.candidateNo}`,
-        code: cand?.code || String.fromCharCode(65 + (idx % 26)),
-        candidateNo: row.candidateNo,
+        name: s?.name || cand?.name || `Performance ${code}`,
+        code: code,
+        candidateNo: idx + 1,
         place: row.place.trim(),
-        label: row.place.trim() || '',
+        label: row.place.trim() || `Place ${idx + 1}`,
         points: pts,
         grade: gr,
       }
-    })
+    }).filter(Boolean)
 
-    const sortedByRankOrPts = [...entries].sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0))
-    const firstEntry = entries.find(e => e.place.toLowerCase().includes('1st') || e.place === '1') || sortedByRankOrPts[0] || null
-    const secondEntry = entries.find(e => e.place.toLowerCase().includes('2nd') || e.place === '2') || sortedByRankOrPts[1] || null
-    const thirdEntry = entries.find(e => e.place.toLowerCase().includes('3rd') || e.place === '3') || sortedByRankOrPts[2] || null
+    const firstEntry = entries.find(e => e.place.toLowerCase().includes('1st') || e.place === '1') || entries[0] || null
+    const secondEntry = entries.find(e => e.place.toLowerCase().includes('2nd') || e.place === '2') || entries[1] || null
+    const thirdEntry = entries.find(e => e.place.toLowerCase().includes('3rd') || e.place === '3') || entries[2] || null
 
     const payload = {
       programmeId: editProg.id,
@@ -404,8 +402,7 @@ export default function JudgesResults() {
     }
 
     if (error) {
-      console.error('Result submit failed:', error)
-      setEditError(error?.message || 'Failed to submit the result. Please try again.')
+      setEditError(error?.message || 'Failed to submit the result.')
       setSaving(false)
       return
     }
@@ -519,14 +516,12 @@ export default function JudgesResults() {
                       {displayEntries.map((data, idx) => (
                         <div key={idx} className="bg-secondary/15 rounded-xl p-3 border border-secondary/30">
                           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                            <span className="text-xs sm:text-sm font-bold min-w-[3rem] text-accent">
-                              Candidate {data.candidateNo || idx + 1}
+                            <span className="text-xs sm:text-sm font-bold min-w-[4rem] text-accent">
+                              {data.place || `${idx + 1}th Place`}
                             </span>
-                            {data.place && (
-                              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30">
-                                {data.place}
-                              </span>
-                            )}
+                            <span className="text-mainText font-medium text-sm sm:text-base">
+                              Performance {data.code || 'Entry'}
+                            </span>
                             <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                             {data.grade && data.grade !== '-' && (
                               <span className={`text-xs font-bold px-2 py-0.5 rounded ${
@@ -634,7 +629,7 @@ export default function JudgesResults() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => loadCaptcha({ retries: 2, delayMs: 450 })}
+                onClick={() => loadCaptcha()}
                 disabled={captchaLoading}
                 className="flex-1 bg-secondary/15 text-mainText rounded-xl p-3 font-semibold text-sm hover:bg-secondary/20 transition"
               >
@@ -647,48 +642,69 @@ export default function JudgesResults() {
 
       {editOpen && editProg && (
         <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
-          <div className="bg-card rounded-2xl p-5 sm:p-6 w-full max-w-xl my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
             <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
 
             <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
-              <span className="col-span-3">Candidate</span>
               <span className="col-span-4">Place</span>
-              <span className="col-span-3 text-center">Points</span>
+              <span className="col-span-4">Code Letter</span>
+              <span className="col-span-2 text-center">Points</span>
               <span className="col-span-2 text-center">Grade</span>
             </div>
 
-            <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-2.5 my-1 custom-scrollbar">
+            <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
               {entryRows.map((row, i) => {
                 const grade = calcGrade(row.points)
+                const candidates = getCandidatesForProg(editProg)
+                const selectedCodesInForm = new Set(entryRows.filter((r, rIdx) => rIdx !== i && Boolean(r.studentId)).map(r => r.studentId))
 
                 return (
-                  <div key={row.studentId || i} className="grid grid-cols-12 gap-2 items-center bg-black/20 p-2.5 rounded-xl border border-secondary/20">
-                    <div className="col-span-3 text-mainText font-bold text-xs sm:text-sm">
-                      Candidate {row.candidateNo}
-                    </div>
+                  <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
                     <div className="col-span-4">
                       <input
                         type="text"
                         placeholder="Enter Place"
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2 outline-none border border-secondary/30 focus:border-mainText text-xs sm:text-sm font-semibold"
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold"
                         value={row.place}
                         onChange={e => updateRowField(i, 'place', e.target.value)}
                       />
                     </div>
-                    <div className="col-span-3">
+                    <div className="col-span-4">
+                      <select
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold cursor-pointer"
+                        value={row.studentId}
+                        onChange={e => updateRowField(i, 'studentId', e.target.value)}
+                      >
+                        <option value="" className="bg-card text-mutedText">Code Letter</option>
+                        {candidates.map(cand => {
+                          const isTakenByOtherRow = selectedCodesInForm.has(cand.id)
+                          return (
+                            <option
+                              key={cand.id}
+                              value={cand.id}
+                              disabled={isTakenByOtherRow}
+                              className={`bg-card ${isTakenByOtherRow ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
+                            >
+                              {cand.code}{isTakenByOtherRow ? ' (Selected)' : ''}
+                            </option>
+                          )
+                        })}
+                      </select>
+                    </div>
+                    <div className="col-span-2">
                       <input
                         type="number"
                         placeholder="Pts"
                         min="0"
                         max="10"
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2 outline-none border border-secondary/30 focus:border-mainText text-center text-xs sm:text-sm font-bold"
+                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm font-bold"
                         value={row.points}
                         onChange={e => updateRowField(i, 'points', e.target.value)}
                       />
                     </div>
                     <div className="col-span-2 flex justify-center">
-                      <div className={`flex items-center justify-center w-full py-2 rounded-xl text-xs font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                      <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
                           grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
                             grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
                               grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
@@ -707,13 +723,13 @@ export default function JudgesResults() {
               <button onClick={handleSaveEdit} disabled={saving} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold hover:bg-primary/90 transition text-sm">
                 {saving ? 'Saving...' : 'Save & Lock Result'}
               </button>
-              <button onClick={() => !saving && closeEdit()} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold transition">
+              <button onClick={() => !saving && closeEdit()} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold transition text-sm">
                 Cancel
               </button>
-            </div >
-          </div >
-        </div >
+            </div>
+          </div>
+        </div>
       )}
-    </div >
+    </div>
   )
 }
