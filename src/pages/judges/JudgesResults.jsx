@@ -248,6 +248,49 @@ export default function JudgesResults() {
     clearCaptchaState()
   }
 
+  const verifyJudgeCredentials = async (email, password) => {
+    // 1. Try judge_credentials RPC
+    try {
+      const { data, error } = await judgeClient.rpc('judge_credentials', {
+        p_judge_email: email,
+        p_judge_password: password,
+      })
+      if (!error && data) {
+        return { valid: Boolean(data.valid), message: data.valid ? '' : 'Invalid judge credentials.' }
+      }
+    } catch (e) {
+      console.warn('judge_credentials RPC fallback:', e)
+    }
+
+    // 2. Try judge_verify_credentials RPC
+    try {
+      const { data, error } = await judgeClient.rpc('judge_verify_credentials', {
+        p_judge_email: email,
+        p_judge_password: password,
+      })
+      if (!error && data) {
+        return { valid: Boolean(data.valid), message: data.valid ? '' : 'Invalid judge credentials.' }
+      }
+    } catch (e) {
+      console.warn('judge_verify_credentials RPC fallback:', e)
+    }
+
+    // 3. Fallback: standard Supabase auth sign-in test via verifyJudgeClient
+    try {
+      const { data, error } = await verifyJudgeClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
+      if (!error && data?.user) {
+        return { valid: true }
+      }
+    } catch (e) {
+      console.warn('verifyJudgeClient signIn fallback:', e)
+    }
+
+    return { valid: false, message: 'Invalid judge credentials.' }
+  }
+
   const handleVerify = async (e) => {
     if (e && e.preventDefault) e.preventDefault()
 
@@ -260,39 +303,31 @@ export default function JudgesResults() {
       return
     }
 
-    // Security Code validation against displayed captcha
-    if (vCaptcha.trim().toUpperCase() !== (captcha || '').trim().toUpperCase()) {
-      setVError('Invalid security code. Please try again.')
-      setVCaptcha('') // Clear ONLY entered security code input
-      return
-      // DO NOT call loadCaptcha()! Displayed security code remains unchanged.
-    }
-
     setVLoading(true)
     setVError('')
 
-    try {
-      const { data: authData, error: authError } = await judgeClient.rpc('judge_verify_credentials', {
-        p_judge_email: vName.trim(),
-        p_judge_password: vPassword,
-      })
-
+    // 1. Verify judge credentials against Supabase (RPC + Auth fallback)
+    const credResult = await verifyJudgeCredentials(vName.trim(), vPassword)
+    if (!credResult.valid) {
+      setVError('Invalid judge credentials.')
+      setVCaptcha('') // Clear ONLY entered security code input
       setVLoading(false)
-
-      if (authError || !authData?.valid) {
-        setVError(authError?.message || 'Invalid judge name or password.')
-        setVCaptcha('')
-        return
-        // DO NOT call loadCaptcha()! Displayed security code remains unchanged.
-      }
-
-      setVerifyOpen(false)
-      await openEdit(editProg)
-    } catch (err) {
-      console.error('Verification error:', err)
-      setVError(err?.message || 'Verification failed. Please try again.')
-      setVLoading(false)
+      return
+      // DO NOT call loadCaptcha()! Displayed security code remains UNCHANGED.
     }
+
+    // 2. Verify security code against displayed captcha
+    if (vCaptcha.trim().toUpperCase() !== (captcha || '').trim().toUpperCase()) {
+      setVError('Invalid security code.')
+      setVCaptcha('') // Clear ONLY entered security code input
+      setVLoading(false)
+      return
+      // DO NOT call loadCaptcha()! Displayed security code remains UNCHANGED.
+    }
+
+    setVLoading(false)
+    setVerifyOpen(false)
+    await openEdit(editProg)
   }
 
   const openEdit = async (prog, preserveFields = false) => {
