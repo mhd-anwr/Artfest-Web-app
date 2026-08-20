@@ -147,17 +147,20 @@ body {
 /* ── Reusable design-system component classes ── */
 
 .floating-nav {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.96);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(17, 95, 50, 0.18);
   border-radius: var(--radius-pill);
-  box-shadow: 0 8px 28px rgba(17, 95, 50, 0.08);
+  box-shadow: 0 8px 28px rgba(17, 95, 50, 0.10);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, backdrop-filter 0.25s ease;
 }
 
 [data-theme='dark'] .floating-nav,
 .dark .floating-nav {
-  background: rgba(11, 36, 18, 0.9);
+  background: rgba(6, 25, 11, 0.95);
+  border: 1px solid rgba(142, 208, 108, 0.30);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
 /* ── iOS Liquid Glass Mobile Navigation ── */
@@ -403,25 +406,42 @@ body {
 }
 
 .nav-link {
-  color: var(--text-muted);
+  color: #115F32 !important;
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0.45rem 1rem;
   border-radius: var(--radius-pill);
-  transition: color 0.3s ease, background-color 0.3s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  color: #115F32 !important;
+  background: rgba(17, 95, 50, 0.10);
+}
+
 .nav-link.active {
-  color: #115F32;
-  background: var(--accent-purple-soft);
+  color: #115F32 !important;
+  background: rgba(17, 95, 50, 0.14);
+  font-weight: 700;
+}
+
+[data-theme='dark'] .nav-link,
+.dark .nav-link {
+  color: #D4FFB8 !important;
 }
 
 [data-theme='dark'] .nav-link:hover,
-.dark .nav-link:hover,
+.dark .nav-link:hover {
+  color: #FFFFFF !important;
+  background: rgba(142, 208, 108, 0.15);
+}
+
 [data-theme='dark'] .nav-link.active,
 .dark .nav-link.active {
-  color: #D4FFB8;
+  color: #FFFFFF !important;
+  background: rgba(142, 208, 108, 0.22);
+  border: 1px solid rgba(212, 255, 184, 0.30);
+  font-weight: 700;
 }
 
 .filter-btn {
@@ -1105,18 +1125,20 @@ body {
 }
 
 .floating-nav.scrolled-nav {
-  background: rgba(17, 95, 50, 0.88) !important;
-  backdrop-filter: blur(16px) !important;
-  border-color: rgba(142, 208, 108, 0.35) !important;
-  box-shadow: 0 10px 30px rgba(6, 25, 11, 0.22) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(17, 95, 50, 0.28) !important;
+  box-shadow: 0 12px 36px rgba(17, 95, 50, 0.14) !important;
 }
 
 [data-theme='dark'] .floating-nav.scrolled-nav,
 .dark .floating-nav.scrolled-nav {
-  background: rgba(6, 25, 11, 0.92) !important;
-  backdrop-filter: blur(16px) !important;
-  border-color: rgba(34, 140, 34, 0.45) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+  background: rgba(6, 25, 11, 0.97) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(142, 208, 108, 0.40) !important;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.65) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -49,11 +49,11 @@ export default function Gallery() {
   return (
     <div className="min-h-screen">
       {/* Transparent Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 lg:px-16 py-4 lg:py-5">
+      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 sm:px-8 lg:px-16 py-4 lg:py-5 pointer-events-none">
         <div className="flex items-center gap-2 tracking-tight select-none focus:outline-none" />
         <Link
           to="/"
-          className="flex items-center gap-1 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-mainText text-xs sm:text-sm font-semibold hover:bg-white/20 transition"
+          className="flex items-center gap-1 px-4 py-2 rounded-full bg-card border border-subtle text-mainText text-xs sm:text-sm font-semibold hover:bg-lavender transition pointer-events-auto shadow-md"
         >
           <ChevronLeft size={16} /> Home
         </Link>

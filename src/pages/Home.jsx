@@ -110,16 +110,16 @@ export default function Home() {
     <div className="min-h-screen overflow-x-hidden">
 
       {/* ── Floating Top Nav ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-8 pt-3 sm:pt-4">
-        <div className={`floating-nav flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] w-full max-w-3xl px-3 py-2 sm:px-5 ${scrollY > 20 ? 'scrolled-nav' : ''}`}>
+      <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center px-3 sm:px-8 pt-3 sm:pt-4 pointer-events-none">
+        <div className={`floating-nav pointer-events-auto flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] w-full max-w-3xl px-3 py-2 sm:px-5 ${scrollY > 20 ? 'scrolled-nav' : ''}`}>
           <Link
             to="/"
             aria-label="Go to the festival home"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-1 sm:gap-2 tracking-tight select-none focus:outline-none justify-self-start font-sora shrink-0"
           >
-            <span className="font-bold text-xl sm:text-3xl leading-none uppercase text-mainText">ISRA</span>
-            <div className="flex flex-col text-[9px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider text-mainText border-l-0 pl-0.5">
+            <span className="font-bold text-xl sm:text-3xl leading-none uppercase text-[#115F32] dark:text-white">ISRA</span>
+            <div className="flex flex-col text-[9px] sm:text-[11px] font-semibold leading-tight uppercase tracking-wider text-[#115F32] dark:text-[#D4FFB8] border-l-0 pl-0.5">
               <span>LIFE</span>
               <span>FESTIVAL</span>
             </div>
