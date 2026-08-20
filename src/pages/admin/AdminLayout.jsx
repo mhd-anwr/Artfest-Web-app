@@ -73,15 +73,15 @@ export default function AdminLayout() {
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-black/10 dark:border-white/10">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-black/10 dark:border-[#8ED06C]/20">
           <Link
             to="/"
-            className="flex flex-col items-start select-none font-sora admin-brand-text"
+            className="flex flex-col items-start select-none font-sora"
           >
-            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight admin-brand-text">
+            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight admin-brand-title">
               ISRA
             </span>
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90 admin-brand-text">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90 admin-brand-subtitle">
               LIFE FESTIVAL
             </span>
           </Link>
@@ -118,7 +118,7 @@ export default function AdminLayout() {
         </nav>
 
         {/* Admin user */}
-        <div className="border-t border-white/10 p-4">
+        <div className="admin-user-footer p-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-[#228C22] text-[#D4FFB8] flex items-center justify-center font-bold text-sm shrink-0 border border-[#8ED06C]/40">
               {(adminEmail || 'A').charAt(0).toUpperCase()}

@@ -558,25 +558,24 @@ body {
 }
 
 .admin-sidebar {
-  background: #115F32;
+  background: #115F32 !important;
   color: #FFFFFF;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(142, 208, 108, 0.20) !important;
 }
 
 [data-theme='dark'] .admin-sidebar,
 .dark .admin-sidebar {
-  background: #06190B;
+  background: #115F32 !important;
   color: #D4FFB8;
-  border-right: 1px solid rgba(34, 140, 34, 0.25);
+  border-right: 1px solid rgba(142, 208, 108, 0.20) !important;
 }
 
 /* Admin Sidebar Brand Header Text */
-.admin-brand-text {
+.admin-brand-title {
   color: #FFFFFF !important;
 }
 
-[data-theme='dark'] .admin-brand-text,
-.dark .admin-brand-text {
+.admin-brand-subtitle {
   color: #D4FFB8 !important;
 }
 
@@ -589,7 +588,7 @@ body {
 
 .admin-nav-item:hover {
   background: rgba(142, 208, 108, 0.12) !important;
-  color: #D4FFB8 !important;
+  color: #FFFFFF !important;
 }
 
 .admin-nav-icon {
@@ -598,12 +597,12 @@ body {
 }
 
 .admin-nav-item:hover .admin-nav-icon {
-  color: #D4FFB8 !important;
+  color: #8ED06C !important;
 }
 
 /* Admin Sidebar Navigation Items - Active State */
 .admin-nav-item-active {
-  background: rgba(142, 208, 108, 0.22) !important;
+  background: rgba(142, 208, 108, 0.20) !important;
   border: 1px solid rgba(212, 255, 184, 0.30) !important;
   color: #FFFFFF !important;
   font-weight: 700 !important;
@@ -619,6 +618,11 @@ body {
 }
 
 /* Admin Footer User & Logout */
+.admin-user-footer {
+  background: rgba(0, 0, 0, 0.10) !important;
+  border-top: 1px solid rgba(142, 208, 108, 0.20) !important;
+}
+
 .admin-user-text {
   color: #D4FFB8 !important;
 }
@@ -631,6 +635,17 @@ body {
 .admin-logout-btn:hover {
   color: #D4FFB8 !important;
   background-color: rgba(142, 208, 108, 0.15) !important;
+}
+
+/* Dark Theme Team Name High-Contrast Overrides */
+[data-theme='dark'] .team-name-text,
+.dark .team-name-text {
+  color: #D4FFB8 !important;
+}
+
+[data-theme='dark'] .team-name-subtext,
+.dark .team-name-subtext {
+  color: #8ED06C !important;
 }
 
 /* Leaderboard rows — 1st gold / 2nd silver / 3rd bronze */
