@@ -384,8 +384,20 @@ export default function JudgesResults() {
   const handleSaveEdit = async () => {
     if (!editProg) return
     if (!first) {
-      setEditError('Select the 1st place participant')
+      setEditError('Please select a Code Letter for 1st place.')
       return
+    }
+
+    // Check for duplicate code letters in judge submission form
+    const selectedStudentIds = [first, second, third].filter(Boolean)
+    const duplicates = selectedStudentIds.filter((item, index) => selectedStudentIds.indexOf(item) !== index)
+    if (duplicates.length > 0) {
+      const dupId = duplicates[0]
+      const dupCand = getCandidatesForProg(editProg).find(c => c.id === dupId)
+      const dupCode = dupCand ? dupCand.code : 'A'
+      const msg = `Code Letter ${dupCode} is already assigned to another place.`
+      setEditError(msg)
+      return toast(msg, 'error')
     }
 
     const payload = {
@@ -692,38 +704,61 @@ export default function JudgesResults() {
       {editOpen && editProg && (
         <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Edit Result</h3>
+            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
             <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
+
+            {/* Column Headers */}
+            <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
+              <span className="col-span-3">Place</span>
+              <span className="col-span-4">Code Letter</span>
+              <span className="col-span-3 text-center">Points</span>
+              <span className="col-span-2 text-center">Grade</span>
+            </div>
 
             {placementLabels.map((label, i) => {
               const v = placementVals[i]
               const grade = calcGrade(v.points)
               const candidates = getCandidatesForProg(editProg)
+              const selectedCodesInForm = new Set([first, second, third].filter(id => id && id !== v.student))
 
               return (
-                <div key={label} className="mb-4">
-                  <label className="text-mutedText text-xs sm:text-sm mb-1 block font-semibold">{label}</label>
-                  <div className="flex gap-2">
+                <div key={label} className="grid grid-cols-12 gap-2 items-center mb-3">
+                  <span className="col-span-3 text-mainText font-bold text-sm sm:text-base px-1">{label}</span>
+                  <div className="col-span-4">
                     <select
-                      className="flex-1 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base font-semibold"
+                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base font-bold cursor-pointer"
                       value={v.student}
                       onChange={e => v.setStudent(e.target.value)}
                     >
-                      <option value="" className="bg-card text-mainText">Code Letter</option>
-                      {candidates.map(cand => (
-                        <option key={cand.id} value={cand.id} className="bg-card text-mainText">
-                          {cand.code}
-                        </option>
-                      ))}
+                      <option value="" className="bg-card text-mutedText">Code Letter</option>
+                      {candidates.map(cand => {
+                        const isTakenByOtherPlace = selectedCodesInForm.has(cand.id)
+                        return (
+                          <option
+                            key={cand.id}
+                            value={cand.id}
+                            disabled={isTakenByOtherPlace}
+                            className={`bg-card ${isTakenByOtherPlace ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
+                          >
+                            {cand.code}{isTakenByOtherPlace ? ' (Selected)' : ''}
+                          </option>
+                        )
+                      })}
                     </select>
+                  </div>
+                  <div className="col-span-3">
                     <input
                       type="number"
                       placeholder="Pts"
-                      className="w-20 sm:w-24 bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-center text-sm sm:text-base font-semibold"
+                      min="0"
+                      max="10"
+                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm sm:text-base font-bold"
                       value={v.points}
                       onChange={e => v.setPoints(e.target.value)}
                     />
-                    <div className={`flex items-center justify-center w-12 sm:w-14 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                  </div>
+                  <div className="col-span-2 flex justify-center">
+                    <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
                         grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
                           grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
                             grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
