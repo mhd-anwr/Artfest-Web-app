@@ -47,10 +47,10 @@ export default function AdminLayout() {
   const closeDrawer = () => setOpen(false)
 
   return (
-    <div className="min-h-screen bg-mainBackground text-mainText">
+    <div className="min-h-screen bg-[#F7FBF5] dark:bg-[#061A0D] text-[#115F32] dark:text-[#D4FFB8]">
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-primary/95 backdrop-blur border-b border-white/10">
-        <button onClick={() => setOpen(true)} aria-label="Open navigation" className="p-1.5 text-mainText">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-[#115F32] backdrop-blur border-b border-[#228C22]/30">
+        <button onClick={() => setOpen(true)} aria-label="Open navigation" className="p-1.5 text-[#D4FFB8]">
           <Menu size={24} />
         </button>
         <div className="flex items-center gap-2.5">
@@ -141,7 +141,7 @@ export default function AdminLayout() {
             <div className="mb-4">
               <button
                 onClick={() => navigate('/admin')}
-                className="inline-flex items-center gap-2 bg-card border border-secondary/40 rounded-xl px-4 py-2 text-sm sm:text-base font-semibold text-mainText shadow-sm hover:bg-white/10 hover:border-mainText/40 transition"
+                className="inline-flex items-center gap-2 bg-white hover:bg-[#F7FBF5] dark:bg-[#0B2A17] dark:hover:bg-[#123D22] border border-[#115F32]/15 dark:border-[#71C247]/25 rounded-xl px-4 py-2 text-sm sm:text-base font-semibold text-[#115F32] dark:text-[#D4FFB8] shadow-sm transition"
               >
                 <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> Back to Dashboard
               </button>

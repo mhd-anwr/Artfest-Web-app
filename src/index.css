@@ -83,25 +83,25 @@ html:not(.dark):not([data-theme='dark']) p {
   --color-light: #8ED06C;
   --color-very-light: #D4FFB8;
 
-  --bg-page: #F2FBF0;
-  --bg-section-1: #E6F7E1;
-  --bg-section-2: #DBF3D3;
-  --card-lavender: #E4F7DA;
+  --bg-page: #F7FBF5;
+  --bg-section-1: #EBF7E8;
+  --bg-section-2: #E0F3DC;
+  --card-lavender: #F9FCF8;
   --card-white: #FFFFFF;
   --card-dark: #0D2B17;
   --text-main: #115F32;
   --text-body: #115F32;
-  --text-muted: #115F32;
+  --text-muted: #4EBA16;
   --text-light: #228C22;
   --accent-purple: #115F32;
   --accent-purple-deep: #228C22;
   --accent-purple-soft: #D4FFB8;
-  --border-subtle: rgba(142, 208, 108, 0.45);
+  --border-subtle: rgba(17, 95, 50, 0.12);
   --btn-result-navy: #115F32;
   --btn-navy-hover: #228C22;
   --radius-pill: 999px;
   --radius-card: 24px;
-  --hero-glow: radial-gradient(circle at 50% 0%, #e4f7da 0%, #f2fbf0 70%);
+  --hero-glow: radial-gradient(circle at 50% 0%, #e4f7da 0%, #f7fbf5 70%);
   --cta-gradient: linear-gradient(135deg, #115f32 0%, #228c22 100%);
   --cursor-glow: radial-gradient(circle, rgba(78, 186, 22, 0.16) 0%, rgba(17, 95, 50, 0.04) 50%, transparent 70%);
   --lot-card-front-bg: #FFFFFF;
@@ -110,12 +110,12 @@ html:not(.dark):not([data-theme='dark']) p {
   --lot-card-back-text: #D4FFB8;
 
   /* Legacy RGB triplet tokens re-pointed to Green Palette */
-  --main-background: 242 251 240; /* #F2FBF0 */
+  --main-background: 247 251 245; /* #F7FBF5 */
   --primary: 17 95 50;            /* #115F32 */
-  --secondary: 228 247 218;       /* #E4F7DA */
+  --secondary: 249 252 248;       /* #F9FCF8 */
   --accent: 34 140 34;            /* #228C22 */
   --main-text: 17 95 50;          /* #115F32 */
-  --muted-text: 17 95 50;         /* #115F32 */
+  --muted-text: 78 186 22;         /* #4EBA16 */
   --success: 78 186 22;           /* #4EBA16 */
   --card: 255 255 255;            /* #FFFFFF */
   --ocean-tint: 212 255 184;      /* #D4FFB8 */
