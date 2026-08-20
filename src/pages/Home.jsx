@@ -33,6 +33,7 @@ export default function Home() {
   const [featured, setFeatured] = useState([])
   const [allImages, setAllImages] = useState([])
   const [teamData, setTeamData] = useState([])
+  const [scrollY, setScrollY] = useState(0)
   const location = useLocation()
   const navigate = useNavigate()
   const aboutRef = useRef(null)
@@ -41,6 +42,26 @@ export default function Home() {
   const galleryReveal = useScrollReveal()
   const aboutReveal = useScrollReveal()
   const teamReveal = useScrollReveal()
+
+  const prefersReduced = useMemo(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches,
+    []
+  )
+
+  useEffect(() => {
+    let raf = 0
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setScrollY(window.scrollY))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
 
   const sparkles = useMemo(
     () =>
@@ -86,11 +107,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
 
       {/* ── Floating Top Nav ── */}
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-8 pt-3 sm:pt-4">
-        <div className="floating-nav flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] w-full max-w-3xl px-3 py-2 sm:px-5">
+        <div className={`floating-nav flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] w-full max-w-3xl px-3 py-2 sm:px-5 ${scrollY > 20 ? 'scrolled-nav' : ''}`}>
           <Link
             to="/"
             aria-label="Go to the festival home"
@@ -126,7 +147,7 @@ export default function Home() {
           <HeroAnimation spotlightImages={featured.length > 0 ? featured : allImages} />
         )}
 
-        <div className="aurora-layer">
+        <div className="aurora-layer" style={!prefersReduced ? { transform: `translateY(${Math.min(scrollY * 0.05, 30)}px)` } : {}}>
           <div className="aurora-blob aurora-a" />
           <div className="aurora-blob aurora-b" />
           <div className="aurora-blob aurora-c" />
@@ -149,17 +170,35 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <div className="mb-4 flex justify-center w-full">
+          <div
+            className="mb-4 flex justify-center w-full"
+            style={!prefersReduced ? {
+              transform: `translateY(${-Math.min(scrollY * 0.15, 28)}px) scale(${1 - Math.min(scrollY * 0.0003, 0.04)})`,
+              opacity: Math.max(1 - scrollY * 0.0018, 0.5)
+            } : {}}
+          >
             <div
               role="img"
               aria-label="ISRA Rendezvous'26 logo"
               className="hero-logo-mask w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl h-16 sm:h-24 md:h-32 lg:h-40 select-none"
             />
           </div>
-          <p className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl">
+          <p
+            className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl"
+            style={!prefersReduced ? {
+              transform: `translateY(${-Math.min(scrollY * 0.12, 22)}px)`,
+              opacity: Math.max(1 - scrollY * 0.0022, 0.4)
+            } : {}}
+          >
             ISRA life Festival 2026 — Tracked, Celebrated, Remembered
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div
+            className="flex flex-col sm:flex-row gap-4"
+            style={!prefersReduced ? {
+              transform: `translateY(${-Math.min(scrollY * 0.08, 16)}px)`,
+              opacity: Math.max(1 - scrollY * 0.0026, 0.3)
+            } : {}}
+          >
             <button
               onClick={() => navigate('/results')}
               className="cta-gradient px-8 py-3 font-semibold font-inter"
@@ -233,7 +272,7 @@ export default function Home() {
           ref={statsReveal.ref}
           className={`mb-12 reveal ${statsReveal.visible ? 'reveal-visible' : ''}`}
         >
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 stagger-grid">
             {stats.map(stat => {
               const Icon = stat.icon
               return (
@@ -280,7 +319,7 @@ export default function Home() {
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 stagger-grid">
               {allImages.slice(0, 8).map(img => (
                 <div key={img.id} className="relative overflow-hidden rounded-xl aspect-[4/3]">
                   <img
@@ -359,7 +398,7 @@ export default function Home() {
             to life — from Stage lights to score sheets.
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10 place-items-center max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10 place-items-center max-w-6xl mx-auto px-4 stagger-grid">
             {teamMembers.map(member => (
               <div key={member.name} className="w-full max-w-[301px] text-center flex flex-col items-center">
                 {member.photo ? (

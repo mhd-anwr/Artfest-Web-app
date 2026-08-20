@@ -81,7 +81,7 @@ export default function Gallery() {
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-mainText">{album.name}</h2>
                   <span className="text-mutedText text-xs font-semibold">({album.imgs.length})</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 stagger-grid">
                   {album.imgs.map(img => (
                     <div key={img.id} className="group relative">
                       <div className="relative overflow-hidden rounded-xl border border-secondary/30">
