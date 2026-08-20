@@ -149,9 +149,13 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-brand font-bold text-mainText mb-4 leading-tight">
-            Rendezvous
-          </h1>
+          <div className="mb-4 flex justify-center w-full">
+            <img
+              src="/rendezvous-hero-logo.png"
+              alt="ISRA Rendezvous'26 logo"
+              className="hero-logo-img w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl h-auto object-contain select-none"
+            />
+          </div>
           <p className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl">
             ISRA life Festival 2026 — Tracked, Celebrated, Remembered
           </p>

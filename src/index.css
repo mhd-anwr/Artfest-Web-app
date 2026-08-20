@@ -643,6 +643,17 @@ body {
   color: #D4FFB8 !important;
 }
 
+/* Hero Logo Image Theme Visibility */
+.hero-logo-img {
+  filter: none;
+  transition: filter 0.2s ease;
+}
+
+[data-theme='dark'] .hero-logo-img,
+.dark .hero-logo-img {
+  filter: brightness(0) invert(1);
+}
+
 [data-theme='dark'] .team-name-subtext,
 .dark .team-name-subtext {
   color: #8ED06C !important;
