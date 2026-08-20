@@ -545,6 +545,17 @@ export const getCodeAssignments = async (programmeId) => {
 }
 
 export const saveCodeAssignments = async (programmeId, category, assignmentList) => {
+  const seenCodes = new Set()
+  for (const a of assignmentList) {
+    if (a.codeLetter) {
+      if (seenCodes.has(a.codeLetter)) {
+        console.error(`Duplicate code letter ${a.codeLetter} detected in saveCodeAssignments!`)
+        return false
+      }
+      seenCodes.add(a.codeLetter)
+    }
+  }
+
   const localKey = `artfest_code_assignments_${programmeId}`
   const localMap = {}
   assignmentList.forEach(a => {

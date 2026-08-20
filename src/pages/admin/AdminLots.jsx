@@ -190,12 +190,17 @@ export default function AdminLots() {
     }
 
     // 2. Check for duplicate code letters in the same programme
-    const usedLetters = candidates.map(c => assignmentsMap[c.id]).filter(Boolean)
-    const duplicates = usedLetters.filter((item, index) => usedLetters.indexOf(item) !== index)
-    if (duplicates.length > 0) {
-      const msg = `Duplicate Code Letter "${duplicates[0]}" detected! Each code letter must be unique within a programme.`
-      setValidationError(msg)
-      return toast(msg, 'error')
+    const usedLettersMap = {}
+    for (const c of candidates) {
+      const code = assignmentsMap[c.id]
+      if (code) {
+        if (usedLettersMap[code]) {
+          const msg = `Code Letter ${code} is already assigned to another participant.`
+          setValidationError(msg)
+          return toast(msg, 'error')
+        }
+        usedLettersMap[code] = true
+      }
     }
 
     setSavingAssignments(true)
@@ -204,9 +209,13 @@ export default function AdminLots() {
       codeLetter: assignmentsMap[c.id]
     }))
 
-    await saveCodeAssignments(selectedProg.id, selectedCat, payload)
+    const success = await saveCodeAssignments(selectedProg.id, selectedCat, payload)
     setSavingAssignments(false)
-    toast('Code letters assigned successfully!')
+    if (success) {
+      toast('Code letters assigned successfully!')
+    } else {
+      toast('Failed to save code letter assignments.', 'error')
+    }
   }
 
   const activeMode = MODES.find(m => m.id === mode)
@@ -445,6 +454,13 @@ export default function AdminLots() {
                 const codeOptions = Array.from({ length: letterCount }, (_, i) => String.fromCharCode(65 + i))
                 const teamInfo = getTeamInfo(cand)
 
+                // Calculate letters taken by OTHER participants in this programme
+                const otherAssignedLetters = new Set(
+                  Object.entries(assignmentsMap)
+                    .filter(([pId, code]) => pId !== cand.id && Boolean(code))
+                    .map(([_, code]) => code)
+                )
+
                 return (
                   <div key={cand.id} className="p-3.5 sm:p-4 rounded-xl border border-secondary/30 bg-black/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -460,19 +476,26 @@ export default function AdminLots() {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <label className="text-mutedText text-xs font-medium shrink-0">Code Letter:</label>
+                    <div className="shrink-0 self-start sm:self-center">
                       <select
-                        className="bg-card text-mainText rounded-xl px-3 py-2 outline-none border border-secondary/40 focus:border-mainText text-sm font-bold cursor-pointer"
+                        className="bg-card text-mainText rounded-xl px-3.5 py-2.5 outline-none border border-secondary/40 focus:border-mainText text-xs sm:text-sm font-bold cursor-pointer transition shadow-sm"
                         value={currentCode}
                         onChange={e => handleAssignmentChange(cand.id, e.target.value)}
                       >
                         <option value="" className="bg-card text-mutedText">Select Code Letter</option>
-                        {codeOptions.map(letter => (
-                          <option key={letter} value={letter} className="bg-card text-mainText font-bold">
-                            Code Letter {letter}
-                          </option>
-                        ))}
+                        {codeOptions.map(letter => {
+                          const isTakenByOther = otherAssignedLetters.has(letter)
+                          return (
+                            <option
+                              key={letter}
+                              value={letter}
+                              disabled={isTakenByOther}
+                              className={`bg-card ${isTakenByOther ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
+                            >
+                              Code Letter {letter}{isTakenByOther ? ' (Assigned)' : ''}
+                            </option>
+                          )
+                        })}
                       </select>
                     </div>
                   </div>
