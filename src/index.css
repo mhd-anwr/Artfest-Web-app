@@ -127,45 +127,45 @@ body:not(.dark):not([data-theme='dark']) p {
   color-scheme: dark;
 
   /* Festival Color Tokens */
-  --color-primary-dark: #0A2814;
+  --color-primary-dark: #061A0D;
   --color-primary: #115F32;       /* Main/Primary Brand Color */
-  --color-bright: #4EBA16;
-  --color-fresh: #71C247;
-  --color-light: #8ED06C;
-  --color-very-light: #D4FFB8;
+  --color-bright: #4EBA16;        /* Strong Accent */
+  --color-fresh: #71C247;         /* Accent */
+  --color-light: #8ED06C;         /* Secondary Text */
+  --color-very-light: #D4FFB8;    /* Primary Text */
 
-  --bg-page: #040E06;             /* Very dark green / near-black */
-  --bg-section-fill: #081B0E;
-  --card-background: #0B2412;     /* Brand surface container */
-  --card-lavender: #0D331A;
-  --card-white: #0B2412;
-  --card-dark: #040E06;
-  --text-main: #D4FFB8;           /* High contrast text on dark surfaces */
+  --bg-page: #061A0D;             /* Primary Dark Background #061A0D */
+  --bg-section-fill: #0B2A17;
+  --card-background: #0B2A17;     /* Main surfaces/cards #0B2A17 */
+  --card-lavender: #123D22;       /* Secondary Surface #123D22 */
+  --card-white: #0B2A17;
+  --card-dark: #061A0D;
+  --text-main: #D4FFB8;           /* Primary Text #D4FFB8 */
   --text-body: #D4FFB8;
-  --text-muted: #8ED06C;
-  --text-light: #71C247;
+  --text-muted: #8ED06C;          /* Secondary Text #8ED06C */
+  --text-light: #71C247;          /* Accent #71C247 */
   --accent-purple: #115F32;       /* Main Brand Green */
-  --accent-purple-deep: #228C22;  /* Active/Interactive Accent */
+  --accent-purple-deep: #228C22;  /* Brand Green */
   --accent-purple-soft: rgba(34, 140, 34, 0.25);
-  --border-subtle: rgba(142, 208, 108, 0.30);
+  --border-subtle: rgba(113, 194, 71, 0.25);
   --btn-result-navy: #115F32;     /* Main Brand Button */
   --btn-navy-hover: #228C22;      /* Button Hover Accent */
-  --hero-glow: radial-gradient(circle at 50% 0%, #115f32 0%, #040e06 80%);
+  --hero-glow: radial-gradient(circle at 50% 0%, #115f32 0%, #061a0d 80%);
   --cta-gradient: linear-gradient(135deg, #115f32 0%, #228c22 100%);
-  --lot-card-front-bg: #0B2412;
-  --lot-card-back-bg: #040E06;
+  --lot-card-front-bg: #0B2A17;
+  --lot-card-back-bg: #061A0D;
   --lot-card-front-text: #D4FFB8;
   --lot-card-back-text: #D4FFB8;
 
-  --main-background: 4 14 6;      /* #040E06 Very Dark Green / Near-Black */
-  --primary: 17 95 50;            /* #115F32 MAIN / PRIMARY BRAND COLOR */
-  --secondary: 34 140 34;         /* #228C22 Active Accent */
-  --accent: 78 186 22;            /* #4EBA16 Bright Highlight */
-  --main-text: 212 255 184;       /* #D4FFB8 High Contrast Text */
-  --muted-text: 142 208 108;      /* #8ED06C Muted Text */
-  --success: 78 186 22;           /* #4EBA16 */
-  --card: 11 36 18;               /* #0B2412 Dark Green Surface */
-  --ocean-tint: 8 27 14;          /* #081B0E Dark Section Fill */
+  --main-background: 6 26 13;     /* #061A0D Primary Dark Background */
+  --primary: 17 95 50;            /* #115F32 MAIN BRAND COLOR */
+  --secondary: 34 140 34;         /* #228C22 Brand Green */
+  --accent: 113 194 71;           /* #71C247 Accent */
+  --main-text: 212 255 184;       /* #D4FFB8 Primary Text */
+  --muted-text: 142 208 108;      /* #8ED06C Secondary Text */
+  --success: 78 186 22;           /* #4EBA16 Strong Accent */
+  --card: 11 42 23;               /* #0B2A17 Main Surfaces/Cards */
+  --ocean-tint: 18 61 34;          /* #123D22 Secondary Surface */
 }
 
 /* ── Reusable design-system component classes ── */

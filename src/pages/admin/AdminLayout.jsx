@@ -77,7 +77,7 @@ export default function AdminLayout() {
         }`}
       >
         {/* Brand Header */}
-        <div className="relative flex items-center justify-center pt-6 pb-4 px-6">
+        <div className="relative flex items-center justify-center pt-6 pb-4 px-6 border-b border-[#228C22]/40">
           <Link to="/" className="flex items-center justify-center select-none w-full">
             <img
               src="/rendezvous-logo.png"
@@ -86,7 +86,7 @@ export default function AdminLayout() {
               style={{ filter: 'none', opacity: 1, mixBlendMode: 'normal', background: 'transparent' }}
             />
           </Link>
-          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden absolute right-4 top-6 p-1.5 text-white/80 hover:text-white transition">
+          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden absolute right-4 top-6 p-1.5 text-[#8ED06C] hover:text-[#D4FFB8] transition">
             <X size={22} />
           </button>
         </div>
@@ -102,16 +102,16 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'admin-nav-item-active'
-                    : 'admin-nav-item'
+                    ? 'bg-[#228C22] text-[#D4FFB8] border border-[#71C247]/40 shadow-sm font-bold'
+                    : 'text-[#D4FFB8] hover:bg-[#123D22] hover:text-[#D4FFB8]'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'admin-nav-icon shrink-0'} />
-                  <span className={isActive ? 'flex-1 truncate font-bold text-white' : 'flex-1 truncate'}>{label}</span>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'admin-nav-dot-active' : 'bg-transparent'}`} />
+                  <Icon size={18} className={isActive ? 'text-[#D4FFB8] shrink-0' : 'text-[#8ED06C] group-hover:text-[#D4FFB8] shrink-0'} />
+                  <span className={isActive ? 'flex-1 truncate font-bold text-[#D4FFB8]' : 'flex-1 truncate text-[#D4FFB8]'}>{label}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#D4FFB8]' : 'bg-transparent'}`} />
                 </>
               )}
             </NavLink>
@@ -119,15 +119,15 @@ export default function AdminLayout() {
         </nav>
 
         {/* Admin user */}
-        <div className="admin-user-footer p-4">
+        <div className="admin-user-footer p-4 border-t border-[#228C22]/40 bg-[#0B2A17]/40">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#228C22] text-[#D4FFB8] flex items-center justify-center font-bold text-sm shrink-0 border border-[#8ED06C]/40">
+            <div className="w-9 h-9 rounded-full bg-[#228C22] text-[#D4FFB8] flex items-center justify-center font-bold text-sm shrink-0 border border-[#71C247]/40">
               {(adminEmail || 'A').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold admin-user-text truncate">{adminEmail || 'Admin'}</p>
+              <p className="text-sm font-semibold text-[#D4FFB8] truncate">{adminEmail || 'Admin'}</p>
             </div>
-            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg admin-logout-btn">
+            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-[#8ED06C] hover:text-[#D4FFB8] hover:bg-[#123D22] transition">
               <LogOut size={18} />
             </button>
           </div>
