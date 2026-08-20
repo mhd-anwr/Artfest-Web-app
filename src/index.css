@@ -40,6 +40,30 @@ body {
   min-height: 100vh;
 }
 
+/* Light Theme Global Dark Green Typography Rules */
+:root:not([data-theme='dark']) body,
+body:not(.dark):not([data-theme='dark']) {
+  color: #115F32;
+  opacity: 1;
+}
+
+body:not(.dark):not([data-theme='dark']) h1,
+body:not(.dark):not([data-theme='dark']) h2,
+body:not(.dark):not([data-theme='dark']) h3,
+body:not(.dark):not([data-theme='dark']) h4,
+body:not(.dark):not([data-theme='dark']) h5,
+body:not(.dark):not([data-theme='dark']) h6 {
+  color: #115F32;
+  opacity: 1;
+  filter: none;
+}
+
+body:not(.dark):not([data-theme='dark']) p {
+  color: #115F32;
+  opacity: 1;
+  filter: none;
+}
+
 /* ─────────────────────────────────────────────
    ARTFEST Official Green Festival Design System
    Primary Dark Green: #115F32

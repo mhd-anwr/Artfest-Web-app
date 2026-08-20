@@ -366,7 +366,7 @@ export default function Home() {
               href="https://www.youtube.com/@isra_media"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 cta-gradient px-8 py-3 font-semibold font-inter"
+              className="inline-flex items-center gap-2 cta-gradient px-8 py-3 font-semibold font-inter text-white"
             >
               Explore <ExternalLink size={16} />
             </a>
