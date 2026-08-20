@@ -155,7 +155,7 @@ export default function JudgesResults() {
   const lockedProgrammeIds = new Set(savedResults.filter(r => r.locked).map(r => r.programmeId))
 
   const notSubmitted = filteredProgrammes
-    .filter(p => !lockedProgrammeIds.has(p.id))
+    .filter(p => !lockedProgrammeIds.has(p.id) && !p.isFinished)
     .sort((a, b) => (resultNoMap[a.id] || 999) - (resultNoMap[b.id] || 999) || a.name.localeCompare(b.name))
 
   const validProgrammeMap = new Map(programmes.map(p => [p.id, p]))

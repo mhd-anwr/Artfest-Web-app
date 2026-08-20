@@ -98,6 +98,7 @@ export default function AdminLots() {
       setSelectedProg(null)
       setAssignmentsMap({})
       setValidationError('')
+      getProgrammes().then(setProgrammes).catch(err => console.error(err))
       setStep('assign_cat')
       return
     }
@@ -143,6 +144,7 @@ export default function AdminLots() {
     setSelectedCat(cat)
     setSelectedProg(null)
     setValidationError('')
+    getProgrammes().then(setProgrammes).catch(err => console.error(err))
     setStep('assign_prog')
   }
 
@@ -220,11 +222,11 @@ export default function AdminLots() {
 
   const activeMode = MODES.find(m => m.id === mode)
 
-  // Filter categories to only those containing programmes
+  // Filter categories to only those containing active/unfinished programmes
   const progsByCategory = {}
   categories.forEach(c => { progsByCategory[c] = [] })
   programmes.forEach(p => {
-    if (p.category) {
+    if (p.category && !p.isFinished) {
       if (!progsByCategory[p.category]) {
         progsByCategory[p.category] = []
       }
