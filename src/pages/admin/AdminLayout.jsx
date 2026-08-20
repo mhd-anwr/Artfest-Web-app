@@ -109,7 +109,7 @@ export default function AdminLayout() {
               {({ isActive }) => (
                 <>
                   <Icon size={18} className={isActive ? 'admin-nav-icon-active shrink-0' : 'admin-nav-icon shrink-0'} />
-                  <span className={isActive ? 'flex-1 truncate admin-nav-item-active font-bold' : 'flex-1 truncate'}>{label}</span>
+                  <span className={isActive ? 'flex-1 truncate font-bold text-white' : 'flex-1 truncate'}>{label}</span>
                   <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'admin-nav-dot-active' : 'bg-transparent'}`} />
                 </>
               )}
