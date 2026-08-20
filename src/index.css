@@ -163,34 +163,72 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
-/* Navbar Brand Text High-Contrast Rules */
-.nav-brand-title {
-  color: #115F32 !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: #115F32 !important;
-}
-
+/* Navbar Brand Text High-Contrast Rules ("ISRA" & "LIFE FESTIVAL") */
+.nav-brand-title,
 .nav-brand-subtitle,
-.nav-brand-subtitle span {
+.nav-brand-subtitle span,
+.floating-nav .nav-brand-title,
+.floating-nav .nav-brand-subtitle,
+.floating-nav .nav-brand-subtitle span,
+.scrolled-nav .nav-brand-title,
+.scrolled-nav .nav-brand-subtitle,
+.scrolled-nav .nav-brand-subtitle span,
+.floating-nav.scrolled-nav .nav-brand-title,
+.floating-nav.scrolled-nav .nav-brand-subtitle,
+.floating-nav.scrolled-nav .nav-brand-subtitle span,
+header .nav-brand-title,
+header .nav-brand-subtitle,
+header .nav-brand-subtitle span {
   color: #115F32 !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #115F32 !important;
+  background: transparent !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  text-shadow: none !important;
 }
 
 [data-theme='dark'] .nav-brand-title,
-.dark .nav-brand-title {
-  color: #D4FFB8 !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: #D4FFB8 !important;
-}
-
 [data-theme='dark'] .nav-brand-subtitle,
 [data-theme='dark'] .nav-brand-subtitle span,
+[data-theme='dark'] .floating-nav .nav-brand-title,
+[data-theme='dark'] .floating-nav .nav-brand-subtitle,
+[data-theme='dark'] .floating-nav .nav-brand-subtitle span,
+[data-theme='dark'] .scrolled-nav .nav-brand-title,
+[data-theme='dark'] .scrolled-nav .nav-brand-subtitle,
+[data-theme='dark'] .scrolled-nav .nav-brand-subtitle span,
+[data-theme='dark'] .floating-nav.scrolled-nav .nav-brand-title,
+[data-theme='dark'] .floating-nav.scrolled-nav .nav-brand-subtitle,
+[data-theme='dark'] .floating-nav.scrolled-nav .nav-brand-subtitle span,
+[data-theme='dark'] header .nav-brand-title,
+[data-theme='dark'] header .nav-brand-subtitle,
+[data-theme='dark'] header .nav-brand-subtitle span,
+.dark .nav-brand-title,
 .dark .nav-brand-subtitle,
-.dark .nav-brand-subtitle span {
+.dark .nav-brand-subtitle span,
+.dark .floating-nav .nav-brand-title,
+.dark .floating-nav .nav-brand-subtitle,
+.dark .floating-nav .nav-brand-subtitle span,
+.dark .scrolled-nav .nav-brand-title,
+.dark .scrolled-nav .nav-brand-subtitle,
+.dark .scrolled-nav .nav-brand-subtitle span,
+.dark .floating-nav.scrolled-nav .nav-brand-title,
+.dark .floating-nav.scrolled-nav .nav-brand-subtitle,
+.dark .floating-nav.scrolled-nav .nav-brand-subtitle span,
+.dark header .nav-brand-title,
+.dark header .nav-brand-subtitle,
+.dark header .nav-brand-subtitle span {
   color: #D4FFB8 !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #D4FFB8 !important;
+  background: transparent !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  text-shadow: none !important;
 }
 
 /* ── iOS Liquid Glass Mobile Navigation ── */
