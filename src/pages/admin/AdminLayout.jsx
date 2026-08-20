@@ -54,9 +54,10 @@ export default function AdminLayout() {
           <Menu size={24} />
         </button>
         <div className="flex items-center gap-2.5">
-          <Link to="/" className="flex flex-col items-start select-none font-sora admin-brand-text">
-            <span className="font-extrabold text-xl leading-none uppercase tracking-tight admin-brand-text">ISRA</span>
-            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight mt-0.5 opacity-90 admin-brand-text">LIFE FESTIVAL</span>
+          <Link to="/" className="flex items-center select-none">
+            <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm flex items-center justify-center border border-white/20">
+              <img src="/rendezvous-logo.png" alt="Rendezvous'26" className="h-6 w-auto object-contain" />
+            </div>
           </Link>
         </div>
       </div>
@@ -73,19 +74,17 @@ export default function AdminLayout() {
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-black/10 dark:border-[#8ED06C]/20">
-          <Link
-            to="/"
-            className="flex flex-col items-start select-none font-sora"
-          >
-            <span className="font-extrabold text-2xl sm:text-3xl leading-none uppercase tracking-tight admin-brand-title">
-              ISRA
-            </span>
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] leading-tight mt-1 opacity-90 admin-brand-subtitle">
-              LIFE FESTIVAL
-            </span>
+        <div className="flex items-center justify-between px-5 py-5">
+          <Link to="/" className="flex items-center select-none">
+            <div className="bg-white px-3.5 py-2 rounded-2xl shadow-sm flex items-center justify-center border border-white/20">
+              <img
+                src="/rendezvous-logo.png"
+                alt="Rendezvous'26"
+                className="h-8 sm:h-9 w-auto max-w-[190px] object-contain"
+              />
+            </div>
           </Link>
-          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1 opacity-70 hover:opacity-100">
+          <button onClick={closeDrawer} aria-label="Close navigation" className="lg:hidden ml-auto p-1.5 text-white/80 hover:text-white transition">
             <X size={22} />
           </button>
         </div>
