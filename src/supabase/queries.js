@@ -193,9 +193,28 @@ export async function getStudentResults(studentId) {
   const unique = latestPerProgramme(validResults)
   const studentResults = []
   for (const result of unique) {
-    const placement = [result.first, result.second, result.third].find(p => p?.studentId === studentId)
-    if (placement) {
-      studentResults.push({ ...result, placement: { ...placement, rank: result.first?.studentId === studentId ? 'first' : result.second?.studentId === studentId ? 'second' : 'third' } })
+    if (Array.isArray(result.entries) && result.entries.length > 0) {
+      const entry = result.entries.find(e => e?.studentId === studentId)
+      if (entry) {
+        studentResults.push({
+          ...result,
+          placement: {
+            ...entry,
+            rank: entry.place || entry.label || 'Participant',
+          },
+        })
+      }
+    } else {
+      const placement = [result.first, result.second, result.third].find(p => p?.studentId === studentId)
+      if (placement) {
+        studentResults.push({
+          ...result,
+          placement: {
+            ...placement,
+            rank: result.first?.studentId === studentId ? '1st Place' : result.second?.studentId === studentId ? '2nd Place' : '3rd Place',
+          },
+        })
+      }
     }
   }
   return studentResults
@@ -205,16 +224,8 @@ export async function getStudentPoints(studentId) {
   const studentResults = await getStudentResults(studentId)
   let total = 0
   for (const r of studentResults) {
-    if (Array.isArray(r.entries) && r.entries.length > 0) {
-      for (const entry of r.entries) {
-        if (entry?.studentId === studentId) {
-          total += (Number(entry.points) || 0)
-        }
-      }
-    } else {
-      if (r.first?.studentId === studentId) total += (Number(r.first.points) || 0)
-      if (r.second?.studentId === studentId) total += (Number(r.second.points) || 0)
-      if (r.third?.studentId === studentId) total += (Number(r.third.points) || 0)
+    if (r.placement?.points != null) {
+      total += (Number(r.placement.points) || 0)
     }
   }
   return total

@@ -153,11 +153,15 @@ export default function AdminPrint() {
       const res = allResults.find(r => r.id === id)
       const prog = res ? programmes.find(p => p.id === res.programmeId) : null
       const rows = []
-      if (res) {
+      if (res && prog) {
+        const registeredStudents = students.filter(s => (s.programmeIds || []).includes(prog.id))
+        const addedStudentIds = new Set()
+
         if (Array.isArray(res.entries) && res.entries.length > 0) {
           res.entries.forEach((entry, idx) => {
             if (!entry) return
             const student = students.find(s => s.id === entry.studentId)
+            if (student) addedStudentIds.add(student.id)
             rows.push({
               key: `res-${id}-${entry.studentId || idx}`,
               chestNo: student?.chestNo || '',
@@ -169,10 +173,27 @@ export default function AdminPrint() {
               point: entry.points != null ? entry.points : '',
             })
           })
+
+          registeredStudents.forEach((student) => {
+            if (!addedStudentIds.has(student.id)) {
+              addedStudentIds.add(student.id)
+              rows.push({
+                key: `res-${id}-extra-${student.id}`,
+                chestNo: student.chestNo || '',
+                name: student.name,
+                team: teamMap[student.team] || student.team || '',
+                code: String.fromCharCode(65 + (rows.length % 26)),
+                grade: '-',
+                price: '',
+                point: 0,
+              })
+            }
+          })
         } else {
           const addRow = (placement, defaultPlace) => {
             if (!placement) return
             const student = students.find(s => s.id === placement.studentId)
+            if (student) addedStudentIds.add(student.id)
             rows.push({
               key: `res-${id}-${placement.studentId || rows.length}`,
               chestNo: student?.chestNo || '',
@@ -187,6 +208,22 @@ export default function AdminPrint() {
           addRow(res.first, '1st Place')
           addRow(res.second, '2nd Place')
           addRow(res.third, '3rd Place')
+
+          registeredStudents.forEach((student) => {
+            if (!addedStudentIds.has(student.id)) {
+              addedStudentIds.add(student.id)
+              rows.push({
+                key: `res-${id}-extra-${student.id}`,
+                chestNo: student.chestNo || '',
+                name: student.name,
+                team: teamMap[student.team] || student.team || '',
+                code: String.fromCharCode(65 + (rows.length % 26)),
+                grade: '-',
+                price: '',
+                point: 0,
+              })
+            }
+          })
         }
       }
       items.push({
