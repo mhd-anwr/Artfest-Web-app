@@ -46,10 +46,13 @@ export default function JudgesResults() {
   const [saving, setSaving] = useState(false)
 
   // Edit form placements
+  const [firstPlaceLabel, setFirstPlaceLabel] = useState('1st Place')
   const [first, setFirst] = useState('')
   const [firstPoints, setFirstPoints] = useState('')
+  const [secondPlaceLabel, setSecondPlaceLabel] = useState('2nd Place')
   const [second, setSecond] = useState('')
   const [secondPoints, setSecondPoints] = useState('')
+  const [thirdPlaceLabel, setThirdPlaceLabel] = useState('3rd Place')
   const [third, setThird] = useState('')
   const [thirdPoints, setThirdPoints] = useState('')
 
@@ -77,7 +80,7 @@ export default function JudgesResults() {
     const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
 
     if (registered.length === 0) {
-      return Array.from({ length: 8 }, (_, i) => {
+      return Array.from({ length: 3 }, (_, i) => {
         const letter = String.fromCharCode(65 + i)
         return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter }
       })
@@ -98,16 +101,17 @@ export default function JudgesResults() {
     return s ? { studentId: s.id, name: s.name, photoURL: s.photoURL } : null
   }
 
-  const placement = (studentId, points, prog) => {
+  const placement = (studentId, points, label, prog) => {
+    if (!studentId && !points) return null
     const candidates = getCandidatesForProg(prog)
     const cand = candidates.find(c => c.id === studentId)
     const s = getStudentObj(studentId)
     const code = cand ? cand.code : (studentId?.startsWith('anon_') ? studentId.split('_').pop() : 'A')
     if (s) {
-      return { ...s, code, points: Number(points) || 0, grade: calcGrade(points) }
+      return { ...s, label: label || 'Place', code, points: Number(points) || 0, grade: calcGrade(points) }
     }
     if (studentId) {
-      return { studentId, name: `Performance ${code}`, code, points: Number(points) || 0, grade: calcGrade(points) }
+      return { studentId, label: label || 'Place', name: `Performance ${code}`, code, points: Number(points) || 0, grade: calcGrade(points) }
     }
     return null
   }
@@ -171,9 +175,9 @@ export default function JudgesResults() {
     : lockedResults
 
   const resetPlacements = () => {
-    setFirst(''); setFirstPoints('')
-    setSecond(''); setSecondPoints('')
-    setThird(''); setThirdPoints('')
+    setFirstPlaceLabel('1st Place'); setFirst(''); setFirstPoints('')
+    setSecondPlaceLabel('2nd Place'); setSecond(''); setSecondPoints('')
+    setThirdPlaceLabel('3rd Place'); setThird(''); setThirdPoints('')
   }
 
   const openEditFlow = (prog) => {
@@ -188,13 +192,8 @@ export default function JudgesResults() {
     setEditError('')
     const assignmentsMap = await getCodeAssignments(prog.id)
     setProgAssignments(assignmentsMap || {})
+    resetPlacements()
     setEditOpen(true)
-    setFirst('')
-    setFirstPoints('')
-    setSecond('')
-    setSecondPoints('')
-    setThird('')
-    setThirdPoints('')
   }
 
   const closePrompt = () => {
@@ -363,10 +362,15 @@ export default function JudgesResults() {
     setProgAssignments(assignmentsMap || {})
 
     if (!preserveFields) {
+      setFirstPlaceLabel(latest?.first?.label || '1st Place')
       setFirst(latest?.first?.studentId || '')
       setFirstPoints(latest?.first?.points != null ? String(latest.first.points) : '')
+
+      setSecondPlaceLabel(latest?.second?.label || '2nd Place')
       setSecond(latest?.second?.studentId || '')
       setSecondPoints(latest?.second?.points != null ? String(latest.second.points) : '')
+
+      setThirdPlaceLabel(latest?.third?.label || '3rd Place')
       setThird(latest?.third?.studentId || '')
       setThirdPoints(latest?.third?.points != null ? String(latest.third.points) : '')
     }
@@ -384,7 +388,7 @@ export default function JudgesResults() {
   const handleSaveEdit = async () => {
     if (!editProg) return
     if (!first) {
-      setEditError('Please select a Code Letter for 1st place.')
+      setEditError('Please select a Code Letter for the first place row.')
       return
     }
 
@@ -403,9 +407,9 @@ export default function JudgesResults() {
     const payload = {
       programmeId: editProg.id,
       name: editProg.name,
-      first: placement(first, firstPoints, editProg),
-      second: placement(second, secondPoints, editProg),
-      third: placement(third, thirdPoints, editProg),
+      first: placement(first, firstPoints, firstPlaceLabel, editProg),
+      second: placement(second, secondPoints, secondPlaceLabel, editProg),
+      third: placement(third, thirdPoints, thirdPlaceLabel, editProg),
       updatedAt: new Date().toISOString(),
       locked: true,
     }
@@ -477,11 +481,10 @@ export default function JudgesResults() {
     loadResults()
   }
 
-  const placementLabels = ['1st Place', '2nd Place', '3rd Place']
   const placementVals = [
-    { student: first, setStudent: setFirst, points: firstPoints, setPoints: setFirstPoints },
-    { student: second, setStudent: setSecond, points: secondPoints, setPoints: setSecondPoints },
-    { student: third, setStudent: setThird, points: thirdPoints, setPoints: setThirdPoints },
+    { placeLabel: firstPlaceLabel, setPlaceLabel: setFirstPlaceLabel, student: first, setStudent: setFirst, points: firstPoints, setPoints: setFirstPoints },
+    { placeLabel: secondPlaceLabel, setPlaceLabel: setSecondPlaceLabel, student: second, setStudent: setSecond, points: secondPoints, setPoints: setSecondPoints },
+    { placeLabel: thirdPlaceLabel, setPlaceLabel: setThirdPlaceLabel, student: third, setStudent: setThird, points: thirdPoints, setPoints: setThirdPoints },
   ]
 
   const editStudentOptions = editProg
@@ -709,28 +712,35 @@ export default function JudgesResults() {
 
             {/* Column Headers */}
             <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
-              <span className="col-span-3">Place</span>
+              <span className="col-span-4">Place</span>
               <span className="col-span-4">Code Letter</span>
-              <span className="col-span-3 text-center">Points</span>
+              <span className="col-span-2 text-center">Points</span>
               <span className="col-span-2 text-center">Grade</span>
             </div>
 
-            {placementLabels.map((label, i) => {
-              const v = placementVals[i]
+            {placementVals.map((v, i) => {
               const grade = calcGrade(v.points)
               const candidates = getCandidatesForProg(editProg)
               const selectedCodesInForm = new Set([first, second, third].filter(id => id && id !== v.student))
 
               return (
-                <div key={label} className="grid grid-cols-12 gap-2 items-center mb-3">
-                  <span className="col-span-3 text-mainText font-bold text-sm sm:text-base px-1">{label}</span>
+                <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
+                  <div className="col-span-4">
+                    <input
+                      type="text"
+                      placeholder="Enter Place"
+                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold"
+                      value={v.placeLabel}
+                      onChange={e => v.setPlaceLabel(e.target.value)}
+                    />
+                  </div>
                   <div className="col-span-4">
                     <select
-                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm sm:text-base font-bold cursor-pointer"
+                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold cursor-pointer"
                       value={v.student}
                       onChange={e => v.setStudent(e.target.value)}
                     >
-                      <option value="" className="bg-card text-mutedText">Code Letter</option>
+                      <option value="" className="bg-card text-mutedText">Select Code Letter</option>
                       {candidates.map(cand => {
                         const isTakenByOtherPlace = selectedCodesInForm.has(cand.id)
                         return (
@@ -746,13 +756,13 @@ export default function JudgesResults() {
                       })}
                     </select>
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <input
                       type="number"
                       placeholder="Pts"
                       min="0"
                       max="10"
-                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm sm:text-base font-bold"
+                      className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm font-bold"
                       value={v.points}
                       onChange={e => v.setPoints(e.target.value)}
                     />
