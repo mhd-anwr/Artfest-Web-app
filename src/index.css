@@ -41,9 +41,10 @@ body {
 }
 
 /* Light Theme Global Typography & Surface Rules (Applies STRICTLY when HTML is not in Dark Mode) */
-html:not(.dark):not([data-theme='dark']) body {
+html:not(.dark):not([data-theme='dark']) body,
+html:not(.dark):not([data-theme='dark']) main {
   background-color: #F5FAF3 !important;
-  color: #31583F;
+  color: #31583F !important;
   opacity: 1;
 }
 
@@ -54,24 +55,66 @@ html:not(.dark):not([data-theme='dark']) h4,
 html:not(.dark):not([data-theme='dark']) h5,
 html:not(.dark):not([data-theme='dark']) h6 {
   color: #115F32 !important;
-  opacity: 1;
-  filter: none;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 html:not(.dark):not([data-theme='dark']) p {
   color: #31583F !important;
-  opacity: 1;
-  filter: none;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
+/* Light Theme Cards, Panels & Containers */
 html:not(.dark):not([data-theme='dark']) .bg-card,
 html:not(.dark):not([data-theme='dark']) .admin-card,
 html:not(.dark):not([data-theme='dark']) .bento-white-card,
-html:not(.dark):not([data-theme='dark']) .bento-dark-card {
+html:not(.dark):not([data-theme='dark']) .bento-dark-card,
+html:not(.dark):not([data-theme='dark']) .bento-standings-card,
+html:not(.dark):not([data-theme='dark']) .postergen-card {
   background-color: #FFFFFF !important;
   border: 1px solid rgba(17, 95, 50, 0.25) !important;
   color: #31583F !important;
   box-shadow: 0 4px 16px rgba(17, 95, 50, 0.06) !important;
+}
+
+/* Light Theme Form Controls (Inputs, Selects, Textareas) */
+html:not(.dark):not([data-theme='dark']) input:not([type='checkbox']):not([type='radio']),
+html:not(.dark):not([data-theme='dark']) select,
+html:not(.dark):not([data-theme='dark']) textarea {
+  background-color: #FFFFFF !important;
+  color: #115F32 !important;
+  border: 1px solid rgba(17, 95, 50, 0.25) !important;
+}
+
+html:not(.dark):not([data-theme='dark']) input::placeholder,
+html:not(.dark):not([data-theme='dark']) textarea::placeholder {
+  color: #52705D !important;
+  opacity: 0.8 !important;
+}
+
+/* Light Theme Modals & Dialog Boxes */
+html:not(.dark):not([data-theme='dark']) [role="dialog"] > div,
+html:not(.dark):not([data-theme='dark']) .modal-box {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(17, 95, 50, 0.25) !important;
+  color: #31583F !important;
+}
+
+/* Light Theme Table Styling */
+html:not(.dark):not([data-theme='dark']) table {
+  background-color: #FFFFFF !important;
+}
+
+html:not(.dark):not([data-theme='dark']) th {
+  background-color: #F5FAF3 !important;
+  color: #115F32 !important;
+  border-bottom: 1px solid rgba(17, 95, 50, 0.25) !important;
+}
+
+html:not(.dark):not([data-theme='dark']) td {
+  color: #173D28 !important;
+  border-bottom: 1px solid rgba(17, 95, 50, 0.15) !important;
 }
 
 /* ─────────────────────────────────────────────
