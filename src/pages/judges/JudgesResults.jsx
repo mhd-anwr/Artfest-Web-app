@@ -178,7 +178,7 @@ export default function JudgesResults() {
     const cands = getCandidatesForProg(prog)
     const initialRows = cands.map((cand, idx) => ({
       place: getOrdinalLabel(idx),
-      studentId: '',
+      studentId: cand.id,
       points: '',
     }))
 

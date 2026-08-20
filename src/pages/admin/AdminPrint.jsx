@@ -162,6 +162,7 @@ export default function AdminPrint() {
             if (!entry) return
             const student = students.find(s => s.id === entry.studentId)
             if (student) addedStudentIds.add(student.id)
+            const isTop3 = (entry.place && (entry.place.includes('1st') || entry.place.includes('2nd') || entry.place.includes('3rd') || entry.place === '1' || entry.place === '2' || entry.place === '3')) || (idx < 3)
             rows.push({
               key: `res-${id}-${entry.studentId || idx}`,
               chestNo: student?.chestNo || '',
@@ -169,7 +170,7 @@ export default function AdminPrint() {
               team: teamMap[student?.team] || student?.team || '',
               code: entry.code || '',
               grade: entry.grade || calcGrade(entry.points),
-              price: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : ''),
+              price: isTop3 ? (entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : '3rd Place')) : '',
               point: entry.points != null ? entry.points : '',
             })
           })
