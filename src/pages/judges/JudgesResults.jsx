@@ -165,9 +165,9 @@ export default function JudgesResults() {
   })
   const filteredLockedResults = categoryFilter
     ? lockedResults.filter(r => {
-        const prog = validProgrammeMap.get(r.programmeId)
-        return categoryFilter === 'General' ? prog?.category === 'General' : prog?.category === categoryFilter
-      })
+      const prog = validProgrammeMap.get(r.programmeId)
+      return categoryFilter === 'General' ? prog?.category === 'General' : prog?.category === categoryFilter
+    })
     : lockedResults
 
   const resetPlacements = () => {
@@ -449,11 +449,11 @@ export default function JudgesResults() {
       const isCrypt = rpcMessage.includes('crypt(') || rpcMessage.includes('42883') || rpcMessage.includes('does not exist')
       const msg =
         is404 ? 'Judge reverify service unavailable. Run judge_reverify_flow.sql in Supabase to create judge_reverify_edit().' :
-        isCrypt ? 'Server password verification failed. Ensure pgcrypto is enabled and judge_reverify_flow.sql has been applied.' :
-        rpcData?.error === 'not_authorized' ? 'You are not authorized to edit this result.' :
-        rpcData?.error === 'invalid_judge' ? 'Judge re-verification failed. Please verify again.' :
-        rpcData?.error === 'captcha_invalid' ? 'Security code was invalid or expired. Please verify again.' :
-        (rpcError?.message || 'Edit failed. Please try again.')
+          isCrypt ? 'Server password verification failed. Ensure pgcrypto is enabled and judge_reverify_flow.sql has been applied.' :
+            rpcData?.error === 'not_authorized' ? 'You are not authorized to edit this result.' :
+              rpcData?.error === 'invalid_judge' ? 'Judge re-verification failed. Please verify again.' :
+                rpcData?.error === 'captcha_invalid' ? 'Security code was invalid or expired. Please verify again.' :
+                  (rpcError?.message || 'Edit failed. Please try again.')
       setEditError(msg)
       setSaving(false)
       return
@@ -569,9 +569,8 @@ export default function JudgesResults() {
                     return (
                       <div key={rank} className="bg-secondary/15 rounded-xl p-3 border border-secondary/30">
                         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                          <span className={`text-xs sm:text-sm font-bold min-w-[1.5rem] sm:min-w-[2rem] ${
-                            rank === '1st' ? 'text-accent' : rank === '2nd' ? 'text-secondary' : 'text-mutedText'
-                          }`}>
+                          <span className={`text-xs sm:text-sm font-bold min-w-[1.5rem] sm:min-w-[2rem] ${rank === '1st' ? 'text-accent' : rank === '2nd' ? 'text-secondary' : 'text-mutedText'
+                            }`}>
                             {rank}
                           </span >
                           <span className="text-mainText font-medium text-sm sm:text-base">
@@ -579,12 +578,11 @@ export default function JudgesResults() {
                           </span>
                           <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                           {data.grade && data.grade !== '-' && (
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                              data.grade === 'A+' ? 'bg-success/15 text-success' :
-                              data.grade === 'A' ? 'bg-blue-500/15 text-blue-400' :
-                              data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
-                              'bg-orange-500/15 text-orange-400'
-                            }`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${data.grade === 'A+' ? 'bg-success/15 text-success' :
+                                data.grade === 'A' ? 'bg-blue-500/15 text-blue-400' :
+                                  data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
+                                    'bg-orange-500/15 text-orange-400'
+                              }`}>
                               {data.grade}
                             </span >
                           )}
@@ -711,7 +709,7 @@ export default function JudgesResults() {
                       value={v.student}
                       onChange={e => v.setStudent(e.target.value)}
                     >
-                      <option value="" className="bg-card text-mainText">Select Code Letter</option>
+                      <option value="" className="bg-card text-mainText">Code Letter</option>
                       {candidates.map(cand => (
                         <option key={cand.id} value={cand.id} className="bg-card text-mainText">
                           {cand.code}
@@ -725,13 +723,12 @@ export default function JudgesResults() {
                       value={v.points}
                       onChange={e => v.setPoints(e.target.value)}
                     />
-                    <div className={`flex items-center justify-center w-12 sm:w-14 rounded-xl text-xs sm:text-sm font-bold ${
-                      grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
-                      grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                      grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
-                      grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
-                      'bg-orange-500/15 text-orange-400 border border-orange-500/40'
-                    }`}>
+                    <div className={`flex items-center justify-center w-12 sm:w-14 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                        grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
+                          grade === 'A' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/40' :
+                            grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
+                              'bg-orange-500/15 text-orange-400 border border-orange-500/40'
+                      }`}>
                       {grade}
                     </div>
                   </div>
