@@ -18,7 +18,7 @@ const FONT_COLORS = [
   { value: '#374151', label: 'Dark Gray' },
   { value: '#D1D5DB', label: 'Light Gray' },
   { value: '#1E3A8A', label: 'Navy' },
-  { value: '#7E22CE', label: 'Purple' },
+  { value: '#115F32', label: 'Dark Green' },
   { value: '#DC2626', label: 'Red' },
   { value: '#15803D', label: 'Green' },
   { value: '#1D4ED8', label: 'Blue' },

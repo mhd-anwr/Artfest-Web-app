@@ -19,14 +19,14 @@ const stats = [
 ]
 
 const teamMembers = [
-  { name: 'Anwar Ahmed', role: 'Festival Chairman', initials: 'AA', tint: 'from-[#6366F1] to-[#7BEAFE]', photo: '/team/Anwar.jpg' },
-  { name: 'Muhammed AbdulQadar', role: 'Festival Convenor', initials: 'MA', tint: 'from-[#7BEAFE] to-[#FFDA63]', photo: '/team/Mohammed.jpeg' },
-  { name: 'Sayyid Mueenudheen ', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#FFDA63] to-[#6366F1]', photo: '/team/Moinu.jpeg' },
-  { name: 'Shammas Mujeeb', role: 'Vice Chairman', initials: 'SM', tint: 'from-[#6366F1] to-[#A78BFA]', photo: '/team/Shammas.jpeg' },
-  { name: 'Midlaj Moideen', role: 'Vice Chairman', initials: 'MM', tint: 'from-[#A78BFA] to-[#7BEAFE]', photo: '/team/midlaj moideen.jpg' },
-  { name: 'Afsal Sharafudheen', role: 'Joint Convenor', initials: 'AS', tint: 'from-[#7BEAFE] to-[#94A3B8]', photo: '/team/Afsal.jpg' },
-  { name: 'Vahid', role: 'Joint Convenor', initials: 'v', tint: 'from-[#FFDA63] to-[#A78BFA]', photo: '/team/vahid.jpg' },
-  { name: 'Farhan Musthafa', role: 'Software Developer', initials: 'FM', tint: 'from-[#FFDA63] to-[#A78BFA]', photo: '/team/faruuunn.jpg' }
+  { name: 'Anwar Ahmed', role: 'Festival Chairman', initials: 'AA', tint: 'from-[#115F32] to-[#228C22]', photo: '/team/Anwar.jpg' },
+  { name: 'Muhammed AbdulQadar', role: 'Festival Convenor', initials: 'MA', tint: 'from-[#228C22] to-[#4EBA16]', photo: '/team/Mohammed.jpeg' },
+  { name: 'Sayyid Mueenudheen ', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#4EBA16] to-[#71C247]', photo: '/team/Moinu.jpeg' },
+  { name: 'Shammas Mujeeb', role: 'Vice Chairman', initials: 'SM', tint: 'from-[#115F32] to-[#4EBA16]', photo: '/team/Shammas.jpeg' },
+  { name: 'Midlaj Moideen', role: 'Vice Chairman', initials: 'MM', tint: 'from-[#228C22] to-[#71C247]', photo: '/team/midlaj moideen.jpg' },
+  { name: 'Afsal Sharafudheen', role: 'Joint Convenor', initials: 'AS', tint: 'from-[#4EBA16] to-[#8ED06C]', photo: '/team/Afsal.jpg' },
+  { name: 'Vahid', role: 'Joint Convenor', initials: 'v', tint: 'from-[#71C247] to-[#D4FFB8]', photo: '/team/vahid.jpg' },
+  { name: 'Farhan Musthafa', role: 'Software Developer', initials: 'FM', tint: 'from-[#115F32] to-[#71C247]', photo: '/team/faruuunn.jpg' }
 ]
 
 export default function Home() {
