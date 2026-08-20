@@ -374,7 +374,7 @@ export default function StudentDashboard() {
           <button
             onClick={() => setShowPosterPicker(true)}
             disabled={completedProgrammes.length === 0}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={18} /> Download Poster
           </button>
@@ -383,7 +383,7 @@ export default function StudentDashboard() {
 
       {showEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-lg rounded-[28px] bg-card p-5 sm:p-6 shadow-2xl border border-subtle max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg rounded-[28px] bg-card p-5 sm:p-6 shadow-md border border-subtle max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h3 className="text-xl font-display font-bold text-mainText">
                 {authGranted ? 'Edit My Details' : 'Admin Verification Required'}

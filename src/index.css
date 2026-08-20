@@ -152,15 +152,15 @@ body {
   backdrop-filter: blur(16px);
   border: 1px solid rgba(17, 95, 50, 0.18);
   border-radius: var(--radius-pill);
-  box-shadow: 0 8px 28px rgba(17, 95, 50, 0.10);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, backdrop-filter 0.25s ease;
 }
 
 [data-theme='dark'] .floating-nav,
 .dark .floating-nav {
-  background: rgba(6, 25, 11, 0.95);
-  border: 1px solid rgba(142, 208, 108, 0.30);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  background: rgba(4, 14, 6, 0.95);
+  border: 1px solid rgba(142, 208, 108, 0.20);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.40);
 }
 
 /* Navbar Brand Text High-Contrast Rules ("ISRA" & "LIFE FESTIVAL") */
@@ -461,8 +461,8 @@ header .nav-brand-subtitle span {
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 251, 240, 0.9) 100%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
   backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(142, 208, 108, 0.6);
-  box-shadow: 0 16px 40px rgba(17, 95, 50, 0.15);
+  border: 1px solid rgba(142, 208, 108, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme='dark'] .liquid-glass-dropdown,
@@ -470,7 +470,7 @@ header .nav-brand-subtitle span {
   background: rgba(14, 47, 25, 0.92);
   background-image: linear-gradient(180deg, rgba(22, 65, 36, 0.95) 0%, rgba(6, 25, 11, 0.9) 100%);
   border: 1px solid rgba(34, 140, 34, 0.35);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .nav-link {
@@ -549,13 +549,13 @@ header .nav-brand-subtitle span {
   background: var(--card-white);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
-  box-shadow: 0 12px 32px rgba(17, 95, 50, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .bento-white-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 42px rgba(34, 140, 34, 0.16);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
 .bento-white-card .stat-number {
@@ -573,22 +573,22 @@ header .nav-brand-subtitle span {
 
 .bento-dark-card {
   background: var(--card-dark);
-  border: 1px solid rgba(142, 208, 108, 0.2);
+  border: 1px solid rgba(142, 208, 108, 0.18);
   border-radius: var(--radius-card);
-  box-shadow: 0 24px 56px rgba(6, 25, 11, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20);
 }
 
 [data-theme='dark'] .bento-dark-card,
 .dark .bento-dark-card {
   background: var(--card-background);
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
 }
 
 .bento-standings-card {
   background: var(--card-lavender);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
-  box-shadow: 0 12px 32px rgba(17, 95, 50, 0.04);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -825,13 +825,13 @@ header .nav-brand-subtitle span {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(17, 95, 50, 0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .postergen-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 44px rgba(17, 95, 50, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
 }
 
 .postergen-card .preview-box {
@@ -860,26 +860,28 @@ header .nav-brand-subtitle span {
   justify-content: center;
   gap: 0.45rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-result:hover {
   background: var(--btn-navy-hover);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(17, 95, 50, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 .cta-gradient {
   background: var(--cta-gradient);
   color: #FFFFFF;
   border-radius: var(--radius-pill);
-  transition: opacity 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cta-gradient:hover {
-  opacity: 0.92;
+  opacity: 0.94;
   transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(34, 140, 34, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
 .bg-section-1 {
@@ -1111,7 +1113,6 @@ header .nav-brand-subtitle span {
   bottom: -8px;
   border-radius: 9999px;
   background: radial-gradient(circle, #D4FFB8 0%, #4EBA16 55%, transparent 100%);
-  box-shadow: 0 0 6px rgba(34, 140, 34, 0.5), 0 0 14px rgba(34, 140, 34, 0.3);
   animation: rise linear infinite;
 }
 
@@ -1196,17 +1197,17 @@ header .nav-brand-subtitle span {
   background: rgba(255, 255, 255, 0.98) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   backdrop-filter: blur(20px) !important;
-  border-color: rgba(17, 95, 50, 0.28) !important;
-  box-shadow: 0 12px 36px rgba(17, 95, 50, 0.14) !important;
+  border-color: rgba(17, 95, 50, 0.22) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05) !important;
 }
 
 [data-theme='dark'] .floating-nav.scrolled-nav,
 .dark .floating-nav.scrolled-nav {
-  background: rgba(6, 25, 11, 0.97) !important;
+  background: rgba(4, 14, 6, 0.97) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   backdrop-filter: blur(20px) !important;
-  border-color: rgba(142, 208, 108, 0.40) !important;
-  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.65) !important;
+  border-color: rgba(142, 208, 108, 0.25) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.40) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1238,7 +1239,6 @@ header .nav-brand-subtitle span {
   bottom: -10px;
   border-radius: 9999px;
   background: radial-gradient(circle, #D4FFB8 0%, #4EBA16 45%, rgba(34, 140, 34, 0.8) 70%, transparent 100%);
-  box-shadow: 0 0 5px rgba(34, 140, 34, 0.5);
   animation: emberRise linear infinite;
 }
 
