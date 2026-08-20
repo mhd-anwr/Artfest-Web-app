@@ -47,7 +47,7 @@ export default function AdminLayout() {
   const closeDrawer = () => setOpen(false)
 
   return (
-    <div className="min-h-screen bg-[#F6FAF4] dark:bg-[#061A0D] text-[#115F32] dark:text-[#D4FFB8]">
+    <div className="min-h-screen bg-[#F5FAF3] dark:bg-[#061A0D] text-[#115F32] dark:text-[#D4FFB8]">
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-[#115F32] backdrop-blur border-b border-[#228C22]/30">
         <button onClick={() => setOpen(true)} aria-label="Open navigation" className="p-1.5 text-[#FFFFFF]">

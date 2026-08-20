@@ -42,8 +42,8 @@ body {
 
 /* Light Theme Global Typography & Surface Rules (Applies STRICTLY when HTML is not in Dark Mode) */
 html:not(.dark):not([data-theme='dark']) body {
-  background-color: #F6FAF4 !important;
-  color: #115F32;
+  background-color: #F5FAF3 !important;
+  color: #31583F;
   opacity: 1;
 }
 
@@ -53,22 +53,25 @@ html:not(.dark):not([data-theme='dark']) h3,
 html:not(.dark):not([data-theme='dark']) h4,
 html:not(.dark):not([data-theme='dark']) h5,
 html:not(.dark):not([data-theme='dark']) h6 {
-  color: #115F32;
+  color: #115F32 !important;
   opacity: 1;
   filter: none;
 }
 
 html:not(.dark):not([data-theme='dark']) p {
-  color: #173D28;
+  color: #31583F !important;
   opacity: 1;
   filter: none;
 }
 
 html:not(.dark):not([data-theme='dark']) .bg-card,
-html:not(.dark):not([data-theme='dark']) .admin-card {
-  background-color: #FFFFFF;
-  border-color: rgba(17, 95, 50, 0.14);
-  color: #173D28;
+html:not(.dark):not([data-theme='dark']) .admin-card,
+html:not(.dark):not([data-theme='dark']) .bento-white-card,
+html:not(.dark):not([data-theme='dark']) .bento-dark-card {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(17, 95, 50, 0.25) !important;
+  color: #31583F !important;
+  box-shadow: 0 4px 16px rgba(17, 95, 50, 0.06) !important;
 }
 
 /* ─────────────────────────────────────────────
@@ -91,25 +94,25 @@ html:not(.dark):not([data-theme='dark']) .admin-card {
   --color-light: #8ED06C;
   --color-very-light: #D4FFB8;
 
-  --bg-page: #F6FAF4;
-  --bg-section-1: #F1F8EE;
+  --bg-page: #F5FAF3;
+  --bg-section-1: #F7FBF5;
   --bg-section-2: #E6F3E2;
-  --card-lavender: #F1F8EE;
+  --card-lavender: #F7FBF5;
   --card-white: #FFFFFF;
   --card-dark: #0D2B17;
   --text-main: #115F32;
-  --text-body: #173D28;
+  --text-body: #31583F;
   --text-muted: #52705D;
   --text-light: #228C22;
   --accent-purple: #115F32;
   --accent-purple-deep: #228C22;
   --accent-purple-soft: #D4FFB8;
-  --border-subtle: rgba(17, 95, 50, 0.14);
+  --border-subtle: rgba(17, 95, 50, 0.25);
   --btn-result-navy: #115F32;
   --btn-navy-hover: #228C22;
   --radius-pill: 999px;
   --radius-card: 18px;
-  --hero-glow: radial-gradient(circle at 50% 0%, #e4f7da 0%, #f6faf4 70%);
+  --hero-glow: radial-gradient(circle at 50% 0%, #e4f7da 0%, #f5faf3 70%);
   --cta-gradient: linear-gradient(135deg, #115f32 0%, #228c22 100%);
   --cursor-glow: radial-gradient(circle, rgba(78, 186, 22, 0.16) 0%, rgba(17, 95, 50, 0.04) 50%, transparent 70%);
   --lot-card-front-bg: #FFFFFF;
@@ -118,9 +121,9 @@ html:not(.dark):not([data-theme='dark']) .admin-card {
   --lot-card-back-text: #D4FFB8;
 
   /* Legacy RGB triplet tokens re-pointed to Green Palette */
-  --main-background: 246 250 244; /* #F6FAF4 */
+  --main-background: 245 250 243; /* #F5FAF3 */
   --primary: 17 95 50;            /* #115F32 */
-  --secondary: 241 248 238;       /* #F1F8EE */
+  --secondary: 247 251 245;       /* #F7FBF5 */
   --accent: 34 140 34;            /* #228C22 */
   --main-text: 17 95 50;          /* #115F32 */
   --muted-text: 82 112 93;         /* #52705D */
