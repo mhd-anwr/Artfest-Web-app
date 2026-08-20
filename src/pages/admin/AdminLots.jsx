@@ -497,7 +497,7 @@ export default function AdminLots() {
                               disabled={isTakenByOther}
                               className={`bg-card ${isTakenByOther ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
                             >
-                              Code Letter {letter}{isTakenByOther ? ' (Assigned)' : ''}
+                              {letter}{isTakenByOther ? ' (Assigned)' : ''}
                             </option>
                           )
                         })}
