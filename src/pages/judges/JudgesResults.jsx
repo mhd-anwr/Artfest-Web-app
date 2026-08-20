@@ -33,6 +33,7 @@ export default function JudgesResults() {
   const [expandedId, setExpandedId] = useState(null)
   const [progAssignments, setProgAssignments] = useState({})
 
+  // Edit flow state
   const [editProg, setEditProg] = useState(null)
   const [isFirstTime, setIsFirstTime] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
@@ -247,7 +248,9 @@ export default function JudgesResults() {
     clearCaptchaState()
   }
 
-  const handleVerify = async () => {
+  const handleVerify = async (e) => {
+    if (e && e.preventDefault) e.preventDefault()
+
     if (!vName.trim() || !vPassword) {
       setVError('Please enter your judge name/email and password.')
       return
@@ -257,25 +260,39 @@ export default function JudgesResults() {
       return
     }
 
+    // Security Code validation against displayed captcha
+    if (vCaptcha.trim().toUpperCase() !== (captcha || '').trim().toUpperCase()) {
+      setVError('Invalid security code. Please try again.')
+      setVCaptcha('') // Clear ONLY entered security code input
+      return
+      // DO NOT call loadCaptcha()! Displayed security code remains unchanged.
+    }
+
     setVLoading(true)
     setVError('')
 
-    const { data: authData, error: authError } = await judgeClient.rpc('judge_verify_credentials', {
-      p_judge_email: vName.trim(),
-      p_judge_password: vPassword,
-    })
+    try {
+      const { data: authData, error: authError } = await judgeClient.rpc('judge_verify_credentials', {
+        p_judge_email: vName.trim(),
+        p_judge_password: vPassword,
+      })
 
-    setVLoading(false)
+      setVLoading(false)
 
-    if (authError || !authData?.valid) {
-      setVError(authError?.message || 'Invalid judge name or password.')
-      setVCaptcha('')
-      await loadCaptcha()
-      return
+      if (authError || !authData?.valid) {
+        setVError(authError?.message || 'Invalid judge name or password.')
+        setVCaptcha('')
+        return
+        // DO NOT call loadCaptcha()! Displayed security code remains unchanged.
+      }
+
+      setVerifyOpen(false)
+      await openEdit(editProg)
+    } catch (err) {
+      console.error('Verification error:', err)
+      setVError(err?.message || 'Verification failed. Please try again.')
+      setVLoading(false)
     }
-
-    setVerifyOpen(false)
-    await openEdit(editProg)
   }
 
   const openEdit = async (prog, preserveFields = false) => {
@@ -442,6 +459,7 @@ export default function JudgesResults() {
         />
       </div>
 
+      {/* ── Not Submitted / Pending Programmes ── */}
       <div className="mb-8">
         <h3 className="text-lg font-poppins font-bold text-mainText mb-3 flex items-center gap-2">
           Pending Submissions ({notSubmitted.length})
@@ -473,6 +491,7 @@ export default function JudgesResults() {
         )}
       </div>
 
+      {/* ── Locked / Saved Results ── */}
       <div>
         <h3 className="text-lg font-poppins font-bold text-mainText mb-3 flex items-center gap-2">
           <Lock size={16} className="text-success" /> Submitted & Locked ({filteredLockedResults.length})
@@ -551,6 +570,7 @@ export default function JudgesResults() {
         )}
       </div>
 
+      {/* Security Prompt Modal */}
       {promptOpen && editProg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={closePrompt}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-md my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
@@ -568,84 +588,90 @@ export default function JudgesResults() {
         </div>
       )}
 
+      {/* Judge Credentials & Security Code Verification Modal */}
       {verifyOpen && editProg && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !vLoading && closeVerify()}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-md my-8 shadow-2xl border border-secondary/30" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Judge Credentials & Security Code</h3>
-            <p className="text-mutedText text-xs sm:text-sm mb-4 truncate">{editProg.name} · {editProg.category}</p>
+            <form onSubmit={handleVerify}>
+              <h3 className="text-lg font-poppins font-bold text-mainText mb-1">Judge Credentials & Security Code</h3>
+              <p className="text-mutedText text-xs sm:text-sm mb-4 truncate">{editProg.name} · {editProg.category}</p>
 
-            <div className="space-y-3 mb-4">
-              <div>
-                <label className="text-mutedText text-xs mb-1 block">Judge Account Email</label>
-                <input
-                  type="email"
-                  placeholder="Judge Name / Email"
-                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
-                  value={vName}
-                  onChange={e => setVName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-mutedText text-xs mb-1 block">Judge Password</label>
-                <input
-                  type="password"
-                  placeholder="Judge Password"
-                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
-                  value={vPassword}
-                  onChange={e => setVPassword(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="text-mutedText text-xs mb-1 block">Security Verification Code</label>
-                <div className="bg-black/40 rounded-xl p-3 mb-2 flex items-center justify-between border border-secondary/30">
-                  <span className="font-mono font-bold text-lg text-accent tracking-widest select-none">
-                    {captchaLoading ? 'Loading...' : captcha || '------'}
-                  </span>
-                  <span className="text-xs text-mutedText">
-                    {captchaLoading ? '' : captchaExpiresAt ? `Expires in ${formatTimeLeft(captchaExpiresAt)}` : ''}
-                  </span>
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="text-mutedText text-xs mb-1 block">Judge Account Email</label>
+                  <input
+                    type="email"
+                    placeholder="Judge Name / Email"
+                    className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
+                    value={vName}
+                    onChange={e => setVName(e.target.value)}
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Enter 6-character code"
-                  maxLength={6}
-                  className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold tracking-widest text-center uppercase"
-                  value={vCaptcha}
-                  onChange={e => setVCaptcha(e.target.value.toUpperCase())}
-                />
+                <div>
+                  <label className="text-mutedText text-xs mb-1 block">Judge Password</label>
+                  <input
+                    type="password"
+                    placeholder="Judge Password"
+                    className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold"
+                    value={vPassword}
+                    onChange={e => setVPassword(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-mutedText text-xs mb-1 block">Security Verification Code</label>
+                  <div className="bg-black/40 rounded-xl p-3 mb-2 flex items-center justify-between border border-secondary/30">
+                    <span className="font-mono font-bold text-lg text-accent tracking-widest select-none">
+                      {captchaLoading ? 'Loading...' : captcha || '------'}
+                    </span>
+                    <span className="text-xs text-mutedText">
+                      {captchaLoading ? '' : captchaExpiresAt ? `Expires in ${formatTimeLeft(captchaExpiresAt)}` : ''}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter 6-character code"
+                    maxLength={6}
+                    className="w-full bg-black/20 text-mainText rounded-xl p-3 outline-none border border-secondary/30 focus:border-mainText text-sm font-semibold tracking-widest text-center uppercase"
+                    value={vCaptcha}
+                    onChange={e => setVCaptcha(e.target.value.toUpperCase())}
+                  />
+                </div>
+
+                {vError && <p className="text-red-400 text-xs mt-1 font-semibold">{vError}</p>}
               </div>
 
-              {vError && <p className="text-red-400 text-xs mt-1 font-semibold">{vError}</p>}
-            </div>
-
-            <div className="flex gap-2 mb-3">
-              <button onClick={closeVerify} disabled={vLoading} className="bg-white/10 text-mainText rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-white/15 transition">
-                Cancel
-              </button>
-              <button onClick={handleVerify} disabled={vLoading} className="bg-primary text-white rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-primary/90 transition">
-                {vLoading ? 'Verifying...' : 'Verify & Edit'}
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => loadCaptcha()}
-                disabled={captchaLoading}
-                className="flex-1 bg-secondary/15 text-mainText rounded-xl p-3 font-semibold text-sm hover:bg-secondary/20 transition"
-              >
-                {captchaLoading ? 'Refreshing...' : 'Reload security code'}
-              </button>
-            </div>
+              <div className="flex gap-2 mb-3">
+                <button type="button" onClick={closeVerify} disabled={vLoading} className="bg-white/10 text-mainText rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-white/15 transition">
+                  Cancel
+                </button>
+                <button type="submit" disabled={vLoading} className="bg-primary text-white rounded-xl p-3 font-semibold text-sm flex-1 hover:bg-primary/90 transition">
+                  {vLoading ? 'Verifying...' : 'Verify & Edit'}
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => loadCaptcha()}
+                  disabled={captchaLoading}
+                  className="flex-1 bg-secondary/15 text-mainText rounded-xl p-3 font-semibold text-sm hover:bg-secondary/20 transition"
+                >
+                  {captchaLoading ? 'Refreshing...' : 'Reload security code'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
+      {/* ── Submit / Edit result modal ── */}
       {editOpen && editProg && (
         <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
             <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
 
+            {/* Column Headers */}
             <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
               <span className="col-span-4">Place</span>
               <span className="col-span-4">Code Letter</span>
@@ -653,6 +679,7 @@ export default function JudgesResults() {
               <span className="col-span-2 text-center">Grade</span>
             </div>
 
+            {/* Scrollable list of placement rows for all candidates */}
             <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
               {entryRows.map((row, i) => {
                 const grade = calcGrade(row.points)
