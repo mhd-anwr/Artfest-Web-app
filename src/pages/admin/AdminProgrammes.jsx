@@ -280,10 +280,10 @@ export default function AdminProgrammes() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
                 <button
                   onClick={() => toggleFinished(prog)}
-                  className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors duration-300 ${prog.isFinished ? 'bg-green-500' : 'bg-white/20'}`}
+                  className={`prog-toggle ${prog.isFinished ? 'toggle-on' : 'toggle-off'} relative w-12 h-6 sm:w-14 sm:h-7 shrink-0`}
                   title={prog.isFinished ? 'Finished' : 'Not finished'}
                 >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow transition-transform duration-300 ${prog.isFinished ? 'translate-x-5 sm:translate-x-7' : ''}`} />
+                  <span className={`prog-toggle-thumb absolute top-0.5 left-0.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 ${prog.isFinished ? 'translate-x-5 sm:translate-x-7' : 'translate-x-0'}`} />
                 </button>
                 <KebabMenu
                   items={[

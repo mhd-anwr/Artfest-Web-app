@@ -234,9 +234,9 @@ export default function AdminResultPoster() {
                       <button
                         onClick={() => togglePublished(count)}
                         aria-label={poster.published ? 'Unpublish' : 'Publish'}
-                        className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${poster.published ? 'bg-green-500' : 'bg-white/20'}`}
+                        className={`prog-toggle ${poster.published ? 'toggle-on' : 'toggle-off'} relative w-12 h-6 shrink-0`}
                       >
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${poster.published ? 'translate-x-6' : ''}`} />
+                        <span className={`prog-toggle-thumb absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 ${poster.published ? 'translate-x-6' : 'translate-x-0'}`} />
                       </button>
                     </div>
                   </div>

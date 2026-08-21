@@ -1836,3 +1836,57 @@ html:not(.dark):not([data-theme='dark']) .lb-3 .lb-points {
     opacity: 0;
   }
 }
+
+/* ==========================================================================
+   PROGRAMME ON/OFF TOGGLE STYLES (Light & Dark Theme Visibility Fix)
+   ========================================================================== */
+.prog-toggle {
+  position: relative;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  cursor: pointer;
+}
+
+/* OFF State — Light Theme (Default) */
+.prog-toggle.toggle-off,
+html:not(.dark):not([data-theme='dark']) .prog-toggle.toggle-off {
+  background-color: #D7E3D9 !important;
+  border: 1px solid #8FAF99 !important;
+}
+
+.prog-toggle.toggle-off .prog-toggle-thumb,
+html:not(.dark):not([data-theme='dark']) .prog-toggle.toggle-off .prog-toggle-thumb {
+  background-color: #FFFFFF !important;
+  border: 1px solid #6F927A !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* OFF State — Dark Theme Override */
+.dark .prog-toggle.toggle-off,
+[data-theme='dark'] .prog-toggle.toggle-off {
+  background-color: #183B27 !important;
+  border: 1px solid #3F7652 !important;
+}
+
+.dark .prog-toggle.toggle-off .prog-toggle-thumb,
+[data-theme='dark'] .prog-toggle.toggle-off .prog-toggle-thumb {
+  background-color: #DDEBDD !important;
+  border: 1px solid #3F7652 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ON State — Light Theme & Dark Theme */
+.prog-toggle.toggle-on,
+.dark .prog-toggle.toggle-on,
+[data-theme='dark'] .prog-toggle.toggle-on {
+  background-color: #22B85A !important;
+  border: 1px solid #22B85A !important;
+}
+
+.prog-toggle.toggle-on .prog-toggle-thumb,
+.dark .prog-toggle.toggle-on .prog-toggle-thumb,
+[data-theme='dark'] .prog-toggle.toggle-on .prog-toggle-thumb {
+  background-color: #FFFFFF !important;
+  border: 1px solid #22B85A !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
