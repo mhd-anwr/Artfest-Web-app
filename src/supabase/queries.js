@@ -618,3 +618,233 @@ export const saveCodeAssignments = async (programmeId, category, assignmentList)
 
   return true
 }
+
+// ── POSTER TEMPLATES & GALLERY FOOTERS QUERIES ──
+
+const DEFAULT_POSTER_TEMPLATES = [
+  {
+    id: 'default-template-1',
+    name: 'Classic Dark Festival',
+    type: 'Program Result Poster',
+    width: 1080,
+    height: 1350,
+    background_type: 'gradient',
+    background_value: 'linear-gradient(135deg, #061A0D 0%, #115F32 100%)',
+    layers: [
+      { id: 'l1', type: 'text', key: 'category', prefix: 'CATEGORY: ', font_family: 'Sora', font_size: 24, font_weight: '700', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 120 },
+      { id: 'l2', type: 'text', key: 'programme_name', prefix: '', font_family: 'Sora', font_size: 52, font_weight: '800', text_align: 'center', color: '#D4FFB8', line_height: 1.2, width: 960, x: 60, y: 170 },
+      { id: 'l3', type: 'text', key: 'result_no', prefix: 'RESULT #', font_family: 'Sora', font_size: 28, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 250 },
+      
+      { id: 'l4', type: 'text', key: 'first_place_label', prefix: '🥇 1ST PLACE', font_family: 'Sora', font_size: 22, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 380 },
+      { id: 'l5', type: 'text', key: 'first_name', prefix: '', font_family: 'Sora', font_size: 44, font_weight: '800', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 415 },
+      { id: 'l6', type: 'text', key: 'first_team', prefix: '', font_family: 'Sora', font_size: 26, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 470 },
+
+      { id: 'l7', type: 'text', key: 'second_place_label', prefix: '🥈 2ND PLACE', font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 560 },
+      { id: 'l8', type: 'text', key: 'second_name', prefix: '', font_family: 'Sora', font_size: 36, font_weight: '700', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 590 },
+      { id: 'l9', type: 'text', key: 'second_team', prefix: '', font_family: 'Sora', font_size: 22, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 635 },
+
+      { id: 'l10', type: 'text', key: 'third_place_label', prefix: '🥉 3RD PLACE', font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 720 },
+      { id: 'l11', type: 'text', key: 'third_name', prefix: '', font_family: 'Sora', font_size: 36, font_weight: '700', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 750 },
+      { id: 'l12', type: 'text', key: 'third_team', prefix: '', font_family: 'Sora', font_size: 22, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 795 },
+
+      { id: 'l13', type: 'text', key: 'festival_footer', prefix: "RENDEZVOUS '26 ART FESTIVAL", font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#4EBA16', line_height: 1.2, width: 900, x: 90, y: 1220 }
+    ]
+  }
+]
+
+export const getPosterTemplates = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('poster_templates')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error && data && data.length > 0) return data
+  } catch (e) {
+    console.warn('getPosterTemplates DB query fallback:', e)
+  }
+
+  const local = typeof window !== 'undefined' ? localStorage.getItem('artfest_poster_templates') : null
+  if (local) {
+    try { return JSON.parse(local) } catch {}
+  }
+  return DEFAULT_POSTER_TEMPLATES
+}
+
+export const getPosterTemplateById = async (id) => {
+  const all = await getPosterTemplates()
+  return all.find(t => t.id === id) || null
+}
+
+export const savePosterTemplate = async (template) => {
+  const isNew = !template.id || template.id.startsWith('default-')
+  const newId = isNew ? (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmpl_${Date.now()}`) : template.id
+  const payload = {
+    id: newId,
+    name: template.name || 'Untitled Template',
+    type: template.type || 'Program Result Poster',
+    width: Number(template.width) || 1080,
+    height: Number(template.height) || 1350,
+    background_type: template.background_type || 'gradient',
+    background_value: template.background_value || 'linear-gradient(135deg, #061A0D 0%, #115F32 100%)',
+    layers: template.layers || [],
+    updated_at: new Date().toISOString(),
+  }
+
+  const current = await getPosterTemplates()
+  const exists = current.some(t => t.id === newId)
+  const updatedList = exists
+    ? current.map(t => t.id === newId ? payload : t)
+    : [payload, ...current]
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('artfest_poster_templates', JSON.stringify(updatedList))
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('poster_templates')
+      .upsert(payload)
+      .select()
+      .single()
+    if (!error && data) return data
+  } catch (e) {
+    console.warn('savePosterTemplate Supabase error fallback:', e)
+  }
+
+  return payload
+}
+
+export const deletePosterTemplate = async (id) => {
+  const current = await getPosterTemplates()
+  const filtered = current.filter(t => t.id !== id)
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('artfest_poster_templates', JSON.stringify(filtered))
+  }
+
+  try {
+    await supabase.from('poster_templates').delete().eq('id', id)
+  } catch (e) {
+    console.warn('deletePosterTemplate DB error:', e)
+  }
+  return true
+}
+
+export const duplicatePosterTemplate = async (id) => {
+  const tmpl = await getPosterTemplateById(id)
+  if (!tmpl) return null
+  const clone = {
+    ...tmpl,
+    id: undefined,
+    name: `${tmpl.name} (Copy)`,
+    created_at: undefined,
+    updated_at: undefined,
+  }
+  return await savePosterTemplate(clone)
+}
+
+export const getGalleryFooters = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('gallery_footers')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error && data) return data
+  } catch (e) {
+    console.warn('getGalleryFooters DB fallback:', e)
+  }
+
+  const local = typeof window !== 'undefined' ? localStorage.getItem('artfest_gallery_footers') : null
+  return local ? JSON.parse(local) : []
+}
+
+export const getActiveGalleryFooter = async () => {
+  const all = await getGalleryFooters()
+  return all.find(f => f.is_active) || null
+}
+
+export const createGalleryFooter = async ({ name, image_url }) => {
+  const newFooter = {
+    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `footer_${Date.now()}`,
+    name,
+    image_url,
+    is_active: false,
+    created_at: new Date().toISOString(),
+  }
+
+  const current = await getGalleryFooters()
+  const updated = [newFooter, ...current]
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('artfest_gallery_footers', JSON.stringify(updated))
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('gallery_footers')
+      .insert({ name, image_url, is_active: false })
+      .select()
+      .single()
+    if (!error && data) return data
+  } catch (e) {
+    console.warn('createGalleryFooter DB error:', e)
+  }
+
+  return newFooter
+}
+
+export const setActiveGalleryFooter = async (id) => {
+  const current = await getGalleryFooters()
+  const updated = current.map(f => ({ ...f, is_active: f.id === id }))
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('artfest_gallery_footers', JSON.stringify(updated))
+  }
+
+  try {
+    await supabase.from('gallery_footers').update({ is_active: false }).neq('id', id)
+    await supabase.from('gallery_footers').update({ is_active: true }).eq('id', id)
+  } catch (e) {
+    console.warn('setActiveGalleryFooter DB error:', e)
+  }
+
+  return true
+}
+
+export const deleteGalleryFooter = async (id) => {
+  const current = await getGalleryFooters()
+  const filtered = current.filter(f => f.id !== id)
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('artfest_gallery_footers', JSON.stringify(filtered))
+  }
+
+  try {
+    await supabase.from('gallery_footers').delete().eq('id', id)
+  } catch (e) {
+    console.warn('deleteGalleryFooter DB error:', e)
+  }
+
+  return true
+}
+
+export const uploadFrameImage = async (file, folder = 'frames') => {
+  const ext = file.name.split('.').pop()
+  const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+
+  try {
+    const { data, error } = await supabase.storage
+      .from('photos')
+      .upload(fileName, file, { cacheControl: '3600', upsert: true })
+
+    if (error) throw error
+
+    const { data: pubUrlData } = supabase.storage
+      .from('photos')
+      .getPublicUrl(fileName)
+
+    return pubUrlData?.publicUrl || null
+  } catch (e) {
+    console.warn('uploadFrameImage Supabase storage upload error:', e)
+    return new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.readAsDataURL(file)
+    })
+  }
+}

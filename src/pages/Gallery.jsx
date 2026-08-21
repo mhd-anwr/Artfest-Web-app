@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getSpotlight } from '../supabase/queries'
+import { getSpotlight, getActiveGalleryFooter } from '../supabase/queries'
 import { Download, Images, ChevronLeft } from 'lucide-react'
 import { useToast } from '../components/Toast'
 
@@ -24,10 +24,12 @@ const groupByAlbum = (images) => {
 
 export default function Gallery() {
   const [images, setImages] = useState([])
+  const [activeFooter, setActiveFooter] = useState(null)
   const toast = useToast()
 
   useEffect(() => {
     getSpotlight().then(setImages)
+    getActiveGalleryFooter().then(setActiveFooter)
   }, [])
 
   const albums = useMemo(() => groupByAlbum(images), [images])
@@ -90,10 +92,19 @@ export default function Gallery() {
                           alt={img.caption || ''}
                           className="w-full h-36 sm:h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+                        {activeFooter?.image_url && (
+                          <div className="absolute bottom-1.5 left-0 right-0 z-10 pointer-events-none px-2 flex justify-center">
+                            <img
+                              src={activeFooter.image_url}
+                              alt="Gallery Footer Overlay"
+                              className="w-full h-auto max-h-10 sm:max-h-14 object-contain drop-shadow"
+                            />
+                          </div>
+                        )}
                         <button
                           onClick={() => handleDownloadImage(img.imageURL, `spotlight_${img.id}.jpg`)}
                           aria-label={`Download ${img.caption || 'image'}`}
-                          className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 p-1.5 sm:p-2 rounded-lg transition"
+                          className="absolute bottom-2 right-2 z-20 bg-black/60 hover:bg-black/80 p-1.5 sm:p-2 rounded-lg transition"
                         >
                           <Download size={14} className="md:w-[18px] md:h-[18px]" color="white" />
                         </button>

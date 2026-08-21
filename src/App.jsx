@@ -18,6 +18,9 @@ import AdminStudents from './pages/admin/AdminStudents'
 import AdminPrint from './pages/admin/AdminPrint'
 import AdminResults from './pages/admin/AdminResults'
 import AdminResultPoster from './pages/admin/AdminResultPoster'
+import AdminPosterTemplates from './pages/admin/AdminPosterTemplates'
+import AdminPosterEditor from './pages/admin/AdminPosterEditor'
+import AdminGalleryFooters from './pages/admin/AdminGalleryFooters'
 import LotsAccess from './pages/LotsAccess'
 import LotsDraw from './pages/LotsDraw'
 import AdminCategories from './pages/admin/AdminCategories'
@@ -76,6 +79,9 @@ function App() {
               <Route path="results" element={<AdminResults />} />
               <Route path="result-poster" element={<AdminResultPoster />} />
               <Route path="categories" element={<AdminCategories />} />
+              <Route path="frames/templates" element={<AdminPosterTemplates />} />
+              <Route path="frames/templates/:id/edit" element={<AdminPosterEditor />} />
+              <Route path="frames/footer" element={<AdminGalleryFooters />} />
             </Route>
             <Route path="/lots" element={<LotsAccess />} />
             <Route path="/lots/draw" element={<LotsDraw />} />

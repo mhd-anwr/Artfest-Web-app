@@ -14,6 +14,10 @@ import {
   Menu,
   X,
   ArrowLeft,
+  Frame,
+  ChevronDown,
+  LayoutTemplate,
+  PanelBottom,
 } from 'lucide-react'
 import IsraLogo from '../../components/IsraLogo'
 
@@ -25,19 +29,34 @@ const navItems = [
   { label: 'Participants', path: '/admin/students', icon: Users },
   { label: 'Spotlight / Gallery', path: '/admin/spotlight', icon: GalleryHorizontalEnd },
   { label: 'Results', path: '/admin/results', icon: FileText },
+  {
+    label: 'Frames',
+    path: '/admin/frames',
+    icon: Frame,
+    children: [
+      { label: 'Templates', path: '/admin/frames/templates', icon: LayoutTemplate },
+      { label: 'Footer', path: '/admin/frames/footer', icon: PanelBottom },
+    ],
+  },
   { label: 'Print', path: '/admin/print', icon: Printer },
 ]
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const [adminEmail, setAdminEmail] = useState('')
-  const navigate = useNavigate()
   const location = useLocation()
+  const navigate = useNavigate()
   const isDashboard = location.pathname === '/admin'
+  const isFramesActive = location.pathname.startsWith('/admin/frames')
+  const [framesExpanded, setFramesExpanded] = useState(isFramesActive)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAdminEmail(data.user?.email || ''))
   }, [])
+
+  useEffect(() => {
+    if (isFramesActive) setFramesExpanded(true)
+  }, [location.pathname, isFramesActive])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -93,29 +112,87 @@ export default function AdminLayout() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {navItems.map(({ label, path, end, icon: Icon }) => (
-            <NavLink
-              key={path}
-              to={path}
-              end={end}
-              onClick={closeDrawer}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-[#228C22] text-[#FFFFFF] border border-[#C8F7A8]/30 shadow-sm font-bold'
-                    : 'text-[#FFFFFF] hover:bg-[#228C22]/40 hover:text-[#FFFFFF]'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon size={18} className={isActive ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
-                  <span className={isActive ? 'flex-1 truncate font-bold text-[#FFFFFF]' : 'flex-1 truncate text-[#FFFFFF]'}>{label}</span>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#C8F7A8]' : 'bg-transparent'}`} />
-                </>
-              )}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon
+            if (item.children) {
+              const active = isFramesActive
+              return (
+                <div key={item.path} className="space-y-1">
+                  <button
+                    onClick={() => {
+                      if (!isFramesActive) {
+                        navigate('/admin/frames/templates')
+                        setFramesExpanded(true)
+                      } else {
+                        setFramesExpanded(v => !v)
+                      }
+                    }}
+                    className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      active
+                        ? 'bg-[#228C22] text-[#FFFFFF] border border-[#C8F7A8]/30 shadow-sm font-bold'
+                        : 'text-[#FFFFFF] hover:bg-[#228C22]/40 hover:text-[#FFFFFF]'
+                    }`}
+                  >
+                    <Icon size={18} className={active ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
+                    <span className={active ? 'flex-1 truncate text-left font-bold text-[#FFFFFF]' : 'flex-1 truncate text-left text-[#FFFFFF]'}>{item.label}</span>
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${framesExpanded ? 'rotate-180 text-[#FFFFFF]' : 'text-[#C8F7A8]'}`} />
+                  </button>
+                  {framesExpanded && (
+                    <div className="pl-4 space-y-1 border-l border-[#C8F7A8]/20 ml-3">
+                      {item.children.map(sub => {
+                        const SubIcon = sub.icon
+                        return (
+                          <NavLink
+                            key={sub.path}
+                            to={sub.path}
+                            onClick={closeDrawer}
+                            className={({ isActive }) =>
+                              `group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                isActive
+                                  ? 'bg-[#228C22]/80 text-[#FFFFFF] font-bold border border-[#C8F7A8]/20'
+                                  : 'text-[#FFFFFF]/90 hover:bg-[#228C22]/30 hover:text-[#FFFFFF]'
+                              }`
+                            }
+                          >
+                            {({ isActive }) => (
+                              <>
+                                <SubIcon size={14} className={isActive ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
+                                <span className="flex-1 truncate">{sub.label}</span>
+                              </>
+                            )}
+                          </NavLink>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.end}
+                onClick={closeDrawer}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-[#228C22] text-[#FFFFFF] border border-[#C8F7A8]/30 shadow-sm font-bold'
+                      : 'text-[#FFFFFF] hover:bg-[#228C22]/40 hover:text-[#FFFFFF]'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon size={18} className={isActive ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
+                    <span className={isActive ? 'flex-1 truncate font-bold text-[#FFFFFF]' : 'flex-1 truncate text-[#FFFFFF]'}>{item.label}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#C8F7A8]' : 'bg-transparent'}`} />
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
         </nav>
 
         {/* Admin user */}

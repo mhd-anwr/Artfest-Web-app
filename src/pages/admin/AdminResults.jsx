@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Eye, Search, Trophy, Image } from 'lucide-react'
+import { Eye, Search, Trophy, Image, Sparkles } from 'lucide-react'
 import { getAllResults, getProgrammes, getStudents, getTeams } from '../../supabase/queries'
 import AdminResultPoster from './AdminResultPoster'
+import PosterGeneratorModal from '../../components/PosterGeneratorModal'
 
 export default function AdminResults() {
   const [programmes, setProgrammes] = useState([])
@@ -11,6 +12,7 @@ export default function AdminResults() {
   const [expandedResultId, setExpandedResultId] = useState(null)
   const [search, setSearch] = useState('')
   const [showPoster, setShowPoster] = useState(false)
+  const [selectedPosterResult, setSelectedPosterResult] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -53,7 +55,6 @@ export default function AdminResults() {
   const buildPlacementRows = (result) => {
     const rows = []
     if (Array.isArray(result.entries) && result.entries.length > 0) {
-      // Normal Admin view shows ONLY top 3
       const top3Entries = result.entries.slice(0, 3)
       top3Entries.forEach((entry, idx) => {
         if (!entry) return
@@ -109,7 +110,7 @@ export default function AdminResults() {
               : 'bg-primary text-white hover:bg-primary/90'
           }`}
         >
-          <Image size={16} className="sm:w-[18px] sm:h-[18px]" /> {showPoster ? 'Hide Poster' : 'Generate Poster'}
+          <Image size={16} className="sm:w-[18px] sm:h-[18px]" /> {showPoster ? 'Hide Legacy Poster' : 'Legacy Poster'}
         </button>
       </div>
 
@@ -117,6 +118,13 @@ export default function AdminResults() {
         <div className="mb-6">
           <AdminResultPoster />
         </div>
+      )}
+
+      {selectedPosterResult && (
+        <PosterGeneratorModal
+          result={selectedPosterResult}
+          onClose={() => setSelectedPosterResult(null)}
+        />
       )}
 
       <div className="space-y-4">
@@ -152,8 +160,23 @@ export default function AdminResults() {
                     </p>
                     <p className="text-mutedText text-sm">{prog?.category || ''}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-mutedText text-xs font-semibold">
-                    <Eye size={15} /> {isExpanded ? 'Collapse' : 'Preview'}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedPosterResult({
+                          ...result,
+                          programmeName: result.name || prog?.name || 'Programme Result',
+                          category: prog?.category || 'General',
+                        })
+                      }}
+                      className="inline-flex items-center gap-1.5 bg-primary/20 hover:bg-primary text-accent hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition border border-primary/30"
+                    >
+                      <Sparkles size={14} /> View Posters
+                    </button>
+                    <div className="flex items-center gap-1 text-mutedText text-xs font-semibold pl-2">
+                      <Eye size={15} /> {isExpanded ? 'Collapse' : 'Preview'}
+                    </div>
                   </div>
                 </div>
 
