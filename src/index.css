@@ -666,10 +666,10 @@ header .nav-brand-subtitle span {
 }
 
 .bento-standings-card {
-  background: var(--card-lavender);
-  border: 1px solid var(--border-subtle);
+  background: #061F11 !important;
+  border: 1px solid rgba(46, 125, 74, 0.35) !important;
   border-radius: var(--radius-card);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 16px 40px rgba(3, 27, 13, 0.6) !important;
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -891,10 +891,9 @@ html[data-theme='dark'] .admin-logout-btn {
   color: #8ED06C !important;
 }
 
-/* Leaderboard rows — 1st gold / 2nd silver / 3rd bronze */
+/* Leaderboard rows — Minimal Monochromatic Green Palette */
 .lb-item {
   border-radius: 18px;
-  border: 1px solid transparent;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -902,57 +901,76 @@ html[data-theme='dark'] .admin-logout-btn {
   transform: translateX(4px);
 }
 
+/* 1st Place */
 .lb-1 {
-  background: #FFF8E1;
-  border-color: #FFE082;
+  background: #123D24 !important;
+  border: 1px solid #2E7D4A !important;
 }
 
-.lb-1 .lb-rank,
+.lb-1 .lb-rank {
+  color: #D8F3A8 !important;
+}
+
+.lb-1 .lb-name {
+  color: #F0F7DF !important;
+}
+
 .lb-1 .lb-points {
-  color: #E57F17;
+  color: #B7E36B !important;
 }
 
+/* 2nd Place */
 .lb-2 {
-  background: #F5F5F5;
-  border-color: #E0E0E0;
+  background: #0E351F !important;
+  border: 1px solid #27663E !important;
 }
 
-.lb-2 .lb-rank,
+.lb-2 .lb-rank {
+  color: #C7D8C0 !important;
+}
+
+.lb-2 .lb-name {
+  color: #E5F0DC !important;
+}
+
 .lb-2 .lb-points {
-  color: #616161;
+  color: #A8D96B !important;
 }
 
+/* 3rd Place */
 .lb-3 {
-  background: #EFEBE9;
-  border-color: #D7CCC8;
+  background: #0B2D1A !important;
+  border: 1px solid #235535 !important;
 }
 
-.lb-3 .lb-rank,
+.lb-3 .lb-rank {
+  color: #B8C8B5 !important;
+}
+
+.lb-3 .lb-name {
+  color: #DDE9D7 !important;
+}
+
 .lb-3 .lb-points {
-  color: #8D6E63;
+  color: #9DCF63 !important;
 }
 
+/* Other Places */
 .lb-other {
-  background: rgba(17, 95, 50, 0.06);
-  border-color: rgba(142, 208, 108, 0.25);
+  background: #082414 !important;
+  border: 1px solid #1E462B !important;
 }
 
-.lb-other .lb-rank,
+.lb-other .lb-rank {
+  color: #9CB29A !important;
+}
+
+.lb-other .lb-name {
+  color: #D3DFCC !important;
+}
+
 .lb-other .lb-points {
-  color: #275235;
-}
-
-[data-theme='dark'] .lb-other,
-.dark .lb-other {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(34, 140, 34, 0.25);
-}
-
-[data-theme='dark'] .lb-other .lb-rank,
-.dark .lb-other .lb-rank,
-[data-theme='dark'] .lb-other .lb-points,
-.dark .lb-other .lb-points {
-  color: #8ED06C;
+  color: #8BC75A !important;
 }
 
 /* Result / poster cards */

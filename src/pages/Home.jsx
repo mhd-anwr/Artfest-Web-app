@@ -244,23 +244,36 @@ export default function Home() {
           </h2>
 
           <div className="relative z-10 max-w-2xl mx-auto flex flex-col gap-4">
-            {teamData.map((team, i) => (
-              <div
-                key={team.id}
-                className={`lb-item ${i < 3 ? `lb-${i + 1}` : 'lb-other'} px-5 py-5 flex items-center justify-center gap-6 text-center`}
-              >
-                <span className="lb-rank font-display font-extrabold text-3xl w-12 shrink-0">
-                  {i + 1}
-                </span>
-                <span className={`font-display font-bold text-xl md:text-2xl truncate flex-1 ${i < 3 ? 'text-[#1D192B]' : 'text-white/90'}`}>
-                  {team.name}
-                </span>
-                <span className="lb-points font-display font-extrabold text-2xl md:text-3xl whitespace-nowrap">
-                  {team.totalPoints || 0}
-                  <span className="text-sm font-medium opacity-70 ml-1">pts</span>
-                </span>
-              </div>
-            ))}
+            {teamData.map((team, i) => {
+              const dotColor = team.color || (
+                team.name?.includes('Dara') ? '#EFFF00' :
+                team.name?.includes('Baza') ? '#E21B23' :
+                team.name?.includes('Qaza') ? '#A855F7' : '#2872A1'
+              )
+              return (
+                <div
+                  key={team.id}
+                  className={`lb-item ${i < 3 ? `lb-${i + 1}` : 'lb-other'} px-4 sm:px-6 py-4.5 sm:py-5 flex items-center justify-between gap-4 sm:gap-6`}
+                >
+                  <span className="lb-rank font-display font-extrabold text-2xl sm:text-3xl w-8 sm:w-10 shrink-0 text-center">
+                    {i + 1}
+                  </span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span
+                      className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                      style={{ backgroundColor: dotColor }}
+                    />
+                    <span className="lb-name font-display font-bold text-lg sm:text-xl md:text-2xl truncate">
+                      {team.name}
+                    </span>
+                  </div>
+                  <span className="lb-points font-display font-extrabold text-xl sm:text-2xl md:text-3xl whitespace-nowrap shrink-0 text-right">
+                    {team.totalPoints || 0}
+                    <span className="text-xs sm:text-sm font-semibold opacity-80 ml-1">pts</span>
+                  </span>
+                </div>
+              )
+            })}
             {teamData.length === 0 && (
               <p className="text-center text-sm text-white/60 py-6">Loading standings…</p>
             )}
