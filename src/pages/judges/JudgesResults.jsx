@@ -426,12 +426,22 @@ export default function JudgesResults() {
     if (!editProg) return
 
     const cands = getCandidatesForProg(editProg, progAssignments || {})
-    const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()))
+    const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))
+
+    // Validate if any row with points is missing code
+    for (let idx = 0; idx < entryRows.length; idx++) {
+      const r = entryRows[idx]
+      if ((r.points || '').trim() !== '' && !(r.code || '').trim()) {
+        const msg = `Please select a Code Letter for position #${idx + 1}.`
+        setEditError(msg)
+        return toast(msg, 'error')
+      }
+    }
 
     const enteredCodes = entryRows.map(r => (r.code || '').trim().toUpperCase()).filter(Boolean)
     const duplicateCodes = enteredCodes.filter((item, index) => enteredCodes.indexOf(item) !== index)
     if (duplicateCodes.length > 0) {
-      const msg = `Code Letter "${duplicateCodes[0]}" is entered in multiple positions.`
+      const msg = `Code Letter "${duplicateCodes[0]}" is selected in multiple positions.`
       setEditError(msg)
       return toast(msg, 'error')
     }
@@ -460,8 +470,8 @@ export default function JudgesResults() {
         codeLetter: trimmedCode,
         code: trimmedCode,
         candidateNo: idx + 1,
-        place: row.place ? row.place.trim() : getOrdinalLabel(idx),
-        label: row.place ? row.place.trim() : getOrdinalLabel(idx),
+        place: getOrdinalLabel(idx),
+        label: getOrdinalLabel(idx),
         points: pts,
         grade: gr,
       }
@@ -762,11 +772,10 @@ export default function JudgesResults() {
             <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
             <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
 
-            {/* Column Headers */}
-            <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
-              <span className="col-span-4">Place</span>
-              <span className="col-span-4">Code Letter</span>
-              <span className="col-span-2 text-center">Points</span>
+            {/* Column Headers: Place label removed from UI */}
+            <div className="grid grid-cols-12 gap-3 text-xs font-bold text-mutedText px-1 mb-2">
+              <span className="col-span-7">Code Letter</span>
+              <span className="col-span-3 text-center">Points</span>
               <span className="col-span-2 text-center">Grade</span>
             </div>
 
@@ -775,57 +784,69 @@ export default function JudgesResults() {
               {entryRows.map((row, i) => {
                 const grade = calcGrade(row.points)
                 const cands = getCandidatesForProg(editProg, progAssignments || {})
-                const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()))
-                const trimmedCode = (row.code || '').trim().toUpperCase()
+                const assignedCodes = Array.from(new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))).sort()
 
-                const isValid = trimmedCode !== '' && (validCodesSet.size === 0 || validCodesSet.has(trimmedCode))
-                const isInvalid = trimmedCode !== '' && validCodesSet.size > 0 && !validCodesSet.has(trimmedCode)
+                const selectedCodesInOtherRows = new Set(
+                  entryRows
+                    .filter((_, idx) => idx !== i)
+                    .map(r => (r.code || '').trim().toUpperCase())
+                    .filter(Boolean)
+                )
 
                 return (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
-                    <div className="col-span-4">
-                      <input
-                        type="text"
-                        placeholder="Enter Place"
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold"
-                        value={row.place}
-                        onChange={e => updateRowField(i, 'place', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-span-4">
-                      <input
-                        type="text"
-                        placeholder="Enter code"
-                        maxLength={6}
-                        className={`w-full text-mainText rounded-xl p-2.5 outline-none text-sm font-bold uppercase transition ${
-                          isValid
-                            ? 'bg-emerald-500/10 border-2 border-emerald-500 text-emerald-400'
-                            : isInvalid
-                            ? 'bg-red-500/10 border-2 border-red-500 text-red-400'
-                            : 'bg-black/20 border border-secondary/30 focus:border-mainText'
-                        }`}
+                  <div key={i} className="grid grid-cols-12 gap-3 items-center mb-3">
+                    {/* Select Dropdown for Code Letter */}
+                    <div className="col-span-7">
+                      <select
+                        className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
                         value={row.code || ''}
-                        onChange={e => updateRowField(i, 'code', e.target.value.toUpperCase().trim())}
-                      />
+                        onChange={e => updateRowField(i, 'code', e.target.value)}
+                      >
+                        <option value="" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA]">
+                          Select Code ▼
+                        </option>
+                        {assignedCodes.map(code => {
+                          const isTaken = selectedCodesInOtherRows.has(code)
+                          return (
+                            <option
+                              key={code}
+                              value={code}
+                              disabled={isTaken}
+                              className={`bg-[#FFFFFF] dark:bg-[#092619] ${
+                                isTaken
+                                  ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
+                                  : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
+                              }`}
+                            >
+                              {code}{isTaken ? ' (Selected)' : ''}
+                            </option>
+                          )
+                        })}
+                      </select>
                     </div>
-                    <div className="col-span-2">
+
+                    {/* Points Input */}
+                    <div className="col-span-3">
                       <input
                         type="number"
                         placeholder="Pts"
                         min="0"
                         max="10"
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-center text-sm font-bold"
+                        className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-center text-sm font-bold focus:border-[#62C744]"
                         value={row.points}
                         onChange={e => updateRowField(i, 'points', e.target.value)}
                       />
                     </div>
+
+                    {/* Grade Display */}
                     <div className="col-span-2 flex justify-center">
-                      <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
-                          grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                            grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
-                              grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
-                                'bg-orange-500/15 text-orange-400 border border-orange-500/40'
-                        }`}>
+                      <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${
+                        grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                        grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
+                        grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
+                        grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
+                        'bg-orange-500/15 text-orange-400 border border-orange-500/40'
+                      }`}>
                         {grade}
                       </div>
                     </div>
