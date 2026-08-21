@@ -275,7 +275,7 @@ export default function JudgesResults() {
     setVName('')
     setVPassword('')
     setVerifyOpen(true)
-    try { await loadCaptcha() } catch {}
+    try { await loadCaptcha() } catch { }
   }
 
   const closeVerify = () => {
@@ -375,8 +375,8 @@ export default function JudgesResults() {
           if (Array.isArray(latest.entries) && latest.entries.length > 0) {
             const matchedEntry = latest.entries[idx] || latest.entries.find(
               e => (e.code && e.code === cand.code) ||
-                   (e.codeLetter && e.codeLetter === cand.code) ||
-                   (e.studentId && e.studentId === cand.id)
+                (e.codeLetter && e.codeLetter === cand.code) ||
+                (e.studentId && e.studentId === cand.id)
             )
 
             if (matchedEntry) {
@@ -613,10 +613,10 @@ export default function JudgesResults() {
               const displayEntries = (result.entries && result.entries.length > 0)
                 ? result.entries.slice(0, 3)
                 : [
-                    result.first && { ...result.first, place: result.first.label || '1st Place' },
-                    result.second && { ...result.second, place: result.second.label || '2nd Place' },
-                    result.third && { ...result.third, place: result.third.label || '3rd Place' },
-                  ].filter(Boolean)
+                  result.first && { ...result.first, place: result.first.label || '1st Place' },
+                  result.second && { ...result.second, place: result.second.label || '2nd Place' },
+                  result.third && { ...result.third, place: result.third.label || '3rd Place' },
+                ].filter(Boolean)
 
               return (
                 <div key={result.id} className="bg-card rounded-xl p-4 shadow-sm border border-secondary/30">
@@ -648,12 +648,11 @@ export default function JudgesResults() {
                             </span>
                             <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                             {data.grade && data.grade !== '-' && (
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                                data.grade === 'A+' ? 'bg-success/15 text-success' :
-                                data.grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247]' :
-                                data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
-                                'bg-orange-500/15 text-orange-400'
-                              }`}>
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded ${data.grade === 'A+' ? 'bg-success/15 text-success' :
+                                  data.grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247]' :
+                                    data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
+                                      'bg-orange-500/15 text-orange-400'
+                                }`}>
                                 {data.grade}
                               </span>
                             )}
@@ -830,7 +829,7 @@ export default function JudgesResults() {
                               onChange={e => updateRowField(i, 'code', e.target.value)}
                             >
                               <option value="" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA]">
-                                Select Code ▼
+                                Select Code
                               </option>
                               {assignedCodes.map(code => {
                                 const isTaken = selectedCodesInOtherRows.has(code)
@@ -839,11 +838,10 @@ export default function JudgesResults() {
                                     key={code}
                                     value={code}
                                     disabled={isTaken}
-                                    className={`bg-[#FFFFFF] dark:bg-[#092619] ${
-                                      isTaken
+                                    className={`bg-[#FFFFFF] dark:bg-[#092619] ${isTaken
                                         ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
                                         : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
-                                    }`}
+                                      }`}
                                   >
                                     {code}{isTaken ? ' (Selected)' : ''}
                                   </option>
