@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { getProgrammes, getStudents, getTeams, getAllResults } from '../../supabase/queries'
+import { supabase } from '../../supabase/client'
 import { ArrowLeft, Printer, CheckSquare, Square, AlertCircle } from 'lucide-react'
 import FilterDropdown from '../../components/FilterDropdown'
 
@@ -39,6 +40,7 @@ export default function AdminPrint() {
   const [allResults, setAllResults] = useState([])
   const [students, setStudents] = useState([])
   const [teams, setTeams] = useState([])
+  const [codeAssignments, setCodeAssignments] = useState({})
   const [activeTab, setActiveTab] = useState('programmes')
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedSet, setSelectedSet] = useState(new Set())
@@ -52,6 +54,21 @@ export default function AdminPrint() {
     getStudents().then(setStudents)
     getTeams().then(setTeams)
     getAllResults().then(setAllResults)
+    supabase.from('performance_code_assignments').select('*').then(({ data }) => {
+      if (data) {
+        const map = {}
+        data.forEach(item => {
+          const pid = item.participant_id || item.participantId
+          const progId = item.programme_id || item.programmeId
+          const code = item.code_letter || item.codeLetter
+          if (progId && pid && code) {
+            if (!map[progId]) map[progId] = {}
+            map[progId][code.toUpperCase()] = pid
+          }
+        })
+        setCodeAssignments(map)
+      }
+    })
   }, [])
 
   useEffect(() => { loadData() }, [loadData])
@@ -154,93 +171,48 @@ export default function AdminPrint() {
       const prog = res ? programmes.find(p => p.id === res.programmeId) : null
       const rows = []
       if (res && prog) {
-        const registeredStudents = students.filter(s => (s.programmeIds || []).includes(prog.id))
-        const addedStudentIds = new Set()
+        const progCodeMap = codeAssignments[prog.id] || {}
 
+        let entriesToUse = []
         if (Array.isArray(res.entries) && res.entries.length > 0) {
-          res.entries.forEach((entry, idx) => {
-            if (!entry) return
-            const sId = entry.studentId || entry.candidateId
-            let student = students.find(s => s.id === sId)
-            if (!student && (entry.code || entry.codeLetter)) {
-              const codeVal = entry.code || entry.codeLetter
-              student = registeredStudents.find(s => s.code === codeVal)
-            }
-            if (!student && entry.name) {
-              student = registeredStudents.find(s => s.name === entry.name)
-            }
-            if (student) addedStudentIds.add(student.id)
-
-            const codeVal = entry.code || entry.codeLetter || ''
-            const ptsVal = entry.points !== undefined && entry.points !== null ? entry.points : (entry.point !== undefined ? entry.point : '')
-            const gradeVal = entry.grade || (ptsVal !== '' ? calcGrade(ptsVal) : '-')
-            const placeVal = entry.place || entry.label || entry.prize || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : '')
-
-            rows.push({
-              key: `res-${id}-${sId || idx}`,
-              chestNo: student?.chestNo || '',
-              name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
-              team: teamMap[student?.team] || student?.team || '',
-              code: codeVal,
-              grade: gradeVal,
-              price: placeVal,
-              point: ptsVal,
-            })
-          })
-
-          registeredStudents.forEach((student) => {
-            if (!addedStudentIds.has(student.id)) {
-              addedStudentIds.add(student.id)
-              rows.push({
-                key: `res-${id}-extra-${student.id}`,
-                chestNo: student.chestNo || '',
-                name: student.name,
-                team: teamMap[student.team] || student.team || '',
-                code: String.fromCharCode(65 + (rows.length % 26)),
-                grade: '-',
-                price: '',
-                point: 0,
-              })
-            }
-          })
+          entriesToUse = res.entries.filter(e => e && (e.code || e.codeLetter))
         } else {
-          const addRow = (placement, defaultPlace) => {
-            if (!placement) return
-            const student = students.find(s => s.id === placement.studentId)
-            if (student) addedStudentIds.add(student.id)
-            const ptsVal = placement.points ?? ''
-            const gradeVal = placement.grade || (ptsVal !== '' ? calcGrade(ptsVal) : '-')
-            rows.push({
-              key: `res-${id}-${placement.studentId || rows.length}`,
-              chestNo: student?.chestNo || '',
-              name: placement.name || student?.name || '',
-              team: teamMap[student?.team] || student?.team || '',
-              code: placement.code || '',
-              grade: gradeVal,
-              price: placement.place || placement.label || placement.prize || defaultPlace,
-              point: ptsVal,
-            })
-          }
-          addRow(res.first, '1st Place')
-          addRow(res.second, '2nd Place')
-          addRow(res.third, '3rd Place')
-
-          registeredStudents.forEach((student) => {
-            if (!addedStudentIds.has(student.id)) {
-              addedStudentIds.add(student.id)
-              rows.push({
-                key: `res-${id}-extra-${student.id}`,
-                chestNo: student.chestNo || '',
-                name: student.name,
-                team: teamMap[student.team] || student.team || '',
-                code: String.fromCharCode(65 + (rows.length % 26)),
-                grade: '-',
-                price: '',
-                point: 0,
-              })
-            }
-          })
+          if (res.first) entriesToUse.push({ ...res.first, place: res.first.label || '1st' })
+          if (res.second) entriesToUse.push({ ...res.second, place: res.second.label || '2nd' })
+          if (res.third) entriesToUse.push({ ...res.third, place: res.third.label || '3rd' })
         }
+
+        entriesToUse.forEach((entry, idx) => {
+          if (!entry) return
+          const codeVal = (entry.code || entry.codeLetter || '').trim().toUpperCase()
+
+          // Stable mapping: match by assigned Code Letter to student ID, or entry.studentId
+          const sId = entry.studentId || entry.candidateId || progCodeMap[codeVal]
+          let student = students.find(s => s.id === sId)
+          if (!student && codeVal) {
+            student = students.find(s => (s.programmeIds || []).includes(prog.id) &&
+              ((s.performanceCode || '').trim().toUpperCase() === codeVal || (s.code || '').trim().toUpperCase() === codeVal)
+            )
+          }
+          if (!student && entry.name) {
+            student = students.find(s => (s.programmeIds || []).includes(prog.id) && s.name === entry.name)
+          }
+
+          const ptsVal = entry.points !== undefined && entry.points !== null ? entry.points : (entry.point !== undefined ? entry.point : '')
+          const gradeVal = entry.grade || (ptsVal !== '' ? calcGrade(ptsVal) : '-')
+          const placeVal = entry.place || entry.label || entry.prize || (idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`)
+
+          rows.push({
+            key: `res-${id}-${student?.id || codeVal || idx}`,
+            chestNo: student?.chestNo || entry.chestNo || '',
+            name: student?.name || entry.name || `Participant ${codeVal || idx + 1}`,
+            team: teamMap[student?.team] || student?.team || entry.team || '',
+            code: codeVal,
+            grade: gradeVal,
+            price: placeVal,
+            point: ptsVal,
+          })
+        })
       }
       items.push({
         sheet: 'result',

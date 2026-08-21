@@ -21,7 +21,7 @@ function getOrdinalLabel(index) {
   const n = index + 1
   const s = ['th', 'st', 'nd', 'rd']
   const v = n % 100
-  return `${n}${(s[(v - 20) % 10] || s[v] || s[0])} Place`
+  return `${n}${(s[(v - 20) % 10] || s[v] || s[0])}`
 }
 
 export default function JudgesResults() {
@@ -388,17 +388,17 @@ export default function JudgesResults() {
           } else {
             if (idx === 0 && latest.first) {
               savedCode = latest.first.code || latest.first.codeLetter || ''
-              savedPlace = latest.first.label || '1st Place'
+              savedPlace = latest.first.label || '1st'
               savedPoints = latest.first.points != null ? String(latest.first.points) : ''
               savedGrade = latest.first.grade || ''
             } else if (idx === 1 && latest.second) {
               savedCode = latest.second.code || latest.second.codeLetter || ''
-              savedPlace = latest.second.label || '2nd Place'
+              savedPlace = latest.second.label || '2nd'
               savedPoints = latest.second.points != null ? String(latest.second.points) : ''
               savedGrade = latest.second.grade || ''
             } else if (idx === 2 && latest.third) {
               savedCode = latest.third.code || latest.third.codeLetter || ''
-              savedPlace = latest.third.label || '3rd Place'
+              savedPlace = latest.third.label || '3rd'
               savedPoints = latest.third.points != null ? String(latest.third.points) : ''
               savedGrade = latest.third.grade || ''
             }
@@ -432,17 +432,16 @@ export default function JudgesResults() {
     const cands = getCandidatesForProg(editProg, progAssignments || {})
     const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))
 
-    // Validate if any row with points is missing code
-    for (let idx = 0; idx < entryRows.length; idx++) {
-      const r = entryRows[idx]
-      if ((r.points || '').trim() !== '' && !(r.code || '').trim()) {
-        const msg = `Please select a Code Letter for position #${idx + 1}.`
-        setEditError(msg)
-        return toast(msg, 'error')
-      }
+    // Filter entryRows to only rows where a code letter was selected
+    const activeRows = entryRows.filter(r => (r.code || '').trim() !== '')
+
+    if (activeRows.length === 0) {
+      const msg = 'Please select at least one Code Letter before submitting.'
+      setEditError(msg)
+      return toast(msg, 'error')
     }
 
-    const enteredCodes = entryRows.map(r => (r.code || '').trim().toUpperCase()).filter(Boolean)
+    const enteredCodes = activeRows.map(r => (r.code || '').trim().toUpperCase())
     const duplicateCodes = enteredCodes.filter((item, index) => enteredCodes.indexOf(item) !== index)
     if (duplicateCodes.length > 0) {
       const msg = `Code Letter "${duplicateCodes[0]}" is selected in multiple positions.`
@@ -450,7 +449,7 @@ export default function JudgesResults() {
       return toast(msg, 'error')
     }
 
-    for (const r of entryRows) {
+    for (const r of activeRows) {
       const trimmedCode = (r.code || '').trim().toUpperCase()
       if (trimmedCode && validCodesSet.size > 0 && !validCodesSet.has(trimmedCode)) {
         const msg = `Code Letter "${trimmedCode}" is invalid for this programme.`
@@ -459,31 +458,55 @@ export default function JudgesResults() {
       }
     }
 
-    const entries = entryRows.map((row, idx) => {
+    const entries = activeRows.map((row, idx) => {
       const trimmedCode = (row.code || '').trim().toUpperCase()
-      const cand = cands.find(c => (c.code || '').trim().toUpperCase() === trimmedCode)
-      const studentId = cand?.id || (trimmedCode ? `anon_${editProg.id}_${trimmedCode}` : `anon_${editProg.id}_row_${idx + 1}`)
-      const s = getStudentObj(studentId)
+
+      let studentId = null
+      let studentName = ''
+
+      if (progAssignments) {
+        const matchPid = Object.keys(progAssignments).find(pid => (progAssignments[pid] || '').toUpperCase() === trimmedCode)
+        if (matchPid) {
+          studentId = matchPid
+          const sObj = getStudentObj(matchPid)
+          if (sObj) studentName = sObj.name
+        }
+      }
+
+      if (!studentId) {
+        const cand = cands.find(c => (c.code || '').trim().toUpperCase() === trimmedCode)
+        if (cand) {
+          studentId = cand.id
+          studentName = cand.name
+        }
+      }
+
+      if (!studentId) {
+        studentId = `anon_${editProg.id}_${trimmedCode}`
+        studentName = `Participant ${trimmedCode}`
+      }
+
       const pts = Number(row.points) || 0
       const gr = (row.grade || '').trim() || 'No Grade'
+      const placeStr = row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx)
 
       return {
         candidateId: studentId,
         studentId: studentId,
-        name: s?.name || cand?.name || (trimmedCode ? `Performance ${trimmedCode}` : `Performance ${idx + 1}`),
+        name: studentName,
         codeLetter: trimmedCode,
         code: trimmedCode,
         candidateNo: idx + 1,
-        place: row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx),
-        label: row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx),
+        place: placeStr,
+        label: placeStr,
         points: pts,
         grade: gr,
       }
     })
 
-    const firstEntry = entries.find(e => e.place.toLowerCase().includes('1st') || e.place === '1') || entries[0] || null
-    const secondEntry = entries.find(e => e.place.toLowerCase().includes('2nd') || e.place === '2') || entries[1] || null
-    const thirdEntry = entries.find(e => e.place.toLowerCase().includes('3rd') || e.place === '3') || entries[2] || null
+    const firstEntry = entries.find(e => (e.place || '').toLowerCase().includes('1st') || e.place === '1') || entries[0] || null
+    const secondEntry = entries.find(e => (e.place || '').toLowerCase().includes('2nd') || e.place === '2') || entries[1] || null
+    const thirdEntry = entries.find(e => (e.place || '').toLowerCase().includes('3rd') || e.place === '3') || entries[2] || null
 
     const payload = {
       programmeId: editProg.id,
@@ -529,31 +552,35 @@ export default function JudgesResults() {
       return
     }
 
+    toast(isFirstTime ? 'Result submitted successfully!' : 'Result updated successfully!')
     setSaving(false)
     closeEdit()
-    toast('Result saved and locked!')
-    loadResults()
+
+    const resultsRes = await judgeClient.from('results').select('*')
+    if (resultsRes.data) setSavedResults(resultsRes.data)
   }
 
   return (
-    <div className="min-h-screen bg-mainBackground p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-mainText hover:opacity-80 transition">
-          <ArrowLeft size={18} /> Home
+    <div className="max-w-4xl mx-auto">
+      {/* ── Top Header Bar ── */}
+      <div className="flex items-center justify-between mb-6 border-b border-secondary/30 pb-4">
+        <button onClick={() => navigate('/judges')} className="flex items-center gap-2 text-mainText hover:text-accent font-semibold transition text-sm">
+          <ArrowLeft size={18} /> Back to Dashboard
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
-          <button onClick={handleLogout} className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-mainText px-3 py-1.5 rounded-xl font-semibold transition text-xs sm:text-sm">
-            <LogOut size={16} /> Logout
+          <button onClick={handleLogout} className="flex items-center gap-1.5 text-red-400 hover:text-red-300 font-semibold text-xs sm:text-sm transition bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">
+            <LogOut size={15} /> Sign out
           </button>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl p-5 mb-6 shadow-sm border border-secondary/30">
-        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText mb-2">Judges Panel</h2>
-        <p className="text-mutedText text-xs sm:text-sm">Submit results per programme. Locked results require judge authentication and captcha verification to edit.</p>
+      <div className="mb-6">
+        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Judge Panel — Submit Results</h2>
+        <p className="text-mutedText text-xs sm:text-sm mt-1">Select code letter, points, and grade for each programme participant.</p>
       </div>
 
+      {/* Category filter */}
       <div className="max-w-xs mx-auto mb-5">
         <FilterDropdown
           dark
@@ -613,9 +640,9 @@ export default function JudgesResults() {
               const displayEntries = (result.entries && result.entries.length > 0)
                 ? result.entries.slice(0, 3)
                 : [
-                  result.first && { ...result.first, place: result.first.label || '1st Place' },
-                  result.second && { ...result.second, place: result.second.label || '2nd Place' },
-                  result.third && { ...result.third, place: result.third.label || '3rd Place' },
+                  result.first && { ...result.first, place: result.first.label || '1st' },
+                  result.second && { ...result.second, place: result.second.label || '2nd' },
+                  result.third && { ...result.third, place: result.third.label || '3rd' },
                 ].filter(Boolean)
 
               return (
@@ -640,11 +667,11 @@ export default function JudgesResults() {
                       {displayEntries.map((data, idx) => (
                         <div key={idx} className="bg-secondary/15 rounded-xl p-3 border border-secondary/30">
                           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                            <span className="text-xs sm:text-sm font-bold min-w-[4rem] text-accent">
-                              {data.place || `${idx + 1}th Place`}
+                            <span className="text-xs sm:text-sm font-bold min-w-[3rem] text-accent">
+                              {data.place || getOrdinalLabel(idx)}
                             </span>
                             <span className="text-mainText font-medium text-sm sm:text-base">
-                              Performance {data.code || 'Entry'}
+                              Code Letter {data.code || data.codeLetter || ''}
                             </span>
                             <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                             {data.grade && data.grade !== '-' && (

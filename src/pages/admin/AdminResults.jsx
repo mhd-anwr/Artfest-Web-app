@@ -61,7 +61,7 @@ export default function AdminResults() {
         const student = students.find(s => s.id === entry.studentId)
         rows.push({
           key: `${result.id}-entry-${idx}`,
-          label: entry.place || (idx === 0 ? '1st Place' : idx === 1 ? '2nd Place' : idx === 2 ? '3rd Place' : ''),
+          label: entry.place || (idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`),
           name: student?.name || entry.name || `Candidate ${entry.candidateNo || idx + 1}`,
           chestNo: student?.chestNo || '',
           team: teamMap[student?.team] || student?.team || '',
@@ -76,7 +76,7 @@ export default function AdminResults() {
       const student = students.find(s => s.id === placement.studentId)
       rows.push({
         key: `${result.id}-${key}`,
-        label: placement.label || (key === 'first' ? '1st Place' : key === 'second' ? '2nd Place' : '3rd Place'),
+        label: placement.label || (key === 'first' ? '1st' : key === 'second' ? '2nd' : '3rd'),
         name: student?.name || placement.name,
         chestNo: student?.chestNo || '',
         team: teamMap[student?.team] || student?.team || '',
