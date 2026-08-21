@@ -72,26 +72,63 @@ export default function JudgesResults() {
     loadResults()
   }, [])
 
-  const getCandidatesForProg = (prog) => {
+  const getCandidatesForProg = (prog, currentAssignments = null) => {
     if (!prog) return []
+    const map = currentAssignments !== null ? currentAssignments : (progAssignments || {})
     const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
+    const baseCandidates = registered.length > 0
+      ? [...registered].sort((a, b) => (a.chestNo || a.name || a.id).localeCompare(b.chestNo || b.name || b.id))
+      : []
 
-    if (registered.length === 0) {
-      return Array.from({ length: 6 }, (_, i) => {
-        const letter = String.fromCharCode(65 + i)
-        return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter, candidateNo: i + 1 }
-      })
+    const mapKeys = Object.keys(map)
+
+    if (mapKeys.length > 0) {
+      const assignedCandidates = []
+
+      if (baseCandidates.length > 0) {
+        baseCandidates.forEach(cand => {
+          const code = map[cand.id]
+          if (code) {
+            assignedCandidates.push({
+              id: cand.id,
+              name: cand.name,
+              chestNo: cand.chestNo,
+              code: code,
+            })
+          }
+        })
+      } else {
+        mapKeys.forEach(key => {
+          const code = map[key]
+          if (code) {
+            assignedCandidates.push({
+              id: key,
+              name: `Performance ${code}`,
+              chestNo: '',
+              code: code,
+            })
+          }
+        })
+      }
+
+      if (assignedCandidates.length > 0) {
+        return assignedCandidates.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+      }
     }
 
-    const sorted = [...registered].sort((a, b) => (a.chestNo || a.name || a.id).localeCompare(b.chestNo || b.name || b.id))
+    if (baseCandidates.length > 0) {
+      return baseCandidates.map((cand, idx) => ({
+        id: cand.id,
+        name: cand.name,
+        chestNo: cand.chestNo,
+        code: cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
+      }))
+    }
 
-    return sorted.map((cand, idx) => ({
-      id: cand.id,
-      name: cand.name,
-      chestNo: cand.chestNo,
-      code: progAssignments[cand.id] || cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
-      candidateNo: idx + 1,
-    }))
+    return Array.from({ length: 6 }, (_, i) => {
+      const letter = String.fromCharCode(65 + i)
+      return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter }
+    })
   }
 
   const getStudentObj = (id) => {
@@ -175,7 +212,7 @@ export default function JudgesResults() {
     const assignmentsMap = await getCodeAssignments(prog.id)
     setProgAssignments(assignmentsMap || {})
 
-    const cands = getCandidatesForProg(prog)
+    const cands = getCandidatesForProg(prog, assignmentsMap || {})
     const initialRows = cands.map((cand, idx) => ({
       place: getOrdinalLabel(idx),
       studentId: cand.id,
@@ -249,7 +286,6 @@ export default function JudgesResults() {
   }
 
   const verifyJudgeCredentials = async (email, password) => {
-    // 1. Try judge_credentials RPC
     try {
       const { data, error } = await judgeClient.rpc('judge_credentials', {
         p_judge_email: email,
@@ -262,7 +298,6 @@ export default function JudgesResults() {
       console.warn('judge_credentials RPC fallback:', e)
     }
 
-    // 2. Try judge_verify_credentials RPC
     try {
       const { data, error } = await judgeClient.rpc('judge_verify_credentials', {
         p_judge_email: email,
@@ -275,7 +310,6 @@ export default function JudgesResults() {
       console.warn('judge_verify_credentials RPC fallback:', e)
     }
 
-    // 3. Fallback: standard Supabase auth sign-in test via verifyJudgeClient
     try {
       const { data, error } = await verifyJudgeClient.auth.signInWithPassword({
         email: email,
@@ -306,23 +340,19 @@ export default function JudgesResults() {
     setVLoading(true)
     setVError('')
 
-    // 1. Verify judge credentials against Supabase (RPC + Auth fallback)
     const credResult = await verifyJudgeCredentials(vName.trim(), vPassword)
     if (!credResult.valid) {
       setVError('Invalid judge credentials.')
-      setVCaptcha('') // Clear ONLY entered security code input
+      setVCaptcha('')
       setVLoading(false)
       return
-      // DO NOT call loadCaptcha()! Displayed security code remains UNCHANGED.
     }
 
-    // 2. Verify security code against displayed captcha
     if (vCaptcha.trim().toUpperCase() !== (captcha || '').trim().toUpperCase()) {
       setVError('Invalid security code.')
-      setVCaptcha('') // Clear ONLY entered security code input
+      setVCaptcha('')
       setVLoading(false)
       return
-      // DO NOT call loadCaptcha()! Displayed security code remains UNCHANGED.
     }
 
     setVLoading(false)
@@ -334,27 +364,29 @@ export default function JudgesResults() {
     const latest = savedResults.find(r => r.programmeId === prog.id)
     const assignmentsMap = await getCodeAssignments(prog.id)
     setProgAssignments(assignmentsMap || {})
-    const cands = getCandidatesForProg(prog)
+    const cands = getCandidatesForProg(prog, assignmentsMap || {})
 
     if (!preserveFields) {
-      let initialRows = []
-      if (Array.isArray(latest?.entries) && latest.entries.length > 0) {
-        initialRows = latest.entries.map((entry, idx) => {
-          const cand = cands.find(c => c.id === (entry.studentId || entry.candidateId) || c.code === (entry.code || entry.codeLetter))
-          const sId = entry.studentId || entry.candidateId || cand?.id || ''
-          return {
-            place: entry.place || entry.label || getOrdinalLabel(idx),
-            studentId: sId,
-            points: entry.points != null ? String(entry.points) : '',
-          }
-        })
-      } else {
-        initialRows = cands.map((cand, idx) => {
-          let savedStudentId = cand.id
-          let savedPlace = getOrdinalLabel(idx)
-          let savedPoints = ''
+      const initialRows = cands.map((cand, idx) => {
+        let savedStudentId = cand.id
+        let savedPlace = getOrdinalLabel(idx)
+        let savedPoints = ''
 
-          if (latest) {
+        if (latest) {
+          if (Array.isArray(latest.entries) && latest.entries.length > 0) {
+            const matchedEntry = latest.entries.find(
+              e => (e.studentId && e.studentId === cand.id) ||
+                   (e.candidateId && e.candidateId === cand.id) ||
+                   (e.code && e.code === cand.code) ||
+                   (e.codeLetter && e.codeLetter === cand.code)
+            ) || latest.entries[idx]
+
+            if (matchedEntry) {
+              savedPlace = matchedEntry.place || matchedEntry.label || getOrdinalLabel(idx)
+              savedPoints = matchedEntry.points != null ? String(matchedEntry.points) : ''
+              savedStudentId = matchedEntry.studentId || matchedEntry.candidateId || cand.id
+            }
+          } else {
             if (idx === 0 && latest.first) {
               savedStudentId = latest.first.studentId || cand.id
               savedPlace = latest.first.label || '1st Place'
@@ -369,14 +401,15 @@ export default function JudgesResults() {
               savedPoints = latest.third.points != null ? String(latest.third.points) : ''
             }
           }
+        }
 
-          return {
-            place: savedPlace,
-            studentId: savedStudentId,
-            points: savedPoints,
-          }
-        })
-      }
+        return {
+          place: savedPlace,
+          studentId: savedStudentId,
+          points: savedPoints,
+        }
+      })
+
       setEntryRows(initialRows)
     }
     setEditError('')
