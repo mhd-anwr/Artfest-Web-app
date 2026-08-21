@@ -213,9 +213,9 @@ export default function JudgesResults() {
     setProgAssignments(assignmentsMap || {})
 
     const cands = getCandidatesForProg(prog, assignmentsMap || {})
-    const initialRows = cands.map((cand, idx) => ({
+    const initialRows = cands.map((_, idx) => ({
       place: getOrdinalLabel(idx),
-      studentId: cand.id,
+      code: '',
       points: '',
     }))
 
@@ -368,35 +368,34 @@ export default function JudgesResults() {
 
     if (!preserveFields) {
       const initialRows = cands.map((cand, idx) => {
-        let savedStudentId = cand.id
+        let savedCode = ''
         let savedPlace = getOrdinalLabel(idx)
         let savedPoints = ''
 
         if (latest) {
           if (Array.isArray(latest.entries) && latest.entries.length > 0) {
-            const matchedEntry = latest.entries.find(
-              e => (e.studentId && e.studentId === cand.id) ||
-                   (e.candidateId && e.candidateId === cand.id) ||
-                   (e.code && e.code === cand.code) ||
-                   (e.codeLetter && e.codeLetter === cand.code)
-            ) || latest.entries[idx]
+            const matchedEntry = latest.entries[idx] || latest.entries.find(
+              e => (e.code && e.code === cand.code) ||
+                   (e.codeLetter && e.codeLetter === cand.code) ||
+                   (e.studentId && e.studentId === cand.id)
+            )
 
             if (matchedEntry) {
               savedPlace = matchedEntry.place || matchedEntry.label || getOrdinalLabel(idx)
               savedPoints = matchedEntry.points != null ? String(matchedEntry.points) : ''
-              savedStudentId = matchedEntry.studentId || matchedEntry.candidateId || cand.id
+              savedCode = matchedEntry.code || matchedEntry.codeLetter || ''
             }
           } else {
             if (idx === 0 && latest.first) {
-              savedStudentId = latest.first.studentId || cand.id
+              savedCode = latest.first.code || latest.first.codeLetter || ''
               savedPlace = latest.first.label || '1st Place'
               savedPoints = latest.first.points != null ? String(latest.first.points) : ''
             } else if (idx === 1 && latest.second) {
-              savedStudentId = latest.second.studentId || cand.id
+              savedCode = latest.second.code || latest.second.codeLetter || ''
               savedPlace = latest.second.label || '2nd Place'
               savedPoints = latest.second.points != null ? String(latest.second.points) : ''
             } else if (idx === 2 && latest.third) {
-              savedStudentId = latest.third.studentId || cand.id
+              savedCode = latest.third.code || latest.third.codeLetter || ''
               savedPlace = latest.third.label || '3rd Place'
               savedPoints = latest.third.points != null ? String(latest.third.points) : ''
             }
@@ -405,7 +404,7 @@ export default function JudgesResults() {
 
         return {
           place: savedPlace,
-          studentId: savedStudentId,
+          code: savedCode,
           points: savedPoints,
         }
       })
@@ -426,32 +425,40 @@ export default function JudgesResults() {
   const handleSaveEdit = async () => {
     if (!editProg) return
 
-    const selectedStudentIds = entryRows.map(r => r.studentId).filter(Boolean)
-    const duplicates = selectedStudentIds.filter((item, index) => selectedStudentIds.indexOf(item) !== index)
-    if (duplicates.length > 0) {
-      const dupId = duplicates[0]
-      const dupCand = getCandidatesForProg(editProg).find(c => c.id === dupId)
-      const dupCode = dupCand ? dupCand.code : 'A'
-      const msg = `Code Letter ${dupCode} is already assigned to another place.`
+    const cands = getCandidatesForProg(editProg, progAssignments || {})
+    const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()))
+
+    const enteredCodes = entryRows.map(r => (r.code || '').trim().toUpperCase()).filter(Boolean)
+    const duplicateCodes = enteredCodes.filter((item, index) => enteredCodes.indexOf(item) !== index)
+    if (duplicateCodes.length > 0) {
+      const msg = `Code Letter "${duplicateCodes[0]}" is entered in multiple positions.`
       setEditError(msg)
       return toast(msg, 'error')
     }
 
-    const candidates = getCandidatesForProg(editProg)
+    for (const r of entryRows) {
+      const trimmedCode = (r.code || '').trim().toUpperCase()
+      if (trimmedCode && validCodesSet.size > 0 && !validCodesSet.has(trimmedCode)) {
+        const msg = `Code Letter "${trimmedCode}" is invalid for this programme.`
+        setEditError(msg)
+        return toast(msg, 'error')
+      }
+    }
+
     const entries = entryRows.map((row, idx) => {
-      const cand = candidates.find(c => c.id === row.studentId) || candidates[idx]
-      const studentId = row.studentId || cand?.id || `anon_${editProg.id}_${cand?.code || String.fromCharCode(65 + idx)}`
+      const trimmedCode = (row.code || '').trim().toUpperCase()
+      const cand = cands.find(c => (c.code || '').trim().toUpperCase() === trimmedCode)
+      const studentId = cand?.id || (trimmedCode ? `anon_${editProg.id}_${trimmedCode}` : `anon_${editProg.id}_row_${idx + 1}`)
       const s = getStudentObj(studentId)
       const pts = Number(row.points) || 0
       const gr = calcGrade(row.points)
-      const code = cand ? cand.code : (studentId?.startsWith('anon_') ? studentId.split('_').pop() : String.fromCharCode(65 + (idx % 26)))
 
       return {
         candidateId: studentId,
         studentId: studentId,
-        name: s?.name || cand?.name || `Performance ${code}`,
-        codeLetter: code,
-        code: code,
+        name: s?.name || cand?.name || (trimmedCode ? `Performance ${trimmedCode}` : `Performance ${idx + 1}`),
+        codeLetter: trimmedCode,
+        code: trimmedCode,
         candidateNo: idx + 1,
         place: row.place ? row.place.trim() : getOrdinalLabel(idx),
         label: row.place ? row.place.trim() : getOrdinalLabel(idx),
@@ -767,8 +774,12 @@ export default function JudgesResults() {
             <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
               {entryRows.map((row, i) => {
                 const grade = calcGrade(row.points)
-                const candidates = getCandidatesForProg(editProg)
-                const selectedCodesInForm = new Set(entryRows.filter((r, rIdx) => rIdx !== i && Boolean(r.studentId)).map(r => r.studentId))
+                const cands = getCandidatesForProg(editProg, progAssignments || {})
+                const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()))
+                const trimmedCode = (row.code || '').trim().toUpperCase()
+
+                const isValid = trimmedCode !== '' && (validCodesSet.size === 0 || validCodesSet.has(trimmedCode))
+                const isInvalid = trimmedCode !== '' && validCodesSet.size > 0 && !validCodesSet.has(trimmedCode)
 
                 return (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
@@ -782,26 +793,20 @@ export default function JudgesResults() {
                       />
                     </div>
                     <div className="col-span-4">
-                      <select
-                        className="w-full bg-black/20 text-mainText rounded-xl p-2.5 outline-none border border-secondary/30 focus:border-mainText text-sm font-bold cursor-pointer"
-                        value={row.studentId}
-                        onChange={e => updateRowField(i, 'studentId', e.target.value)}
-                      >
-                        <option value="" className="bg-card text-mutedText">Code Letter</option>
-                        {candidates.map(cand => {
-                          const isTakenByOtherRow = selectedCodesInForm.has(cand.id)
-                          return (
-                            <option
-                              key={cand.id}
-                              value={cand.id}
-                              disabled={isTakenByOtherRow}
-                              className={`bg-card ${isTakenByOtherRow ? 'text-mutedText opacity-40 font-normal' : 'text-mainText font-bold'}`}
-                            >
-                              {cand.code}{isTakenByOtherRow ? ' (Selected)' : ''}
-                            </option>
-                          )
-                        })}
-                      </select>
+                      <input
+                        type="text"
+                        placeholder="Enter code"
+                        maxLength={6}
+                        className={`w-full text-mainText rounded-xl p-2.5 outline-none text-sm font-bold uppercase transition ${
+                          isValid
+                            ? 'bg-emerald-500/10 border-2 border-emerald-500 text-emerald-400'
+                            : isInvalid
+                            ? 'bg-red-500/10 border-2 border-red-500 text-red-400'
+                            : 'bg-black/20 border border-secondary/30 focus:border-mainText'
+                        }`}
+                        value={row.code || ''}
+                        onChange={e => updateRowField(i, 'code', e.target.value.toUpperCase().trim())}
+                      />
                     </div>
                     <div className="col-span-2">
                       <input
