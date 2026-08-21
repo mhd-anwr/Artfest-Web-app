@@ -467,8 +467,8 @@ export default function JudgesResults() {
         codeLetter: trimmedCode,
         code: trimmedCode,
         candidateNo: idx + 1,
-        place: getOrdinalLabel(idx),
-        label: getOrdinalLabel(idx),
+        place: row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx),
+        label: row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx),
         points: pts,
         grade: gr,
       }
@@ -782,9 +782,9 @@ export default function JudgesResults() {
                 </div>
               ) : (
                 <>
-                  {/* Column Headers */}
+                  {/* Column Headers: Place header removed completely */}
                   <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
-                    <span className="col-span-3">Place</span>
+                    <span className="col-span-3"></span>
                     <span className="col-span-5">Code Letter</span>
                     <span className="col-span-2 text-center">Points</span>
                     <span className="col-span-2 text-center">Grade</span>
@@ -805,11 +805,15 @@ export default function JudgesResults() {
 
                       return (
                         <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
-                          {/* Display-only Place Label */}
-                          <div className="col-span-3 flex items-center">
-                            <span className="text-xs sm:text-sm font-bold text-accent px-2.5 py-2 rounded-xl bg-secondary/15 border border-secondary/30 w-full truncate">
-                              {getOrdinalLabel(i)}
-                            </span>
+                          {/* Editable Place Text Input */}
+                          <div className="col-span-3">
+                            <input
+                              type="text"
+                              placeholder="Place"
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold focus:border-[#62C744]"
+                              value={row.place}
+                              onChange={e => updateRowField(i, 'place', e.target.value)}
+                            />
                           </div>
 
                           {/* Select Dropdown for Code Letter */}
