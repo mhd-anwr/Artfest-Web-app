@@ -4,6 +4,7 @@ import { supabase } from '../supabase/client'
 import { getProgrammeById, getResultByProgrammeId } from '../supabase/queries'
 import { ArrowLeft, Trophy, Download } from 'lucide-react'
 import ResultPoster from '../components/ResultPoster'
+import PosterGeneratorModal from '../components/PosterGeneratorModal'
 import StudentAvatar from '../components/StudentAvatar'
 
 const MEDALS = [
@@ -20,6 +21,7 @@ export default function ResultDetail() {
   const [studentPhotos, setStudentPhotos] = useState({})
   const [chestNos, setChestNos] = useState({})
   const [showPoster, setShowPoster] = useState(false)
+  const [showTemplatePosters, setShowTemplatePosters] = useState(false)
 
   useEffect(() => {
     getProgrammeById(id).then(async (p) => {
@@ -104,13 +106,32 @@ export default function ResultDetail() {
             </div>
           ))}
 
-          <button
-            onClick={() => setShowPoster(true)}
-            className="btn-result w-full mt-2 p-3.5 text-base"
-          >
-            <Download size={18} /> Download Poster
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+            <button
+              onClick={() => setShowTemplatePosters(true)}
+              className="btn-result w-full p-3.5 text-sm sm:text-base font-bold bg-primary text-white hover:opacity-90 flex items-center justify-center gap-2"
+            >
+              <Trophy size={18} /> View Generated Posters
+            </button>
+            <button
+              onClick={() => setShowPoster(true)}
+              className="w-full p-3.5 text-sm sm:text-base font-semibold rounded-xl bg-card border border-secondary/40 text-mainText hover:bg-secondary/20 flex items-center justify-center gap-2"
+            >
+              <Download size={18} /> Classic Poster
+            </button>
+          </div>
         </div>
+      )}
+
+      {showTemplatePosters && (
+        <PosterGeneratorModal
+          result={{
+            ...result,
+            programmeName: programme.name,
+            category: programme.category,
+          }}
+          onClose={() => setShowTemplatePosters(false)}
+        />
       )}
 
       {showPoster && (

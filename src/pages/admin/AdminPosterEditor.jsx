@@ -14,32 +14,63 @@ import {
   MoveDown,
   ZoomIn,
   ZoomOut,
-  Maximize2,
   Image as ImageIcon,
   Type,
   Sliders,
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Grid,
 } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 
-const AVAILABLE_KEYS = [
-  { key: 'category', label: 'Category' },
-  { key: 'programme_name', label: 'Programme Name' },
-  { key: 'result_no', label: 'Result Number' },
-  { key: 'first_place_label', label: '1st Place Heading' },
-  { key: 'first_name', label: '1st Place Winner Name' },
-  { key: 'first_team', label: '1st Place Winner Team' },
-  { key: 'second_place_label', label: '2nd Place Heading' },
-  { key: 'second_name', label: '2nd Place Winner Name' },
-  { key: 'second_team', label: '2nd Place Winner Team' },
-  { key: 'third_place_label', label: '3rd Place Heading' },
-  { key: 'third_name', label: '3rd Place Winner Name' },
-  { key: 'third_team', label: '3rd Place Winner Team' },
-  { key: 'festival_footer', label: 'Festival Footer Text' },
-  { key: 'custom_text', label: 'Custom Static Text' },
+const LAYER_CATEGORIES = [
+  {
+    category: 'Programme Info',
+    keys: [
+      { key: 'programme_name', label: 'Program Name' },
+      { key: 'category', label: 'Category' },
+      { key: 'result_no', label: 'Result Number' },
+    ],
+  },
+  {
+    category: 'Winner Container & 1st Place',
+    keys: [
+      { key: 'first_place_label', label: '1st Place Position/Heading' },
+      { key: 'first_name', label: '1st Place Winner Name' },
+      { key: 'first_team', label: '1st Place Winner Team' },
+      { key: 'first_photo', label: '1st Place Winner Photo (Image)' },
+    ],
+  },
+  {
+    category: '2nd Place',
+    keys: [
+      { key: 'second_place_label', label: '2nd Place Position/Heading' },
+      { key: 'second_name', label: '2nd Place Winner Name' },
+      { key: 'second_team', label: '2nd Place Winner Team' },
+      { key: 'second_photo', label: '2nd Place Winner Photo (Image)' },
+    ],
+  },
+  {
+    category: '3rd Place',
+    keys: [
+      { key: 'third_place_label', label: '3rd Place Position/Heading' },
+      { key: 'third_name', label: '3rd Place Winner Name' },
+      { key: 'third_team', label: '3rd Place Winner Team' },
+      { key: 'third_photo', label: '3rd Place Winner Photo (Image)' },
+    ],
+  },
+  {
+    category: 'Other / Custom',
+    keys: [
+      { key: 'festival_footer', label: 'Festival Footer Text' },
+      { key: 'custom_text', label: 'Custom Static Text' },
+      { key: 'custom_image', label: 'Custom Image Element' },
+    ],
+  },
 ]
+
+const ALL_AVAILABLE_KEYS = LAYER_CATEGORIES.flatMap(c => c.keys)
 
 const SAMPLE_PREVIEW_DATA = {
   category: 'General Cat-A',
@@ -48,12 +79,15 @@ const SAMPLE_PREVIEW_DATA = {
   first_place_label: '🥇 1ST PLACE',
   first_name: 'Ahammed Kabeer',
   first_team: 'Dimashqi Dara',
+  first_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop',
   second_place_label: '🥈 2ND PLACE',
   second_name: 'Muhammed Sinan',
   second_team: 'Bukharian Baza',
+  second_photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
   third_place_label: '🥉 3RD PLACE',
   third_name: 'Faris Rahiman',
   third_team: 'Qayrawani Qaza',
+  third_photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop',
   festival_footer: "RENDEZVOUS '26 ART FESTIVAL",
   custom_text: 'Official Result Announcement',
 }
@@ -78,9 +112,11 @@ export default function AdminPosterEditor() {
   const [saving, setSaving] = useState(false)
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const [zoom, setZoom] = useState(0.45)
+  const [showGrid, setShowGrid] = useState(false)
   const [sampleData, setSampleData] = useState(SAMPLE_PREVIEW_DATA)
   const [showSamplePanel, setShowSamplePanel] = useState(false)
-  const [bgTab, setBgTab] = useState('gradient') // 'solid' | 'gradient' | 'image'
+  const [bgTab, setBgTab] = useState('gradient')
+  const [uploadingBg, setUploadingBg] = useState(false)
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -165,12 +201,12 @@ export default function AdminPosterEditor() {
     }))
   }
 
-  const addTextLayer = () => {
+  const addCustomTextField = () => {
     const newLayer = {
       id: `layer_${Date.now()}`,
       type: 'text',
       key: 'custom_text',
-      prefix: 'New Text: ',
+      prefix: 'Text: ',
       font_family: 'Sora',
       font_size: 28,
       font_weight: '700',
@@ -183,24 +219,24 @@ export default function AdminPosterEditor() {
     }
     setTemplate(prev => ({ ...prev, layers: [...prev.layers, newLayer] }))
     setSelectedLayerId(newLayer.id)
-    toast('Added new text layer')
+    toast('Added custom text field')
   }
 
-  const addImageLayer = () => {
+  const addImageElement = () => {
     const newLayer = {
       id: `layer_${Date.now()}`,
       type: 'image',
-      key: 'image_url',
+      key: 'first_photo',
       prefix: '',
-      image_url: 'https://placehold.co/200x200/115F32/FFFFFF/png?text=Logo',
+      image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop',
       width: 200,
       height: 200,
       x: (template.width || 1080) / 2 - 100,
-      y: 80,
+      y: 350,
     }
     setTemplate(prev => ({ ...prev, layers: [...prev.layers, newLayer] }))
     setSelectedLayerId(newLayer.id)
-    toast('Added new image layer')
+    toast('Added image element')
   }
 
   const deleteLayer = (layerId) => {
@@ -227,14 +263,21 @@ export default function AdminPosterEditor() {
   const handleBgImageUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setUploadingBg(true)
     toast('Uploading background image...')
-    const url = await uploadFrameImage(file, 'template_bgs')
-    if (url) {
-      setTemplate(prev => ({ ...prev, background_type: 'image', background_value: url }))
-      setBgTab('image')
-      toast('Background image updated!')
-    } else {
-      toast('Failed to upload image', 'error')
+    try {
+      const url = await uploadFrameImage(file, 'template_bgs')
+      if (url) {
+        setTemplate(prev => ({ ...prev, background_type: 'image', background_value: url }))
+        setBgTab('image')
+        toast('Background image updated!')
+      } else {
+        toast('Failed to upload image', 'error')
+      }
+    } catch (err) {
+      toast('Upload error', 'error')
+    } finally {
+      setUploadingBg(false)
     }
   }
 
@@ -255,154 +298,173 @@ export default function AdminPosterEditor() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4">
-      {/* Editor Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card rounded-2xl p-4 sm:p-5 border border-secondary/30 shadow-sm">
+      {/* Sticky Top Bar with Back Arrow and Duplicate Save Button */}
+      <div className="sticky top-14 lg:top-0 z-30 flex items-center justify-between gap-3 bg-card/95 backdrop-blur rounded-2xl p-4 border border-secondary/30 shadow-md">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/admin/frames/templates')}
-            className="p-2 rounded-xl bg-secondary/15 hover:bg-secondary/25 text-mainText transition"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/15 hover:bg-secondary/25 text-mainText text-xs font-semibold transition"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} /> Back to Templates
           </button>
           <div>
-            <h2 className="text-xl font-bold text-mainText flex items-center gap-2">
-              <Sliders className="text-accent" size={22} /> {template.name}
+            <h2 className="text-lg font-bold text-mainText flex items-center gap-2">
+              <Sliders className="text-accent" size={20} /> {template.name}
             </h2>
-            <p className="text-xs text-mutedText">
-              Live Poster Template Editor ({canvasWidth}×{canvasHeight}px)
+            <p className="text-[11px] text-mutedText">
+              Design Template Editor ({canvasWidth}×{canvasHeight}px)
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="inline-flex items-center gap-2 bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:opacity-90 transition shadow-sm disabled:opacity-50"
-          >
-            <Save size={16} /> {saving ? 'Saving...' : 'Save Template'}
-          </button>
-        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 bg-primary text-white font-semibold text-xs px-4 py-2.5 rounded-xl hover:opacity-90 transition shadow-sm disabled:opacity-50"
+        >
+          <Save size={15} /> {saving ? 'Saving...' : 'Save changes'}
+        </button>
       </div>
 
       {/* 3-Column Editor Area */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* COLUMN 1: LEFT LAYERS PANEL (3 cols) */}
-        <div className="lg:col-span-3 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-4 max-h-[750px] flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-mainText text-sm flex items-center gap-1.5">
-              <Type size={16} className="text-accent" /> Template Layers ({template.layers?.length || 0})
-            </h3>
-          </div>
+        {/* COLUMN 1: LEFT SIDEBAR - LAYERS PANEL (3 cols) */}
+        <div className="lg:col-span-3 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-4 max-h-[750px] flex flex-col justify-between overflow-hidden">
+          <div className="space-y-3 flex-1 overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between border-b border-secondary/20 pb-2">
+              <h3 className="font-bold text-mainText text-sm flex items-center gap-1.5">
+                <Type size={16} className="text-accent" /> Layers ({template.layers?.length || 0})
+              </h3>
+              <span className="text-[10px] text-mutedText">Click to select</span>
+            </div>
 
-          {/* Add Layer Actions */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={addTextLayer}
-              className="inline-flex items-center justify-center gap-1.5 bg-secondary/20 hover:bg-secondary/30 text-mainText text-xs font-semibold py-2 px-2.5 rounded-xl transition"
-            >
-              <Plus size={14} /> Text Layer
-            </button>
-            <button
-              onClick={addImageLayer}
-              className="inline-flex items-center justify-center gap-1.5 bg-secondary/20 hover:bg-secondary/30 text-mainText text-xs font-semibold py-2 px-2.5 rounded-xl transition"
-            >
-              <Plus size={14} /> Image Layer
-            </button>
-          </div>
+            {/* Layers List */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {template.layers?.map((layer, idx) => {
+                const isSelected = layer.id === selectedLayerId
+                const keyMeta = ALL_AVAILABLE_KEYS.find(k => k.key === layer.key)
+                const keyLabel = keyMeta?.label || layer.key
 
-          {/* Layer List */}
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {template.layers?.map((layer, idx) => {
-              const isSelected = layer.id === selectedLayerId
-              const keyLabel = AVAILABLE_KEYS.find(k => k.key === layer.key)?.label || layer.key
-
-              return (
-                <div
-                  key={layer.id}
-                  onClick={() => setSelectedLayerId(layer.id)}
-                  className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between gap-2 ${
-                    isSelected
-                      ? 'bg-primary/20 border-primary text-mainText font-bold shadow-sm'
-                      : 'bg-mainBackground/40 border-secondary/20 hover:bg-secondary/10 text-mutedText'
-                  }`}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] bg-secondary/30 text-mainText px-1.5 py-0.5 rounded font-mono">
-                        #{idx + 1}
-                      </span>
-                      <span className="truncate font-semibold text-mainText">{layer.prefix}{keyLabel}</span>
+                return (
+                  <div
+                    key={layer.id}
+                    onClick={() => setSelectedLayerId(layer.id)}
+                    className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between gap-2 ${
+                      isSelected
+                        ? 'bg-[#115F32] text-white border-[#C8F7A8] shadow-md font-bold'
+                        : 'bg-mainBackground/50 border-secondary/20 hover:bg-secondary/15 text-mainText'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-secondary/30 text-mainText'}`}>
+                          #{idx + 1}
+                        </span>
+                        <span className="truncate font-semibold">{layer.prefix}{keyLabel}</span>
+                      </div>
+                      <p className={`text-[10px] truncate mt-0.5 ${isSelected ? 'text-[#C8F7A8]' : 'text-mutedText'}`}>
+                        {layer.type === 'image' ? '🖼 Image' : '🔤 Text'} · X:{layer.x} Y:{layer.y}
+                      </p>
                     </div>
-                    <p className="text-[10px] text-mutedText truncate mt-0.5">
-                      X: {layer.x}px · Y: {layer.y}px
-                    </p>
-                  </div>
 
-                  <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={() => moveLayer(idx, -1)}
-                      disabled={idx === 0}
-                      className="p-1 hover:text-accent disabled:opacity-20"
-                      title="Move Up"
-                    >
-                      <MoveUp size={12} />
-                    </button>
-                    <button
-                      onClick={() => moveLayer(idx, 1)}
-                      disabled={idx === template.layers.length - 1}
-                      className="p-1 hover:text-accent disabled:opacity-20"
-                      title="Move Down"
-                    >
-                      <MoveDown size={12} />
-                    </button>
-                    <button
-                      onClick={() => deleteLayer(layer.id)}
-                      className="p-1 text-red-400 hover:text-red-500"
-                      title="Delete Layer"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => moveLayer(idx, -1)}
+                        disabled={idx === 0}
+                        className="p-1 hover:text-accent disabled:opacity-20"
+                        title="Move Up"
+                      >
+                        <MoveUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => moveLayer(idx, 1)}
+                        disabled={idx === template.layers.length - 1}
+                        className="p-1 hover:text-accent disabled:opacity-20"
+                        title="Move Down"
+                      >
+                        <MoveDown size={12} />
+                      </button>
+                      <button
+                        onClick={() => deleteLayer(layer.id)}
+                        className="p-1 text-red-400 hover:text-red-500"
+                        title="Delete Layer"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* COLUMN 2: CENTER LIVE CANVAS PREVIEW (6 cols) */}
-        <div className="lg:col-span-6 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-3 flex flex-col items-center justify-between min-h-[600px] overflow-hidden">
-          {/* Zoom Controls */}
-          <div className="w-full flex items-center justify-between gap-2 border-b border-secondary/20 pb-3">
-            <span className="text-xs font-semibold text-mutedText">Live Poster Canvas</span>
-            <div className="flex items-center gap-1 bg-mainBackground rounded-xl p-1 border border-secondary/20">
-              <button
-                onClick={() => setZoom(z => Math.max(0.2, z - 0.1))}
-                className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
-                title="Zoom Out"
-              >
-                <ZoomOut size={14} />
-              </button>
-              <span className="text-xs font-mono px-2 text-mainText font-bold">
-                {Math.round(zoom * 100)}%
-              </span>
-              <button
-                onClick={() => setZoom(z => Math.min(1.2, z + 0.1))}
-                className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
-                title="Zoom In"
-              >
-                <ZoomIn size={14} />
-              </button>
-              <button
-                onClick={() => setZoom(0.45)}
-                className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText text-[11px] font-semibold px-2"
-              >
-                Fit
-              </button>
+                )
+              })}
             </div>
           </div>
 
-          {/* Canvas Wrapper */}
+          {/* Add Layer Buttons at Bottom of Left Sidebar */}
+          <div className="pt-2 border-t border-secondary/20 space-y-2 shrink-0">
+            <button
+              onClick={addCustomTextField}
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-primary/20 hover:bg-primary text-accent hover:text-white border border-primary/30 text-xs font-semibold py-2.5 rounded-xl transition"
+            >
+              <Plus size={14} /> Add custom text field
+            </button>
+            <button
+              onClick={addImageElement}
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-secondary/20 hover:bg-secondary/30 text-mainText text-xs font-semibold py-2.5 rounded-xl transition"
+            >
+              <Plus size={14} /> Add image element
+            </button>
+          </div>
+        </div>
+
+        {/* COLUMN 2: CENTER LIVE PREVIEW PANEL (6 cols) */}
+        <div className="lg:col-span-6 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-3 flex flex-col items-center justify-between min-h-[600px] overflow-hidden">
+          {/* Controls: Zoom & Grid Toggle */}
+          <div className="w-full flex items-center justify-between gap-2 border-b border-secondary/20 pb-3">
+            <span className="text-xs font-bold text-mainText flex items-center gap-1.5">
+              Live Preview Canvas
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowGrid(g => !g)}
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition border ${
+                  showGrid
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-mainBackground border-secondary/20 text-mutedText hover:text-mainText'
+                }`}
+                title="Toggle Grid Lines"
+              >
+                <Grid size={13} /> Grid {showGrid ? 'ON' : 'OFF'}
+              </button>
+
+              <div className="flex items-center gap-1 bg-mainBackground rounded-xl p-1 border border-secondary/20">
+                <button
+                  onClick={() => setZoom(z => Math.max(0.2, z - 0.1))}
+                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={14} />
+                </button>
+                <span className="text-xs font-mono px-2 text-mainText font-bold">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={() => setZoom(z => Math.min(1.2, z + 0.1))}
+                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
+                  title="Zoom In"
+                >
+                  <ZoomIn size={14} />
+                </button>
+                <button
+                  onClick={() => setZoom(0.45)}
+                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText text-[11px] font-semibold px-2"
+                >
+                  Fit
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Preview Canvas Wrapper */}
           <div className="w-full flex-1 flex items-center justify-center p-4 overflow-auto min-h-[460px]">
             <div
               ref={canvasRef}
@@ -413,7 +475,18 @@ export default function AdminPosterEditor() {
                 ...canvasBgStyle,
               }}
             >
-              {/* Render Layers */}
+              {/* Optional Grid Lines Overlay */}
+              {showGrid && (
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+                    backgroundSize: `${100 * zoom}px ${100 * zoom}px`,
+                  }}
+                />
+              )}
+
+              {/* Render Poster Layers */}
               {template.layers?.map(layer => {
                 const isSelected = layer.id === selectedLayerId
                 const scaledX = (layer.x || 0) * zoom
@@ -426,7 +499,9 @@ export default function AdminPosterEditor() {
                     key={layer.id}
                     onClick={() => setSelectedLayerId(layer.id)}
                     className={`absolute cursor-pointer transition-all ${
-                      isSelected ? 'outline outline-2 outline-accent ring-2 ring-accent/40 z-30' : 'hover:outline hover:outline-1 hover:outline-white/40 z-20'
+                      isSelected
+                        ? 'outline outline-2 outline-[#228C22] ring-4 ring-[#228C22]/40 z-30'
+                        : 'hover:outline hover:outline-1 hover:outline-white/40 z-20'
                     }`}
                     style={{
                       left: `${scaledX}px`,
@@ -437,9 +512,9 @@ export default function AdminPosterEditor() {
                   >
                     {layer.type === 'image' ? (
                       <img
-                        src={layer.image_url || 'https://placehold.co/200x200/115F32/FFFFFF/png?text=Logo'}
-                        alt="Layer"
-                        className="object-contain"
+                        src={sampleData[layer.key] || layer.image_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop'}
+                        alt="Layer Element"
+                        className="object-contain rounded-lg shadow"
                         style={{
                           width: `${(layer.width || 200) * zoom}px`,
                           height: `${(layer.height || 200) * zoom}px`,
@@ -453,7 +528,7 @@ export default function AdminPosterEditor() {
                           fontWeight: layer.font_weight || '700',
                           color: layer.color || '#FFFFFF',
                           lineHeight: layer.line_height || 1.2,
-                          textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                         }}
                       >
                         {getLayerRenderText(layer)}
@@ -465,23 +540,23 @@ export default function AdminPosterEditor() {
             </div>
           </div>
 
-          {/* Sample Data Toggle Drawer */}
+          {/* Example Poster Data for Preview Section */}
           <div className="w-full border-t border-secondary/20 pt-3">
             <button
               onClick={() => setShowSamplePanel(v => !v)}
-              className="w-full flex items-center justify-between text-xs font-semibold text-mutedText hover:text-mainText transition"
+              className="w-full flex items-center justify-between text-xs font-bold text-mainText hover:text-accent transition"
             >
               <span className="flex items-center gap-1.5">
-                <Sparkles size={14} className="text-accent" /> Example Data for Preview Testing
+                <Sparkles size={14} className="text-accent" /> Example Poster Data for Preview
               </span>
               {showSamplePanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
             {showSamplePanel && (
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs max-h-40 overflow-y-auto p-2 bg-mainBackground/50 rounded-xl">
+              <div className="grid grid-cols-2 gap-2 mt-3 text-xs max-h-48 overflow-y-auto p-3 bg-mainBackground/60 rounded-xl border border-secondary/20">
                 {Object.keys(SAMPLE_PREVIEW_DATA).map(key => (
                   <div key={key}>
-                    <label className="text-[10px] text-mutedText block font-mono capitalize">{key}</label>
+                    <label className="text-[10px] text-mutedText block font-mono capitalize mb-0.5">{key}</label>
                     <input
                       type="text"
                       value={sampleData[key] || ''}
@@ -495,18 +570,20 @@ export default function AdminPosterEditor() {
           </div>
         </div>
 
-        {/* COLUMN 3: RIGHT TEMPLATE CONFIGURATION PANEL (3 cols) */}
+        {/* COLUMN 3: RIGHT SIDEBAR - TEMPLATE CONFIGURATION PANEL (3 cols) */}
         <div className="lg:col-span-3 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-4 max-h-[750px] overflow-y-auto">
-          <h3 className="font-bold text-mainText text-sm">Template Settings</h3>
+          <h3 className="font-bold text-mainText text-sm border-b border-secondary/20 pb-2">
+            Template Configuration
+          </h3>
 
-          {/* Name */}
+          {/* Template Name */}
           <div>
             <label className="text-xs font-semibold text-mutedText block mb-1">Template Name</label>
             <input
               type="text"
               value={template.name || ''}
               onChange={e => setTemplate(t => ({ ...t, name: e.target.value }))}
-              className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-medium text-mainText focus:outline-none focus:border-accent"
+              className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -518,7 +595,7 @@ export default function AdminPosterEditor() {
                 type="number"
                 value={template.width || 1080}
                 onChange={e => setTemplate(t => ({ ...t, width: Number(e.target.value) }))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-medium text-mainText focus:outline-none focus:border-accent"
+                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -527,16 +604,16 @@ export default function AdminPosterEditor() {
                 type="number"
                 value={template.height || 1350}
                 onChange={e => setTemplate(t => ({ ...t, height: Number(e.target.value) }))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-medium text-mainText focus:outline-none focus:border-accent"
+                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
               />
             </div>
           </div>
 
-          {/* Background Configuration */}
+          {/* Background Image & Style Selector */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-mutedText block">Background Style</label>
-            
-            {/* Tabs */}
+
+            {/* Style Selector Tabs */}
             <div className="grid grid-cols-3 gap-1 bg-mainBackground p-1 rounded-xl border border-secondary/20 text-xs">
               {['gradient', 'solid', 'image'].map(tab => (
                 <button
@@ -570,7 +647,7 @@ export default function AdminPosterEditor() {
                     onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
                     className="w-8 h-8 rounded-lg border-0 cursor-pointer"
                   />
-                  <span className="text-xs text-mutedText">Pick solid hex color</span>
+                  <span className="text-xs text-mutedText">Solid Hex Color</span>
                 </div>
               </div>
             )}
@@ -584,7 +661,7 @@ export default function AdminPosterEditor() {
                   className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-mono text-mainText focus:outline-none"
                   placeholder="linear-gradient(...)"
                 />
-                <p className="text-[10px] text-mutedText font-semibold">Preset Gradients:</p>
+                <p className="text-[10px] text-mutedText font-semibold">Preset Festival Gradients:</p>
                 <div className="space-y-1">
                   {PRESET_GRADIENTS.map((g, idx) => (
                     <button
@@ -606,32 +683,43 @@ export default function AdminPosterEditor() {
                   value={template.background_value || ''}
                   onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
                   className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs text-mainText"
-                  placeholder="Background Image Storage URL"
+                  placeholder="Storage Image URL"
                 />
-                <label className="inline-flex items-center justify-center gap-1.5 w-full bg-secondary/20 hover:bg-secondary/30 text-mainText text-xs font-semibold py-2 rounded-xl cursor-pointer transition">
-                  <ImageIcon size={14} /> Upload Background Image
+                <label className="inline-flex items-center justify-center gap-1.5 w-full bg-primary text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm">
+                  <ImageIcon size={14} /> {uploadingBg ? 'Uploading Image...' : 'Upload Background Image'}
                   <input type="file" accept="image/*" onChange={handleBgImageUpload} className="hidden" />
                 </label>
               </div>
             )}
+          </div>
+
+          {/* Primary Save Button */}
+          <div className="pt-2 border-t border-secondary/20">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full inline-flex items-center justify-center gap-2 bg-primary text-white font-bold text-xs py-3 rounded-xl hover:opacity-90 transition shadow-sm disabled:opacity-50"
+            >
+              <Save size={16} /> {saving ? 'Saving...' : 'Save Template Changes'}
+            </button>
           </div>
         </div>
       </div>
 
       {/* BOTTOM TOOLBAR FOR SELECTED LAYER */}
       {selectedLayer && (
-        <div className="bg-card rounded-2xl p-4 border border-accent/40 shadow-lg space-y-3">
+        <div className="bg-card rounded-2xl p-4 border-2 border-[#228C22] shadow-xl space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders size={14} /> Edit Layer: {selectedLayer.prefix}{selectedLayer.key}
+              <Sliders size={14} /> Selected Layer: {selectedLayer.prefix}{selectedLayer.key}
             </span>
             <span className="text-[11px] text-mutedText">
-              💡 Press Arrow keys to move layer (Hold Shift for 10px steps)
+              💡 Arrow keys nudge position (Shift = 10px steps)
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2 text-xs">
-            {/* Binding Key */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-2 text-xs">
+            {/* Key Binding */}
             <div className="col-span-2">
               <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Key Binding</label>
               <select
@@ -639,7 +727,7 @@ export default function AdminPosterEditor() {
                 onChange={e => updateSelectedLayer('key', e.target.value)}
                 className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
               >
-                {AVAILABLE_KEYS.map(k => (
+                {ALL_AVAILABLE_KEYS.map(k => (
                   <option key={k.key} value={k.key}>{k.label}</option>
                 ))}
               </select>
@@ -647,18 +735,18 @@ export default function AdminPosterEditor() {
 
             {/* Prefix */}
             <div className="col-span-2">
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Text Prefix</label>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Prefix</label>
               <input
                 type="text"
                 value={selectedLayer.prefix || ''}
                 onChange={e => updateSelectedLayer('prefix', e.target.value)}
                 className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-                placeholder="e.g. RESULT #"
+                placeholder="Prefix e.g. 1st: "
               />
             </div>
 
             {/* Font Family */}
-            <div className="col-span-2">
+            <div>
               <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Family</label>
               <select
                 value={selectedLayer.font_family || 'Sora'}
@@ -673,7 +761,7 @@ export default function AdminPosterEditor() {
 
             {/* Font Size */}
             <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Size (px)</label>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Size (px)</label>
               <input
                 type="number"
                 value={selectedLayer.font_size || 24}
@@ -684,7 +772,7 @@ export default function AdminPosterEditor() {
 
             {/* Font Weight */}
             <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Weight</label>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Weight</label>
               <select
                 value={selectedLayer.font_weight || '700'}
                 onChange={e => updateSelectedLayer('font_weight', e.target.value)}
@@ -694,6 +782,20 @@ export default function AdminPosterEditor() {
                 <option value="600">SemiBold</option>
                 <option value="700">Bold</option>
                 <option value="800">Extrabold</option>
+              </select>
+            </div>
+
+            {/* Text Alignment */}
+            <div>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Alignment</label>
+              <select
+                value={selectedLayer.text_align || 'center'}
+                onChange={e => updateSelectedLayer('text_align', e.target.value)}
+                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
               </select>
             </div>
 
@@ -716,9 +818,32 @@ export default function AdminPosterEditor() {
               </div>
             </div>
 
+            {/* Line Height */}
+            <div>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Line Height</label>
+              <input
+                type="number"
+                step="0.1"
+                value={selectedLayer.line_height || 1.2}
+                onChange={e => updateSelectedLayer('line_height', Number(e.target.value))}
+                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
+              />
+            </div>
+
+            {/* Width */}
+            <div>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Width (px)</label>
+              <input
+                type="number"
+                value={selectedLayer.width || 300}
+                onChange={e => updateSelectedLayer('width', Number(e.target.value))}
+                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
+              />
+            </div>
+
             {/* Position X */}
             <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">X (px)</label>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">X Pos (px)</label>
               <input
                 type="number"
                 value={selectedLayer.x || 0}
@@ -729,7 +854,7 @@ export default function AdminPosterEditor() {
 
             {/* Position Y */}
             <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Y (px)</label>
+              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Y Pos (px)</label>
               <input
                 type="number"
                 value={selectedLayer.y || 0}

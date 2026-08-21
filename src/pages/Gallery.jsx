@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSpotlight, getActiveGalleryFooter } from '../supabase/queries'
-import { Download, Images, ChevronLeft } from 'lucide-react'
+import { Download, Images, ChevronLeft, X, Maximize2 } from 'lucide-react'
 import { useToast } from '../components/Toast'
 
 const FALLBACK_ALBUM = 'Spotlight'
@@ -25,6 +25,7 @@ const groupByAlbum = (images) => {
 export default function Gallery() {
   const [images, setImages] = useState([])
   const [activeFooter, setActiveFooter] = useState(null)
+  const [selectedPhoto, setSelectedPhoto] = useState(null)
   const toast = useToast()
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function Gallery() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 stagger-grid">
                   {album.imgs.map(img => (
-                    <div key={img.id} className="group relative">
+                    <div key={img.id} className="group relative cursor-pointer" onClick={() => setSelectedPhoto(img)}>
                       <div className="relative overflow-hidden rounded-xl border border-secondary/30">
                         <img
                           src={img.imageURL}
@@ -102,7 +103,10 @@ export default function Gallery() {
                           </div>
                         )}
                         <button
-                          onClick={() => handleDownloadImage(img.imageURL, `spotlight_${img.id}.jpg`)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDownloadImage(img.imageURL, `spotlight_${img.id}.jpg`)
+                          }}
                           aria-label={`Download ${img.caption || 'image'}`}
                           className="absolute bottom-2 right-2 z-20 bg-black/60 hover:bg-black/80 p-1.5 sm:p-2 rounded-lg transition"
                         >
@@ -120,6 +124,47 @@ export default function Gallery() {
           </div>
         )}
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute -top-10 right-0 p-2 text-white hover:text-accent transition"
+            >
+              <X size={26} />
+            </button>
+
+            {/* Photo Container with Footer Overlay */}
+            <div className="relative overflow-hidden rounded-2xl border border-white/20 shadow-2xl flex items-center justify-center bg-black max-h-[80vh]">
+              <img
+                src={selectedPhoto.imageURL}
+                alt={selectedPhoto.caption || 'Gallery Photo'}
+                className="max-h-[80vh] max-w-full object-contain"
+              />
+              {activeFooter?.image_url && (
+                <div className="absolute bottom-3 left-0 right-0 z-10 pointer-events-none px-4 flex justify-center">
+                  <img
+                    src={activeFooter.image_url}
+                    alt="Gallery Footer Overlay"
+                    className="w-[90%] sm:w-[85%] h-auto max-h-14 sm:max-h-20 object-contain drop-shadow-md"
+                  />
+                </div>
+              )}
+            </div>
+
+            {selectedPhoto.caption && (
+              <p className="text-white text-sm sm:text-base font-semibold mt-3 text-center">
+                {selectedPhoto.caption}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
