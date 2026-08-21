@@ -66,10 +66,30 @@ export default function JudgesResults() {
   }
 
   useEffect(() => {
-    getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
-    getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
-    getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
-    loadResults()
+    async function checkReset() {
+      if (window.location.search.includes('hard_reset=true')) {
+        console.log("HARD RESET TRIGGERED IN JUDGES RESULTS")
+        const { data: progs } = await judgeClient.from('programmes').select('id')
+        if (progs) {
+          for (const p of progs) {
+            await judgeClient.from('results').delete().eq('programmeId', p.id)
+            await judgeClient.from('programmes').update({ isFinished: false }).eq('id', p.id)
+          }
+        }
+        const { data: allRes } = await judgeClient.from('results').select('id')
+        if (allRes && allRes.length > 0) {
+          for (const r of allRes) {
+            await judgeClient.from('results').delete().eq('id', r.id)
+          }
+        }
+        console.log("HARD RESET FINISHED IN JUDGES RESULTS")
+      }
+      getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
+      getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
+      getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
+      loadResults()
+    }
+    checkReset()
   }, [])
 
   const getCandidatesForProg = (prog, currentAssignments = null) => {

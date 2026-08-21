@@ -4,6 +4,8 @@ import { getAllResults, getProgrammes, getStudents, getTeams } from '../../supab
 import AdminResultPoster from './AdminResultPoster'
 import PosterGeneratorModal from '../../components/PosterGeneratorModal'
 
+import { supabase } from '../../supabase/client'
+
 export default function AdminResults() {
   const [programmes, setProgrammes] = useState([])
   const [students, setStudents] = useState([])
@@ -14,7 +16,7 @@ export default function AdminResults() {
   const [showPoster, setShowPoster] = useState(false)
   const [selectedPosterResult, setSelectedPosterResult] = useState(null)
 
-  useEffect(() => {
+  const loadAll = () => {
     Promise.all([
       getProgrammes(),
       getStudents(),
@@ -26,6 +28,30 @@ export default function AdminResults() {
       setTeams(teamData)
       setResults(resultData)
     })
+  }
+
+  useEffect(() => {
+    async function checkReset() {
+      if (window.location.search.includes('hard_reset=true')) {
+        console.log("HARD RESET TRIGGERED IN ADMIN RESULTS")
+        const { data: progs } = await supabase.from('programmes').select('id')
+        if (progs) {
+          for (const p of progs) {
+            await supabase.from('results').delete().eq('programmeId', p.id)
+            await supabase.from('programmes').update({ isFinished: false }).eq('id', p.id)
+          }
+        }
+        const { data: allRes } = await supabase.from('results').select('id')
+        if (allRes && allRes.length > 0) {
+          for (const r of allRes) {
+            await supabase.from('results').delete().eq('id', r.id)
+          }
+        }
+        console.log("HARD RESET FINISHED IN ADMIN RESULTS")
+      }
+      loadAll()
+    }
+    checkReset()
   }, [])
 
   const teamMap = useMemo(() => {
@@ -90,6 +116,42 @@ export default function AdminResults() {
     return rows
   }
 
+  const handleHardResetResults = async () => {
+    if (!window.confirm("CRITICAL DESTRUCTIVE ACTION: Are you sure you want to PERMANENTLY RESET & CLEAR ALL RESULT DATA?\n\nThis will delete all submitted results, locked results, and result entries from the database.\n\nMaster data (Participants, Programmes, Teams, Code Assignments) will be preserved 100%.")) {
+      return
+    }
+
+    try {
+      // 1. Delete results per programme
+      const { data: progs } = await supabase.from('programmes').select('id')
+      if (progs && progs.length > 0) {
+        for (const p of progs) {
+          await supabase.from('results').delete().eq('programmeId', p.id)
+          await supabase.from('programmes').update({ isFinished: false }).eq('id', p.id)
+        }
+      }
+
+      // 2. Delete any remaining results by ID
+      const { data: allRes } = await supabase.from('results').select('id')
+      if (allRes && allRes.length > 0) {
+        for (const r of allRes) {
+          await supabase.from('results').delete().eq('id', r.id)
+        }
+      }
+
+      // 3. Clear client-side result storage
+      try {
+        localStorage.removeItem('artfest_results')
+        localStorage.removeItem('artfest_judge_drafts')
+      } catch (e) {}
+
+      alert("HARD RESET COMPLETE! Results system reset to 0.")
+      loadAll()
+    } catch (err) {
+      alert("Error resetting results: " + err.message)
+    }
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between gap-3 mb-6">
@@ -102,16 +164,24 @@ export default function AdminResults() {
             <p className="text-mutedText text-sm">Admin preview only. Judges remain the only write path for results.</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowPoster(s => !s)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base shrink-0 ${
-            showPoster
-              ? 'bg-card border border-secondary/40 text-mainText hover:bg-white/10'
-              : 'bg-primary text-white hover:bg-primary/90'
-          }`}
-        >
-          <Image size={16} className="sm:w-[18px] sm:h-[18px]" /> {showPoster ? 'Hide Legacy Poster' : 'Legacy Poster'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleHardResetResults}
+            className="bg-red-600/90 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-sm shrink-0 shadow-sm"
+          >
+            Reset All Results
+          </button>
+          <button
+            onClick={() => setShowPoster(s => !s)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base shrink-0 ${
+              showPoster
+                ? 'bg-card border border-secondary/40 text-mainText hover:bg-white/10'
+                : 'bg-primary text-white hover:bg-primary/90'
+            }`}
+          >
+            <Image size={16} className="sm:w-[18px] sm:h-[18px]" /> {showPoster ? 'Hide Legacy Poster' : 'Legacy Poster'}
+          </button>
+        </div>
       </div>
 
       {showPoster && (
