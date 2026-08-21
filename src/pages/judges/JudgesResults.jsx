@@ -214,6 +214,7 @@ export default function JudgesResults() {
       place: getOrdinalLabel(idx),
       code: '',
       points: '',
+      grade: '',
     }))
 
     setEntryRows(initialRows)
@@ -368,6 +369,7 @@ export default function JudgesResults() {
         let savedCode = ''
         let savedPlace = getOrdinalLabel(idx)
         let savedPoints = ''
+        let savedGrade = ''
 
         if (latest) {
           if (Array.isArray(latest.entries) && latest.entries.length > 0) {
@@ -381,20 +383,24 @@ export default function JudgesResults() {
               savedPlace = matchedEntry.place || matchedEntry.label || getOrdinalLabel(idx)
               savedPoints = matchedEntry.points != null ? String(matchedEntry.points) : ''
               savedCode = matchedEntry.code || matchedEntry.codeLetter || ''
+              savedGrade = matchedEntry.grade || ''
             }
           } else {
             if (idx === 0 && latest.first) {
               savedCode = latest.first.code || latest.first.codeLetter || ''
               savedPlace = latest.first.label || '1st Place'
               savedPoints = latest.first.points != null ? String(latest.first.points) : ''
+              savedGrade = latest.first.grade || ''
             } else if (idx === 1 && latest.second) {
               savedCode = latest.second.code || latest.second.codeLetter || ''
               savedPlace = latest.second.label || '2nd Place'
               savedPoints = latest.second.points != null ? String(latest.second.points) : ''
+              savedGrade = latest.second.grade || ''
             } else if (idx === 2 && latest.third) {
               savedCode = latest.third.code || latest.third.codeLetter || ''
               savedPlace = latest.third.label || '3rd Place'
               savedPoints = latest.third.points != null ? String(latest.third.points) : ''
+              savedGrade = latest.third.grade || ''
             }
           }
         }
@@ -403,6 +409,7 @@ export default function JudgesResults() {
           place: savedPlace,
           code: savedCode,
           points: savedPoints,
+          grade: savedGrade,
         }
       })
 
@@ -458,7 +465,7 @@ export default function JudgesResults() {
       const studentId = cand?.id || (trimmedCode ? `anon_${editProg.id}_${trimmedCode}` : `anon_${editProg.id}_row_${idx + 1}`)
       const s = getStudentObj(studentId)
       const pts = Number(row.points) || 0
-      const gr = calcGrade(row.points)
+      const gr = (row.grade || '').trim() || 'No Grade'
 
       return {
         candidateId: studentId,
@@ -785,15 +792,14 @@ export default function JudgesResults() {
                   {/* Column Headers: Place header removed completely */}
                   <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
                     <span className="col-span-3"></span>
-                    <span className="col-span-5">Code Letter</span>
+                    <span className="col-span-4">Code Letter</span>
                     <span className="col-span-2 text-center">Points</span>
-                    <span className="col-span-2 text-center">Grade</span>
+                    <span className="col-span-3 text-center">Grade</span>
                   </div>
 
                   {/* Scrollable list of placement rows for all candidates */}
                   <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
                     {entryRows.map((row, i) => {
-                      const grade = calcGrade(row.points)
                       const assignedCodes = Array.from(new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))).sort()
 
                       const selectedCodesInOtherRows = new Set(
@@ -817,7 +823,7 @@ export default function JudgesResults() {
                           </div>
 
                           {/* Select Dropdown for Code Letter */}
-                          <div className="col-span-5">
+                          <div className="col-span-4">
                             <select
                               className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
                               value={row.code || ''}
@@ -859,17 +865,32 @@ export default function JudgesResults() {
                             />
                           </div>
 
-                          {/* Grade Display */}
-                          <div className="col-span-2 flex justify-center">
-                            <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${
-                              grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
-                              grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                              grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
-                              grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
-                              'bg-orange-500/15 text-orange-400 border border-orange-500/40'
-                            }`}>
-                              {grade}
-                            </div>
+                          {/* Grade Manual Select Dropdown */}
+                          <div className="col-span-3">
+                            <select
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
+                              value={row.grade || ''}
+                              onChange={e => updateRowField(i, 'grade', e.target.value)}
+                            >
+                              <option value="" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA]">
+                                Select Grade
+                              </option>
+                              <option value="A+" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5] font-bold">
+                                A+
+                              </option>
+                              <option value="A" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5] font-bold">
+                                A
+                              </option>
+                              <option value="B" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5] font-bold">
+                                B
+                              </option>
+                              <option value="C" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5] font-bold">
+                                C
+                              </option>
+                              <option value="No Grade" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA] font-semibold">
+                                No Grade
+                              </option>
+                            </select>
                           </div>
                         </div>
                       )
