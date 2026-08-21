@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronUp,
   Grid,
+  Move,
 } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 
@@ -117,6 +118,9 @@ export default function AdminPosterEditor() {
   const [showSamplePanel, setShowSamplePanel] = useState(false)
   const [bgTab, setBgTab] = useState('gradient')
   const [uploadingBg, setUploadingBg] = useState(false)
+  const [dragState, setDragState] = useState(null)
+  const [snapGuides, setSnapGuides] = useState({ x: null, y: null })
+
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -170,6 +174,126 @@ export default function AdminPosterEditor() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedLayerId, template])
+
+  // Global MouseMove and MouseUp listeners for Direct Canvas Drag & Resize
+  useEffect(() => {
+    if (!dragState) return
+
+    const handleMouseMove = (e) => {
+      const { type, layerId, startMouseX, startMouseY, startX, startY, startW, startH, corner } = dragState
+      const dxScreen = e.clientX - startMouseX
+      const dyScreen = e.clientY - startMouseY
+
+      const dxLogical = Math.round(dxScreen / zoom)
+      const dyLogical = Math.round(dyScreen / zoom)
+
+      const canvasW = template.width || 1080
+      const canvasH = template.height || 1350
+
+      setTemplate(prev => {
+        if (!prev) return prev
+        const layers = prev.layers.map(l => {
+          if (l.id !== layerId) return l
+
+          if (type === 'move') {
+            let newX = startX + dxLogical
+            let newY = startY + dyLogical
+
+            const layerW = l.width || 300
+            const layerH = l.height || (l.type === 'image' ? 200 : (l.font_size || 24) * 1.4)
+
+            // Boundaries: keep inside poster canvas
+            newX = Math.max(-50, Math.min(canvasW - 20, newX))
+            newY = Math.max(-50, Math.min(canvasH - 20, newY))
+
+            // Snap Guides calculation (~7px tolerance)
+            let guideX = null
+            let guideY = null
+
+            // Center Horizontal Snap
+            if (Math.abs((newX + layerW / 2) - canvasW / 2) < 8) {
+              newX = Math.round(canvasW / 2 - layerW / 2)
+              guideX = canvasW / 2
+            } else if (Math.abs(newX) < 8) {
+              newX = 0
+              guideX = 0
+            } else if (Math.abs((newX + layerW) - canvasW) < 8) {
+              newX = canvasW - layerW
+              guideX = canvasW
+            }
+
+            // Center Vertical Snap
+            if (Math.abs((newY + layerH / 2) - canvasH / 2) < 8) {
+              newY = Math.round(canvasH / 2 - layerH / 2)
+              guideY = canvasH / 2
+            } else if (Math.abs(newY) < 8) {
+              newY = 0
+              guideY = 0
+            } else if (Math.abs((newY + layerH) - canvasH) < 8) {
+              newY = canvasH - layerH
+              guideY = canvasH
+            }
+
+            setSnapGuides({ x: guideX, y: guideY })
+
+            return { ...l, x: newX, y: newY }
+          }
+
+          if (type === 'resize') {
+            let newW = startW
+            let newH = startH
+            let newX = startX
+            let newY = startY
+
+            const isImage = l.type === 'image'
+            const aspectRatio = isImage ? (startH / startW) : 1
+
+            if (corner === 'br') {
+              newW = Math.max(40, startW + dxLogical)
+              newH = isImage ? Math.round(newW * aspectRatio) : Math.max(20, startH + dyLogical)
+            } else if (corner === 'bl') {
+              newW = Math.max(40, startW - dxLogical)
+              newX = startX + (startW - newW)
+              newH = isImage ? Math.round(newW * aspectRatio) : Math.max(20, startH + dyLogical)
+            } else if (corner === 'tr') {
+              newW = Math.max(40, startW + dxLogical)
+              newH = isImage ? Math.round(newW * aspectRatio) : Math.max(20, startH - dyLogical)
+              newY = startY + (startH - newH)
+            } else if (corner === 'tl') {
+              newW = Math.max(40, startW - dxLogical)
+              newX = startX + (startW - newW)
+              newH = isImage ? Math.round(newW * aspectRatio) : Math.max(20, startH - dyLogical)
+              newY = startY + (startH - newH)
+            }
+
+            return {
+              ...l,
+              width: newW,
+              height: isImage ? newH : l.height,
+              x: newX,
+              y: newY,
+            }
+          }
+
+          return l
+        })
+
+        return { ...prev, layers }
+      })
+    }
+
+    const handleMouseUp = () => {
+      setDragState(null)
+      setSnapGuides({ x: null, y: null })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [dragState, zoom, template?.width, template?.height])
 
   if (loading || !template) {
     return (
@@ -279,6 +403,35 @@ export default function AdminPosterEditor() {
     } finally {
       setUploadingBg(false)
     }
+  }
+
+  const startDragMove = (e, layer) => {
+    e.stopPropagation()
+    setSelectedLayerId(layer.id)
+    setDragState({
+      type: 'move',
+      layerId: layer.id,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startX: layer.x || 0,
+      startY: layer.y || 0,
+    })
+  }
+
+  const startResize = (e, layer, corner) => {
+    e.stopPropagation()
+    setSelectedLayerId(layer.id)
+    setDragState({
+      type: 'resize',
+      layerId: layer.id,
+      corner,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startX: layer.x || 0,
+      startY: layer.y || 0,
+      startW: layer.width || 300,
+      startH: layer.height || (layer.type === 'image' ? 200 : (layer.font_size || 24) * 1.4),
+    })
   }
 
   const getLayerRenderText = (layer) => {
@@ -468,14 +621,14 @@ export default function AdminPosterEditor() {
           <div className="w-full flex-1 flex items-center justify-center p-4 overflow-auto min-h-[460px]">
             <div
               ref={canvasRef}
-              className="relative shadow-2xl rounded-lg overflow-hidden transition-all duration-150 border border-white/10 shrink-0 select-none"
+              className="relative shadow-2xl rounded-lg overflow-hidden transition-all duration-75 border border-white/10 shrink-0 select-none"
               style={{
                 width: `${canvasWidth * zoom}px`,
                 height: `${canvasHeight * zoom}px`,
                 ...canvasBgStyle,
               }}
             >
-              {/* Optional Grid Lines Overlay */}
+              {/* Grid Overlay */}
               {showGrid && (
                 <div
                   className="absolute inset-0 pointer-events-none z-10"
@@ -483,6 +636,20 @@ export default function AdminPosterEditor() {
                     backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)`,
                     backgroundSize: `${100 * zoom}px ${100 * zoom}px`,
                   }}
+                />
+              )}
+
+              {/* Snap Guide Lines */}
+              {snapGuides.x !== null && (
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-accent/80 shadow z-40 pointer-events-none"
+                  style={{ left: `${snapGuides.x * zoom}px` }}
+                />
+              )}
+              {snapGuides.y !== null && (
+                <div
+                  className="absolute left-0 right-0 h-0.5 bg-accent/80 shadow z-40 pointer-events-none"
+                  style={{ top: `${snapGuides.y * zoom}px` }}
                 />
               )}
 
@@ -497,11 +664,11 @@ export default function AdminPosterEditor() {
                 return (
                   <div
                     key={layer.id}
-                    onClick={() => setSelectedLayerId(layer.id)}
-                    className={`absolute cursor-pointer transition-all ${
+                    onMouseDown={(e) => startDragMove(e, layer)}
+                    className={`absolute group transition-shadow ${
                       isSelected
-                        ? 'outline outline-2 outline-[#228C22] ring-4 ring-[#228C22]/40 z-30'
-                        : 'hover:outline hover:outline-1 hover:outline-white/40 z-20'
+                        ? 'ring-2 ring-[#228C22] border-2 border-[#C8F7A8] shadow-2xl z-30 cursor-move'
+                        : 'hover:outline hover:outline-1 hover:outline-white/50 z-20 cursor-pointer'
                     }`}
                     style={{
                       left: `${scaledX}px`,
@@ -514,7 +681,7 @@ export default function AdminPosterEditor() {
                       <img
                         src={sampleData[layer.key] || layer.image_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop'}
                         alt="Layer Element"
-                        className="object-contain rounded-lg shadow"
+                        className="object-contain rounded-lg shadow pointer-events-none"
                         style={{
                           width: `${(layer.width || 200) * zoom}px`,
                           height: `${(layer.height || 200) * zoom}px`,
@@ -522,6 +689,7 @@ export default function AdminPosterEditor() {
                       />
                     ) : (
                       <div
+                        className="pointer-events-none"
                         style={{
                           fontFamily: layer.font_family || 'Sora',
                           fontSize: `${scaledFontSize}px`,
@@ -533,6 +701,32 @@ export default function AdminPosterEditor() {
                       >
                         {getLayerRenderText(layer)}
                       </div>
+                    )}
+
+                    {/* Corner Resize Handles for Selected Element */}
+                    {isSelected && (
+                      <>
+                        <div
+                          onMouseDown={(e) => startResize(e, layer, 'tl')}
+                          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
+                          title="Resize Top-Left"
+                        />
+                        <div
+                          onMouseDown={(e) => startResize(e, layer, 'tr')}
+                          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
+                          title="Resize Top-Right"
+                        />
+                        <div
+                          onMouseDown={(e) => startResize(e, layer, 'bl')}
+                          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
+                          title="Resize Bottom-Left"
+                        />
+                        <div
+                          onMouseDown={(e) => startResize(e, layer, 'br')}
+                          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
+                          title="Resize Bottom-Right"
+                        />
+                      </>
                     )}
                   </div>
                 )
@@ -713,8 +907,8 @@ export default function AdminPosterEditor() {
             <span className="text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
               <Sliders size={14} /> Selected Layer: {selectedLayer.prefix}{selectedLayer.key}
             </span>
-            <span className="text-[11px] text-mutedText">
-              💡 Arrow keys nudge position (Shift = 10px steps)
+            <span className="text-[11px] text-mutedText flex items-center gap-1">
+              <Move size={12} className="text-accent" /> Drag on canvas or use Arrow keys (Shift = 10px steps)
             </span>
           </div>
 
