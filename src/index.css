@@ -1838,13 +1838,38 @@ html:not(.dark):not([data-theme='dark']) .lb-3 .lb-points {
 }
 
 /* ==========================================================================
-   PROGRAMME ON/OFF TOGGLE STYLES (Light & Dark Theme Visibility Fix)
+   PROGRAMME ON/OFF TOGGLE STYLES (Perfect Vertical & Horizontal Alignment)
    ========================================================================== */
 .prog-toggle {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 0 2px;
   border-radius: 9999px;
   transition: background-color 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+}
+
+.prog-toggle-thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, border-color 0.3s ease;
+  transform: translateX(0);
+}
+
+@media (min-width: 640px) {
+  .prog-toggle-thumb {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 /* OFF State — Light Theme (Default) */
@@ -1859,6 +1884,7 @@ html:not(.dark):not([data-theme='dark']) .prog-toggle.toggle-off .prog-toggle-th
   background-color: #FFFFFF !important;
   border: 1px solid #6F927A !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transform: translateX(0) !important;
 }
 
 /* OFF State — Dark Theme Override */
@@ -1873,6 +1899,7 @@ html:not(.dark):not([data-theme='dark']) .prog-toggle.toggle-off .prog-toggle-th
   background-color: #DDEBDD !important;
   border: 1px solid #3F7652 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: translateX(0) !important;
 }
 
 /* ON State — Light Theme & Dark Theme */
@@ -1889,4 +1916,13 @@ html:not(.dark):not([data-theme='dark']) .prog-toggle.toggle-off .prog-toggle-th
   background-color: #FFFFFF !important;
   border: 1px solid #22B85A !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transform: translateX(24px) !important;
+}
+
+@media (min-width: 640px) {
+  .prog-toggle.toggle-on .prog-toggle-thumb,
+  .dark .prog-toggle.toggle-on .prog-toggle-thumb,
+  [data-theme='dark'] .prog-toggle.toggle-on .prog-toggle-thumb {
+    transform: translateX(28px) !important;
+  }
 }
