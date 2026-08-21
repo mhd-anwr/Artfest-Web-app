@@ -21,7 +21,12 @@ import {
   ChevronDown,
   ChevronUp,
   Grid,
-  Move,
+  MoreVertical,
+  RotateCw,
+  Eye,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 
@@ -37,28 +42,28 @@ const LAYER_CATEGORIES = [
   {
     category: 'Winner Container & 1st Place',
     keys: [
-      { key: 'first_place_label', label: '1st Place Position/Heading' },
+      { key: 'first_place_label', label: '1st Place Heading' },
       { key: 'first_name', label: '1st Place Winner Name' },
       { key: 'first_team', label: '1st Place Winner Team' },
-      { key: 'first_photo', label: '1st Place Winner Photo (Image)' },
+      { key: 'first_photo', label: '1st Place Winner Photo' },
     ],
   },
   {
     category: '2nd Place',
     keys: [
-      { key: 'second_place_label', label: '2nd Place Position/Heading' },
+      { key: 'second_place_label', label: '2nd Place Heading' },
       { key: 'second_name', label: '2nd Place Winner Name' },
       { key: 'second_team', label: '2nd Place Winner Team' },
-      { key: 'second_photo', label: '2nd Place Winner Photo (Image)' },
+      { key: 'second_photo', label: '2nd Place Winner Photo' },
     ],
   },
   {
     category: '3rd Place',
     keys: [
-      { key: 'third_place_label', label: '3rd Place Position/Heading' },
+      { key: 'third_place_label', label: '3rd Place Heading' },
       { key: 'third_name', label: '3rd Place Winner Name' },
       { key: 'third_team', label: '3rd Place Winner Team' },
-      { key: 'third_photo', label: '3rd Place Winner Photo (Image)' },
+      { key: 'third_photo', label: '3rd Place Winner Photo' },
     ],
   },
   {
@@ -102,6 +107,7 @@ const PRESET_GRADIENTS = [
 ]
 
 const FONT_FAMILIES = ['Sora', 'Montserrat', 'Inter', 'Roboto', 'Serif', 'Monospace']
+const ZOOM_LEVELS = [0.25, 0.45, 0.60, 0.75, 1.0]
 
 export default function AdminPosterEditor() {
   const { id } = useParams()
@@ -140,11 +146,22 @@ export default function AdminPosterEditor() {
     load()
   }, [id])
 
-  // Keyboard nudging for selected layer (Arrow keys)
+  // Keyboard Navigation: Arrow keys (1px / 10px with Shift), Delete, Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!selectedLayerId || !template) return
       if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) return
+
+      if (e.key === 'Escape') {
+        setSelectedLayerId(null)
+        return
+      }
+
+      if (!selectedLayerId || !template) return
+
+      if (e.key === 'Delete') {
+        deleteLayer(selectedLayerId)
+        return
+      }
 
       const step = e.shiftKey ? 10 : 1
       let dx = 0
@@ -163,8 +180,8 @@ export default function AdminPosterEditor() {
           if (l.id !== selectedLayerId) return l
           return {
             ...l,
-            x: Math.max(0, (l.x || 0) + dx),
-            y: Math.max(0, (l.y || 0) + dy),
+            x: Math.max(-50, (l.x || 0) + dx),
+            y: Math.max(-50, (l.y || 0) + dy),
           }
         })
         return { ...prev, layers }
@@ -297,7 +314,7 @@ export default function AdminPosterEditor() {
 
   if (loading || !template) {
     return (
-      <div className="max-w-6xl mx-auto p-12 text-center text-mutedText bg-card rounded-2xl border border-secondary/30">
+      <div className="max-w-6xl mx-auto p-12 text-center text-[#64806F] dark:text-[#B8D9BA] bg-[#FFFFFF] dark:bg-[#092619] rounded-2xl border border-[#C8DEC9] dark:border-[#1E6339]">
         Loading poster template editor...
       </div>
     )
@@ -332,7 +349,7 @@ export default function AdminPosterEditor() {
       key: 'custom_text',
       prefix: 'Text: ',
       font_family: 'Sora',
-      font_size: 28,
+      font_size: 32,
       font_weight: '700',
       text_align: 'center',
       color: '#FFFFFF',
@@ -340,10 +357,12 @@ export default function AdminPosterEditor() {
       width: template.width ? template.width - 160 : 920,
       x: 80,
       y: 400,
+      rotation: 0,
+      opacity: 100,
     }
     setTemplate(prev => ({ ...prev, layers: [...prev.layers, newLayer] }))
     setSelectedLayerId(newLayer.id)
-    toast('Added custom text field')
+    toast('Added text field')
   }
 
   const addImageElement = () => {
@@ -357,6 +376,8 @@ export default function AdminPosterEditor() {
       height: 200,
       x: (template.width || 1080) / 2 - 100,
       y: 350,
+      rotation: 0,
+      opacity: 100,
     }
     setTemplate(prev => ({ ...prev, layers: [...prev.layers, newLayer] }))
     setSelectedLayerId(newLayer.id)
@@ -451,47 +472,44 @@ export default function AdminPosterEditor() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4">
-      {/* Sticky Top Bar with Back Arrow and Duplicate Save Button */}
-      <div className="sticky top-14 lg:top-0 z-30 flex items-center justify-between gap-3 bg-card/95 backdrop-blur rounded-2xl p-4 border border-secondary/30 shadow-md">
+      {/* Sticky Header */}
+      <div className="sticky top-14 lg:top-0 z-30 flex items-center justify-between gap-3 bg-[#FFFFFF] dark:bg-[#092619] backdrop-blur-md rounded-2xl p-4 border border-[#C8DEC9] dark:border-[#1E6339] shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/admin/frames/templates')}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/15 hover:bg-secondary/25 text-mainText text-xs font-semibold transition"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#F5FAF3] dark:bg-[#0D3220] hover:bg-[#E4F4E6] dark:hover:bg-[#164B2A] text-[#123B27] dark:text-[#EAF8E5] text-xs font-semibold transition"
           >
             <ArrowLeft size={16} /> Back to Templates
           </button>
           <div>
-            <h2 className="text-lg font-bold text-mainText flex items-center gap-2">
-              <Sliders className="text-accent" size={20} /> {template.name}
+            <h2 className="text-lg font-bold text-[#123B27] dark:text-[#EAF8E5] flex items-center gap-2">
+              Template Editor <span className="text-[#64806F] dark:text-[#B8D9BA] font-normal">· {template.name}</span>
             </h2>
-            <p className="text-[11px] text-mutedText">
-              Design Template Editor ({canvasWidth}×{canvasHeight}px)
-            </p>
           </div>
         </div>
 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 bg-primary text-white font-semibold text-xs px-4 py-2.5 rounded-xl hover:opacity-90 transition shadow-sm disabled:opacity-50"
+          className="inline-flex items-center gap-2 bg-[#0B5D35] hover:bg-[#167A43] text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-sm disabled:opacity-50"
         >
-          <Save size={15} /> {saving ? 'Saving...' : 'Save changes'}
+          <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
 
-      {/* 3-Column Editor Area */}
+      {/* 3-Column Editor Workspace Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* COLUMN 1: LEFT SIDEBAR - LAYERS PANEL (3 cols) */}
-        <div className="lg:col-span-3 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-4 max-h-[750px] flex flex-col justify-between overflow-hidden">
+        
+        {/* COLUMN 1: LEFT - LAYERS PANEL (3 cols) */}
+        <div className="lg:col-span-3 bg-[#FFFFFF] dark:bg-[#092619] rounded-2xl p-4 border border-[#C8DEC9] dark:border-[#1E6339] shadow-sm space-y-4 max-h-[780px] flex flex-col justify-between overflow-hidden">
           <div className="space-y-3 flex-1 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between border-b border-secondary/20 pb-2">
-              <h3 className="font-bold text-mainText text-sm flex items-center gap-1.5">
-                <Type size={16} className="text-accent" /> Layers ({template.layers?.length || 0})
+            <div className="flex items-center justify-between border-b border-[#C8DEC9] dark:border-[#1E6339] pb-2.5">
+              <h3 className="font-bold text-[#123B27] dark:text-[#EAF8E5] text-sm uppercase tracking-wider flex items-center gap-1.5">
+                <Type size={16} className="text-[#62C744]" /> Layers ({template.layers?.length || 0})
               </h3>
-              <span className="text-[10px] text-mutedText">Click to select</span>
             </div>
 
-            {/* Layers List */}
+            {/* Layer Rows */}
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">
               {template.layers?.map((layer, idx) => {
                 const isSelected = layer.id === selectedLayerId
@@ -504,27 +522,24 @@ export default function AdminPosterEditor() {
                     onClick={() => setSelectedLayerId(layer.id)}
                     className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between gap-2 ${
                       isSelected
-                        ? 'bg-[#115F32] text-white border-[#C8F7A8] shadow-md font-bold'
-                        : 'bg-mainBackground/50 border-secondary/20 hover:bg-secondary/15 text-mainText'
+                        ? 'bg-[#E4F4E6] dark:bg-[#164B2A] text-[#123B27] dark:text-[#EAF8E5] border-[#62C744] dark:border-[#1E6339] shadow-sm font-bold'
+                        : 'bg-[#F5FAF3]/60 dark:bg-[#0D3220]/60 border-[#C8DEC9]/50 dark:border-[#1E6339]/50 hover:bg-[#E4F4E6]/50 dark:hover:bg-[#164B2A]/50 text-[#123B27] dark:text-[#EAF8E5]'
                     }`}
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-secondary/30 text-mainText'}`}>
-                          #{idx + 1}
-                        </span>
-                        <span className="truncate font-semibold">{layer.prefix}{keyLabel}</span>
-                      </div>
-                      <p className={`text-[10px] truncate mt-0.5 ${isSelected ? 'text-[#C8F7A8]' : 'text-mutedText'}`}>
-                        {layer.type === 'image' ? '🖼 Image' : '🔤 Text'} · X:{layer.x} Y:{layer.y}
-                      </p>
+                    <div className="min-w-0 flex-1 flex items-center gap-2">
+                      {layer.type === 'image' ? (
+                        <ImageIcon size={15} className="text-[#62C744] shrink-0" />
+                      ) : (
+                        <Type size={15} className="text-[#167A43] shrink-0" />
+                      )}
+                      <span className="truncate font-semibold">{layer.prefix}{keyLabel}</span>
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                       <button
                         onClick={() => moveLayer(idx, -1)}
                         disabled={idx === 0}
-                        className="p-1 hover:text-accent disabled:opacity-20"
+                        className="p-1 hover:text-[#62C744] text-[#64806F] dark:text-[#B8D9BA] disabled:opacity-20 transition"
                         title="Move Up"
                       >
                         <MoveUp size={12} />
@@ -532,14 +547,14 @@ export default function AdminPosterEditor() {
                       <button
                         onClick={() => moveLayer(idx, 1)}
                         disabled={idx === template.layers.length - 1}
-                        className="p-1 hover:text-accent disabled:opacity-20"
+                        className="p-1 hover:text-[#62C744] text-[#64806F] dark:text-[#B8D9BA] disabled:opacity-20 transition"
                         title="Move Down"
                       >
                         <MoveDown size={12} />
                       </button>
                       <button
                         onClick={() => deleteLayer(layer.id)}
-                        className="p-1 text-red-400 hover:text-red-500"
+                        className="p-1 text-red-400 hover:text-red-500 transition"
                         title="Delete Layer"
                       >
                         <Trash2 size={12} />
@@ -551,65 +566,92 @@ export default function AdminPosterEditor() {
             </div>
           </div>
 
-          {/* Add Layer Buttons at Bottom of Left Sidebar */}
-          <div className="pt-2 border-t border-secondary/20 space-y-2 shrink-0">
+          {/* Add Layer Buttons at Bottom of Left Panel */}
+          <div className="pt-2 border-t border-[#C8DEC9] dark:border-[#1E6339] space-y-2 shrink-0">
             <button
               onClick={addCustomTextField}
-              className="w-full inline-flex items-center justify-center gap-1.5 bg-primary/20 hover:bg-primary text-accent hover:text-white border border-primary/30 text-xs font-semibold py-2.5 rounded-xl transition"
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-[#0B5D35]/15 dark:bg-[#167A43]/20 hover:bg-[#0B5D35] hover:text-white text-[#0B5D35] dark:text-[#65D13E] border border-[#0B5D35]/30 text-xs font-bold py-2.5 rounded-xl transition"
             >
-              <Plus size={14} /> Add custom text field
+              <Plus size={14} /> Add Text
             </button>
             <button
               onClick={addImageElement}
-              className="w-full inline-flex items-center justify-center gap-1.5 bg-secondary/20 hover:bg-secondary/30 text-mainText text-xs font-semibold py-2.5 rounded-xl transition"
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-[#F5FAF3] dark:bg-[#0D3220] hover:bg-[#E4F4E6] dark:hover:bg-[#164B2A] text-[#123B27] dark:text-[#EAF8E5] border border-[#C8DEC9] dark:border-[#1E6339] text-xs font-semibold py-2.5 rounded-xl transition"
             >
-              <Plus size={14} /> Add image element
+              <Plus size={14} /> Add Image
             </button>
           </div>
         </div>
 
-        {/* COLUMN 2: CENTER LIVE PREVIEW PANEL (6 cols) */}
-        <div className="lg:col-span-6 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-3 flex flex-col items-center justify-between min-h-[600px] overflow-hidden">
-          {/* Controls: Zoom & Grid Toggle */}
-          <div className="w-full flex items-center justify-between gap-2 border-b border-secondary/20 pb-3">
-            <span className="text-xs font-bold text-mainText flex items-center gap-1.5">
-              Live Preview Canvas
-            </span>
+        {/* COLUMN 2: CENTER - LIVE POSTER CANVAS (6 cols) */}
+        <div className="lg:col-span-6 bg-[#FFFFFF] dark:bg-[#092619] rounded-2xl p-4 border border-[#C8DEC9] dark:border-[#1E6339] shadow-sm space-y-3 flex flex-col items-center justify-between min-h-[620px] overflow-hidden">
+          
+          {/* Header Controls: Canvas Size, Zoom & Grid */}
+          <div className="w-full flex flex-wrap items-center justify-between gap-2 border-b border-[#C8DEC9] dark:border-[#1E6339] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#123B27] dark:text-[#EAF8E5] uppercase tracking-wider">
+                LIVE PREVIEW
+              </span>
+              <span className="text-[11px] font-mono text-[#64806F] dark:text-[#B8D9BA]">
+                ({canvasWidth} × {canvasHeight} px)
+              </span>
+            </div>
 
             <div className="flex items-center gap-2">
+              {/* Grid Toggle */}
               <button
                 onClick={() => setShowGrid(g => !g)}
                 className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition border ${
                   showGrid
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-mainBackground border-secondary/20 text-mutedText hover:text-mainText'
+                    ? 'bg-[#0B5D35] text-white border-[#0B5D35]'
+                    : 'bg-[#F5FAF3] dark:bg-[#0D3220] border-[#C8DEC9] dark:border-[#1E6339] text-[#64806F] dark:text-[#B8D9BA] hover:text-[#123B27]'
                 }`}
                 title="Toggle Grid Lines"
               >
-                <Grid size={13} /> Grid {showGrid ? 'ON' : 'OFF'}
+                <Grid size={13} /> {showGrid ? 'Grid ON' : 'Grid OFF'}
               </button>
 
-              <div className="flex items-center gap-1 bg-mainBackground rounded-xl p-1 border border-secondary/20">
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 bg-[#F5FAF3] dark:bg-[#0D3220] rounded-xl p-1 border border-[#C8DEC9] dark:border-[#1E6339]">
                 <button
-                  onClick={() => setZoom(z => Math.max(0.2, z - 0.1))}
-                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
+                  onClick={() => {
+                    const currIdx = ZOOM_LEVELS.indexOf(zoom)
+                    if (currIdx > 0) setZoom(ZOOM_LEVELS[currIdx - 1])
+                    else setZoom(z => Math.max(0.2, z - 0.05))
+                  }}
+                  className="p-1.5 hover:bg-[#E4F4E6] dark:hover:bg-[#164B2A] rounded-lg text-[#123B27] dark:text-[#EAF8E5]"
                   title="Zoom Out"
                 >
                   <ZoomOut size={14} />
                 </button>
-                <span className="text-xs font-mono px-2 text-mainText font-bold">
-                  {Math.round(zoom * 100)}%
-                </span>
+
+                <select
+                  value={zoom}
+                  onChange={e => setZoom(Number(e.target.value))}
+                  className="bg-transparent text-xs font-mono font-bold text-[#123B27] dark:text-[#EAF8E5] outline-none cursor-pointer px-1"
+                >
+                  {ZOOM_LEVELS.map(z => (
+                    <option key={z} value={z} className="bg-white dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5]">
+                      {Math.round(z * 100)}%
+                    </option>
+                  ))}
+                </select>
+
                 <button
-                  onClick={() => setZoom(z => Math.min(1.2, z + 0.1))}
-                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText"
+                  onClick={() => {
+                    const currIdx = ZOOM_LEVELS.indexOf(zoom)
+                    if (currIdx !== -1 && currIdx < ZOOM_LEVELS.length - 1) setZoom(ZOOM_LEVELS[currIdx + 1])
+                    else setZoom(z => Math.min(1.2, z + 0.05))
+                  }}
+                  className="p-1.5 hover:bg-[#E4F4E6] dark:hover:bg-[#164B2A] rounded-lg text-[#123B27] dark:text-[#EAF8E5]"
                   title="Zoom In"
                 >
                   <ZoomIn size={14} />
                 </button>
+                
                 <button
                   onClick={() => setZoom(0.45)}
-                  className="p-1.5 hover:bg-secondary/20 rounded-lg text-mainText text-[11px] font-semibold px-2"
+                  className="p-1.5 hover:bg-[#E4F4E6] dark:hover:bg-[#164B2A] rounded-lg text-[#123B27] dark:text-[#EAF8E5] text-[11px] font-bold px-2"
                 >
                   Fit
                 </button>
@@ -617,23 +659,23 @@ export default function AdminPosterEditor() {
             </div>
           </div>
 
-          {/* Live Preview Canvas Wrapper */}
-          <div className="w-full flex-1 flex items-center justify-center p-4 overflow-auto min-h-[460px]">
+          {/* Centered Poster Canvas Workspace */}
+          <div className="w-full flex-1 flex items-center justify-center p-4 overflow-auto min-h-[480px] bg-[#F4FAF3] dark:bg-[#061B10] rounded-xl border border-[#C8DEC9]/60 dark:border-[#1E6339]/60">
             <div
               ref={canvasRef}
-              className="relative shadow-2xl rounded-lg overflow-hidden transition-all duration-75 border border-white/10 shrink-0 select-none"
+              className="relative shadow-2xl rounded-lg overflow-hidden transition-all duration-75 border border-white/20 shrink-0 select-none"
               style={{
                 width: `${canvasWidth * zoom}px`,
                 height: `${canvasHeight * zoom}px`,
                 ...canvasBgStyle,
               }}
             >
-              {/* Grid Overlay */}
+              {/* Optional Grid Overlay */}
               {showGrid && (
                 <div
                   className="absolute inset-0 pointer-events-none z-10"
                   style={{
-                    backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px)`,
                     backgroundSize: `${100 * zoom}px ${100 * zoom}px`,
                   }}
                 />
@@ -642,13 +684,13 @@ export default function AdminPosterEditor() {
               {/* Snap Guide Lines */}
               {snapGuides.x !== null && (
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-accent/80 shadow z-40 pointer-events-none"
+                  className="absolute top-0 bottom-0 w-0.5 bg-[#62C744] shadow z-40 pointer-events-none"
                   style={{ left: `${snapGuides.x * zoom}px` }}
                 />
               )}
               {snapGuides.y !== null && (
                 <div
-                  className="absolute left-0 right-0 h-0.5 bg-accent/80 shadow z-40 pointer-events-none"
+                  className="absolute left-0 right-0 h-0.5 bg-[#62C744] shadow z-40 pointer-events-none"
                   style={{ top: `${snapGuides.y * zoom}px` }}
                 />
               )}
@@ -667,7 +709,7 @@ export default function AdminPosterEditor() {
                     onMouseDown={(e) => startDragMove(e, layer)}
                     className={`absolute group transition-shadow ${
                       isSelected
-                        ? 'ring-2 ring-[#228C22] border-2 border-[#C8F7A8] shadow-2xl z-30 cursor-move'
+                        ? 'ring-2 ring-[#62C744] border-2 border-[#62C744] shadow-2xl z-30 cursor-move'
                         : 'hover:outline hover:outline-1 hover:outline-white/50 z-20 cursor-pointer'
                     }`}
                     style={{
@@ -675,6 +717,8 @@ export default function AdminPosterEditor() {
                       top: `${scaledY}px`,
                       width: `${scaledW}px`,
                       textAlign: layer.text_align || 'center',
+                      transform: layer.rotation ? `rotate(${layer.rotation}deg)` : undefined,
+                      opacity: layer.opacity != null ? layer.opacity / 100 : 1,
                     }}
                   >
                     {layer.type === 'image' ? (
@@ -708,22 +752,22 @@ export default function AdminPosterEditor() {
                       <>
                         <div
                           onMouseDown={(e) => startResize(e, layer, 'tl')}
-                          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
+                          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#0B5D35] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
                           title="Resize Top-Left"
                         />
                         <div
                           onMouseDown={(e) => startResize(e, layer, 'tr')}
-                          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
+                          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#0B5D35] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
                           title="Resize Top-Right"
                         />
                         <div
                           onMouseDown={(e) => startResize(e, layer, 'bl')}
-                          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
+                          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#0B5D35] rounded-sm shadow z-50 cursor-nesw-resize hover:scale-125 transition-transform"
                           title="Resize Bottom-Left"
                         />
                         <div
                           onMouseDown={(e) => startResize(e, layer, 'br')}
-                          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#228C22] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
+                          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#0B5D35] rounded-sm shadow z-50 cursor-nwse-resize hover:scale-125 transition-transform"
                           title="Resize Bottom-Right"
                         />
                       </>
@@ -734,28 +778,28 @@ export default function AdminPosterEditor() {
             </div>
           </div>
 
-          {/* Example Poster Data for Preview Section */}
-          <div className="w-full border-t border-secondary/20 pt-3">
+          {/* Example Poster Data for Preview Testing Drawer */}
+          <div className="w-full border-t border-[#C8DEC9] dark:border-[#1E6339] pt-3">
             <button
               onClick={() => setShowSamplePanel(v => !v)}
-              className="w-full flex items-center justify-between text-xs font-bold text-mainText hover:text-accent transition"
+              className="w-full flex items-center justify-between text-xs font-bold text-[#123B27] dark:text-[#EAF8E5] hover:text-[#62C744] transition"
             >
               <span className="flex items-center gap-1.5">
-                <Sparkles size={14} className="text-accent" /> Example Poster Data for Preview
+                <Sparkles size={14} className="text-[#62C744]" /> Example Poster Data for Preview
               </span>
               {showSamplePanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
             {showSamplePanel && (
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs max-h-48 overflow-y-auto p-3 bg-mainBackground/60 rounded-xl border border-secondary/20">
+              <div className="grid grid-cols-2 gap-2 mt-3 text-xs max-h-48 overflow-y-auto p-3 bg-[#F5FAF3] dark:bg-[#0D3220] rounded-xl border border-[#C8DEC9] dark:border-[#1E6339]">
                 {Object.keys(SAMPLE_PREVIEW_DATA).map(key => (
                   <div key={key}>
-                    <label className="text-[10px] text-mutedText block font-mono capitalize mb-0.5">{key}</label>
+                    <label className="text-[10px] text-[#64806F] dark:text-[#B8D9BA] block font-mono capitalize mb-0.5">{key}</label>
                     <input
                       type="text"
                       value={sampleData[key] || ''}
                       onChange={e => setSampleData(s => ({ ...s, [key]: e.target.value }))}
-                      className="w-full bg-card border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText focus:outline-none focus:border-accent"
+                      className="w-full bg-[#FFFFFF] dark:bg-[#092619] border border-[#C8DEC9] dark:border-[#1E6339] rounded-lg px-2 py-1 text-xs text-[#123B27] dark:text-[#EAF8E5] focus:outline-none focus:border-[#62C744]"
                     />
                   </div>
                 ))}
@@ -764,301 +808,371 @@ export default function AdminPosterEditor() {
           </div>
         </div>
 
-        {/* COLUMN 3: RIGHT SIDEBAR - TEMPLATE CONFIGURATION PANEL (3 cols) */}
-        <div className="lg:col-span-3 bg-card rounded-2xl p-4 border border-secondary/30 shadow-sm space-y-4 max-h-[750px] overflow-y-auto">
-          <h3 className="font-bold text-mainText text-sm border-b border-secondary/20 pb-2">
-            Template Configuration
-          </h3>
+        {/* COLUMN 3: RIGHT - TEMPLATE CONFIGURATION & SELECTED LAYER PROPERTIES (3 cols) */}
+        <div className="lg:col-span-3 space-y-4 max-h-[780px] overflow-y-auto pr-1">
+          
+          {/* Card 1: TEMPLATE CONFIGURATION */}
+          <div className="bg-[#FFFFFF] dark:bg-[#092619] rounded-2xl p-4 border border-[#C8DEC9] dark:border-[#1E6339] shadow-sm space-y-4">
+            <h3 className="font-bold text-[#123B27] dark:text-[#EAF8E5] text-xs uppercase tracking-wider border-b border-[#C8DEC9] dark:border-[#1E6339] pb-2">
+              Template Configuration
+            </h3>
 
-          {/* Template Name */}
-          <div>
-            <label className="text-xs font-semibold text-mutedText block mb-1">Template Name</label>
-            <input
-              type="text"
-              value={template.name || ''}
-              onChange={e => setTemplate(t => ({ ...t, name: e.target.value }))}
-              className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
-            />
-          </div>
-
-          {/* Canvas Dimensions */}
-          <div className="grid grid-cols-2 gap-2">
+            {/* Template Name */}
             <div>
-              <label className="text-xs font-semibold text-mutedText block mb-1">Width (px)</label>
+              <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Template Name</label>
               <input
-                type="number"
-                value={template.width || 1080}
-                onChange={e => setTemplate(t => ({ ...t, width: Number(e.target.value) }))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
+                type="text"
+                value={template.name || ''}
+                onChange={e => setTemplate(t => ({ ...t, name: e.target.value }))}
+                className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs font-semibold text-[#123B27] dark:text-[#EAF8E5] focus:outline-none focus:border-[#62C744]"
               />
             </div>
-            <div>
-              <label className="text-xs font-semibold text-mutedText block mb-1">Height (px)</label>
-              <input
-                type="number"
-                value={template.height || 1350}
-                onChange={e => setTemplate(t => ({ ...t, height: Number(e.target.value) }))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-semibold text-mainText focus:outline-none focus:border-accent"
-              />
-            </div>
-          </div>
 
-          {/* Background Image & Style Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-mutedText block">Background Style</label>
-
-            {/* Style Selector Tabs */}
-            <div className="grid grid-cols-3 gap-1 bg-mainBackground p-1 rounded-xl border border-secondary/20 text-xs">
-              {['gradient', 'solid', 'image'].map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setBgTab(tab)
-                    setTemplate(t => ({ ...t, background_type: tab }))
-                  }}
-                  className={`py-1 rounded-lg font-semibold capitalize transition ${
-                    bgTab === tab ? 'bg-primary text-white shadow-sm' : 'text-mutedText hover:text-mainText'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {bgTab === 'solid' && (
-              <div className="space-y-2 pt-1">
+            {/* Canvas Dimensions */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Width (px)</label>
                 <input
-                  type="text"
-                  value={template.background_value || '#061A0D'}
-                  onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
-                  className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-mono text-mainText"
-                  placeholder="#061A0D"
+                  type="number"
+                  value={template.width || 1080}
+                  onChange={e => setTemplate(t => ({ ...t, width: Number(e.target.value) }))}
+                  className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs font-semibold text-[#123B27] dark:text-[#EAF8E5] focus:outline-none focus:border-[#62C744]"
                 />
-                <div className="flex items-center gap-2">
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Height (px)</label>
+                <input
+                  type="number"
+                  value={template.height || 1350}
+                  onChange={e => setTemplate(t => ({ ...t, height: Number(e.target.value) }))}
+                  className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs font-semibold text-[#123B27] dark:text-[#EAF8E5] focus:outline-none focus:border-[#62C744]"
+                />
+              </div>
+            </div>
+
+            {/* Background Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block">Background</label>
+
+              <div className="grid grid-cols-3 gap-1 bg-[#F5FAF3] dark:bg-[#0D3220] p-1 rounded-xl border border-[#C8DEC9] dark:border-[#1E6339] text-xs">
+                {['gradient', 'solid', 'image'].map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setBgTab(tab)
+                      setTemplate(t => ({ ...t, background_type: tab }))
+                    }}
+                    className={`py-1 rounded-lg font-semibold capitalize transition ${
+                      bgTab === tab ? 'bg-[#0B5D35] text-white shadow-sm' : 'text-[#64806F] dark:text-[#B8D9BA] hover:text-[#123B27]'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {bgTab === 'solid' && (
+                <div className="space-y-2 pt-1">
                   <input
-                    type="color"
-                    value={template.background_value.startsWith('#') ? template.background_value : '#061A0D'}
+                    type="text"
+                    value={template.background_value || '#061A0D'}
                     onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
-                    className="w-8 h-8 rounded-lg border-0 cursor-pointer"
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs font-mono text-[#123B27] dark:text-[#EAF8E5]"
+                    placeholder="#061A0D"
                   />
-                  <span className="text-xs text-mutedText">Solid Hex Color</span>
-                </div>
-              </div>
-            )}
-
-            {bgTab === 'gradient' && (
-              <div className="space-y-2 pt-1">
-                <textarea
-                  rows={2}
-                  value={template.background_value || ''}
-                  onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
-                  className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs font-mono text-mainText focus:outline-none"
-                  placeholder="linear-gradient(...)"
-                />
-                <p className="text-[10px] text-mutedText font-semibold">Preset Festival Gradients:</p>
-                <div className="space-y-1">
-                  {PRESET_GRADIENTS.map((g, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setTemplate(t => ({ ...t, background_value: g }))}
-                      className="w-full h-7 rounded-lg border border-white/20 transition hover:opacity-80"
-                      style={{ background: g }}
-                      title={g}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={template.background_value?.startsWith('#') ? template.background_value : '#061A0D'}
+                      onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
+                      className="w-8 h-8 rounded-lg border-0 cursor-pointer"
                     />
-                  ))}
+                    <span className="text-xs text-[#64806F] dark:text-[#B8D9BA]">Solid Hex Color</span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {bgTab === 'image' && (
-              <div className="space-y-2 pt-1">
-                <input
-                  type="text"
-                  value={template.background_value || ''}
-                  onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
-                  className="w-full bg-mainBackground border border-secondary/30 rounded-xl px-3 py-2 text-xs text-mainText"
-                  placeholder="Storage Image URL"
-                />
-                <label className="inline-flex items-center justify-center gap-1.5 w-full bg-primary text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm">
-                  <ImageIcon size={14} /> {uploadingBg ? 'Uploading Image...' : 'Upload Background Image'}
-                  <input type="file" accept="image/*" onChange={handleBgImageUpload} className="hidden" />
-                </label>
-              </div>
-            )}
-          </div>
+              {bgTab === 'gradient' && (
+                <div className="space-y-2 pt-1">
+                  <textarea
+                    rows={2}
+                    value={template.background_value || ''}
+                    onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs font-mono text-[#123B27] dark:text-[#EAF8E5] focus:outline-none"
+                    placeholder="linear-gradient(...)"
+                  />
+                  <p className="text-[10px] text-[#64806F] dark:text-[#B8D9BA] font-semibold">Preset Gradients:</p>
+                  <div className="space-y-1">
+                    {PRESET_GRADIENTS.map((g, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setTemplate(t => ({ ...t, background_value: g }))}
+                        className="w-full h-7 rounded-lg border border-white/20 transition hover:opacity-80"
+                        style={{ background: g }}
+                        title={g}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Primary Save Button */}
-          <div className="pt-2 border-t border-secondary/20">
+              {bgTab === 'image' && (
+                <div className="space-y-2 pt-1">
+                  <input
+                    type="text"
+                    value={template.background_value || ''}
+                    onChange={e => setTemplate(t => ({ ...t, background_value: e.target.value }))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                    placeholder="Storage Image URL"
+                  />
+                  <label className="inline-flex items-center justify-center gap-1.5 w-full bg-[#0B5D35] text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer hover:bg-[#167A43] transition shadow-sm">
+                    <ImageIcon size={14} /> {uploadingBg ? 'Uploading Image...' : 'Upload Background'}
+                    <input type="file" accept="image/*" onChange={handleBgImageUpload} className="hidden" />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Save Button */}
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full inline-flex items-center justify-center gap-2 bg-primary text-white font-bold text-xs py-3 rounded-xl hover:opacity-90 transition shadow-sm disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 bg-[#0B5D35] hover:bg-[#167A43] text-white font-bold text-xs py-3 rounded-xl transition shadow-sm disabled:opacity-50"
             >
               <Save size={16} /> {saving ? 'Saving...' : 'Save Template Changes'}
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* BOTTOM TOOLBAR FOR SELECTED LAYER */}
-      {selectedLayer && (
-        <div className="bg-card rounded-2xl p-4 border-2 border-[#228C22] shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders size={14} /> Selected Layer: {selectedLayer.prefix}{selectedLayer.key}
-            </span>
-            <span className="text-[11px] text-mutedText flex items-center gap-1">
-              <Move size={12} className="text-accent" /> Drag on canvas or use Arrow keys (Shift = 10px steps)
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-2 text-xs">
-            {/* Key Binding */}
-            <div className="col-span-2">
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Key Binding</label>
-              <select
-                value={selectedLayer.key || 'custom_text'}
-                onChange={e => updateSelectedLayer('key', e.target.value)}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              >
-                {ALL_AVAILABLE_KEYS.map(k => (
-                  <option key={k.key} value={k.key}>{k.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Prefix */}
-            <div className="col-span-2">
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Prefix</label>
-              <input
-                type="text"
-                value={selectedLayer.prefix || ''}
-                onChange={e => updateSelectedLayer('prefix', e.target.value)}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-                placeholder="Prefix e.g. 1st: "
-              />
-            </div>
-
-            {/* Font Family */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Family</label>
-              <select
-                value={selectedLayer.font_family || 'Sora'}
-                onChange={e => updateSelectedLayer('font_family', e.target.value)}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              >
-                {FONT_FAMILIES.map(f => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Font Size */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Size (px)</label>
-              <input
-                type="number"
-                value={selectedLayer.font_size || 24}
-                onChange={e => updateSelectedLayer('font_size', Number(e.target.value))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              />
-            </div>
-
-            {/* Font Weight */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Font Weight</label>
-              <select
-                value={selectedLayer.font_weight || '700'}
-                onChange={e => updateSelectedLayer('font_weight', e.target.value)}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              >
-                <option value="400">Normal</option>
-                <option value="600">SemiBold</option>
-                <option value="700">Bold</option>
-                <option value="800">Extrabold</option>
-              </select>
-            </div>
-
-            {/* Text Alignment */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Alignment</label>
-              <select
-                value={selectedLayer.text_align || 'center'}
-                onChange={e => updateSelectedLayer('text_align', e.target.value)}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              >
-                <option value="left">Left</option>
-                <option value="center">Center</option>
-                <option value="right">Right</option>
-              </select>
-            </div>
-
-            {/* Color */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Color</label>
-              <div className="flex items-center gap-1">
-                <input
-                  type="color"
-                  value={selectedLayer.color || '#FFFFFF'}
-                  onChange={e => updateSelectedLayer('color', e.target.value)}
-                  className="w-6 h-6 rounded cursor-pointer border-0"
-                />
-                <input
-                  type="text"
-                  value={selectedLayer.color || '#FFFFFF'}
-                  onChange={e => updateSelectedLayer('color', e.target.value)}
-                  className="w-full bg-mainBackground border border-secondary/30 rounded px-1 py-0.5 text-[10px] font-mono text-mainText"
-                />
+          {/* Card 2: SELECTED LAYER PROPERTY EDITOR */}
+          {selectedLayer && (
+            <div className="bg-[#FFFFFF] dark:bg-[#092619] rounded-2xl p-4 border-2 border-[#62C744] shadow-md space-y-4">
+              <div className="flex items-center justify-between border-b border-[#C8DEC9] dark:border-[#1E6339] pb-2">
+                <h3 className="font-bold text-[#123B27] dark:text-[#EAF8E5] text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <Sliders size={14} className="text-[#62C744]" /> Selected Layer
+                </h3>
+                <span className="text-[10px] text-[#62C744] font-bold uppercase">{selectedLayer.type}</span>
               </div>
-            </div>
 
-            {/* Line Height */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Line Height</label>
-              <input
-                type="number"
-                step="0.1"
-                value={selectedLayer.line_height || 1.2}
-                onChange={e => updateSelectedLayer('line_height', Number(e.target.value))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              />
-            </div>
+              {/* Layer/Binding */}
+              <div>
+                <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Layer / Binding</label>
+                <select
+                  value={selectedLayer.key || 'custom_text'}
+                  onChange={e => updateSelectedLayer('key', e.target.value)}
+                  className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                >
+                  {ALL_AVAILABLE_KEYS.map(k => (
+                    <option key={k.key} value={k.key}>{k.label}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Width */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Width (px)</label>
-              <input
-                type="number"
-                value={selectedLayer.width || 300}
-                onChange={e => updateSelectedLayer('width', Number(e.target.value))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              />
-            </div>
+              {selectedLayer.type === 'text' ? (
+                <>
+                  {/* Prefix */}
+                  <div>
+                    <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Prefix</label>
+                    <input
+                      type="text"
+                      value={selectedLayer.prefix || ''}
+                      onChange={e => updateSelectedLayer('prefix', e.target.value)}
+                      className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      placeholder="Prefix text..."
+                    />
+                  </div>
 
-            {/* Position X */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">X Pos (px)</label>
-              <input
-                type="number"
-                value={selectedLayer.x || 0}
-                onChange={e => updateSelectedLayer('x', Number(e.target.value))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              />
-            </div>
+                  {/* Font Family & Weight */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Font Family</label>
+                      <select
+                        value={selectedLayer.font_family || 'Sora'}
+                        onChange={e => updateSelectedLayer('font_family', e.target.value)}
+                        className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-2 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      >
+                        {FONT_FAMILIES.map(f => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                    </div>
 
-            {/* Position Y */}
-            <div>
-              <label className="text-[10px] text-mutedText block font-semibold mb-0.5">Y Pos (px)</label>
-              <input
-                type="number"
-                value={selectedLayer.y || 0}
-                onChange={e => updateSelectedLayer('y', Number(e.target.value))}
-                className="w-full bg-mainBackground border border-secondary/30 rounded-lg px-2 py-1 text-xs text-mainText"
-              />
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Font Weight</label>
+                      <select
+                        value={selectedLayer.font_weight || '700'}
+                        onChange={e => updateSelectedLayer('font_weight', e.target.value)}
+                        className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-2 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      >
+                        <option value="400">Normal</option>
+                        <option value="600">SemiBold</option>
+                        <option value="700">Bold</option>
+                        <option value="800">Extrabold</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Font Size & Alignment */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Font Size (px)</label>
+                      <input
+                        type="number"
+                        value={selectedLayer.font_size || 24}
+                        onChange={e => updateSelectedLayer('font_size', Number(e.target.value))}
+                        className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Alignment</label>
+                      <div className="grid grid-cols-3 gap-1 bg-[#F5FAF3] dark:bg-[#0D3220] p-1 rounded-xl border border-[#C8DEC9] dark:border-[#1E6339]">
+                        {[
+                          { val: 'left', icon: AlignLeft },
+                          { val: 'center', icon: AlignCenter },
+                          { val: 'right', icon: AlignRight },
+                        ].map(align => {
+                          const AlignIcon = align.icon
+                          const isAct = (selectedLayer.text_align || 'center') === align.val
+                          return (
+                            <button
+                              key={align.val}
+                              onClick={() => updateSelectedLayer('text_align', align.val)}
+                              className={`p-1 rounded-lg flex items-center justify-center transition ${
+                                isAct ? 'bg-[#0B5D35] text-white shadow-sm' : 'text-[#64806F] dark:text-[#B8D9BA]'
+                              }`}
+                            >
+                              <AlignIcon size={14} />
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Color & Line Height */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Color</label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="color"
+                          value={selectedLayer.color || '#FFFFFF'}
+                          onChange={e => updateSelectedLayer('color', e.target.value)}
+                          className="w-8 h-8 rounded-lg cursor-pointer border-0 shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={selectedLayer.color || '#FFFFFF'}
+                          onChange={e => updateSelectedLayer('color', e.target.value)}
+                          className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-lg px-2 py-1.5 text-xs font-mono text-[#123B27] dark:text-[#EAF8E5]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Line Height</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={selectedLayer.line_height || 1.2}
+                        onChange={e => updateSelectedLayer('line_height', Number(e.target.value))}
+                        className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Image Source / Upload */}
+                  <div>
+                    <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Image URL</label>
+                    <input
+                      type="text"
+                      value={selectedLayer.image_url || ''}
+                      onChange={e => updateSelectedLayer('image_url', e.target.value)}
+                      className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-2 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Position & Size */}
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#C8DEC9] dark:border-[#1E6339]">
+                <div>
+                  <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Width (px)</label>
+                  <input
+                    type="number"
+                    value={selectedLayer.width || 300}
+                    onChange={e => updateSelectedLayer('width', Number(e.target.value))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                  />
+                </div>
+                {selectedLayer.type === 'image' && (
+                  <div>
+                    <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Height (px)</label>
+                    <input
+                      type="number"
+                      value={selectedLayer.height || 200}
+                      onChange={e => updateSelectedLayer('height', Number(e.target.value))}
+                      className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">X Position (px)</label>
+                  <input
+                    type="number"
+                    value={selectedLayer.x || 0}
+                    onChange={e => updateSelectedLayer('x', Number(e.target.value))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1">Y Position (px)</label>
+                  <input
+                    type="number"
+                    value={selectedLayer.y || 0}
+                    onChange={e => updateSelectedLayer('y', Number(e.target.value))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                  />
+                </div>
+              </div>
+
+              {/* Rotation & Opacity */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1 flex items-center gap-1">
+                    <RotateCw size={12} /> Rotation (°)
+                  </label>
+                  <input
+                    type="number"
+                    value={selectedLayer.rotation || 0}
+                    onChange={e => updateSelectedLayer('rotation', Number(e.target.value))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-[#64806F] dark:text-[#B8D9BA] block mb-1 flex items-center gap-1">
+                    <Eye size={12} /> Opacity (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={selectedLayer.opacity != null ? selectedLayer.opacity : 100}
+                    onChange={e => updateSelectedLayer('opacity', Number(e.target.value))}
+                    className="w-full bg-[#F5FAF3] dark:bg-[#0D3220] border border-[#C8DEC9] dark:border-[#1E6339] rounded-xl px-3 py-1.5 text-xs text-[#123B27] dark:text-[#EAF8E5]"
+                  />
+                </div>
+              </div>
+
             </div>
-          </div>
+          )}
+
         </div>
-      )}
+
+      </div>
     </div>
   )
 }
