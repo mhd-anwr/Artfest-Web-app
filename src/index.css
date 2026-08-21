@@ -901,58 +901,114 @@ html[data-theme='dark'] .admin-logout-btn {
   transform: translateX(4px);
 }
 
-/* 1st Place */
+/* Leaderboard Ranking Cards — Dark Theme Default / Explicit */
+.dark .lb-1,
+[data-theme='dark'] .lb-1,
 .lb-1 {
-  background: #123D24 !important;
-  border: 1px solid #2E7D4A !important;
+  background: #164A2C !important;
+  border: 1px solid #3D8B5A !important;
 }
 
-.lb-1 .lb-rank {
-  color: #D8F3A8 !important;
-}
-
+.dark .lb-1 .lb-rank,
+[data-theme='dark'] .lb-1 .lb-rank,
+.dark .lb-1 .lb-name,
+[data-theme='dark'] .lb-1 .lb-name,
+.lb-1 .lb-rank,
 .lb-1 .lb-name {
-  color: #F0F7DF !important;
+  color: #F0F8E8 !important;
 }
 
+.dark .lb-1 .lb-points,
+[data-theme='dark'] .lb-1 .lb-points,
 .lb-1 .lb-points {
   color: #B7E36B !important;
 }
 
-/* 2nd Place */
+.dark .lb-2,
+[data-theme='dark'] .lb-2,
 .lb-2 {
-  background: #0E351F !important;
-  border: 1px solid #27663E !important;
+  background: #123E26 !important;
+  border: 1px solid #327349 !important;
 }
 
-.lb-2 .lb-rank {
-  color: #C7D8C0 !important;
-}
-
+.dark .lb-2 .lb-rank,
+[data-theme='dark'] .lb-2 .lb-rank,
+.dark .lb-2 .lb-name,
+[data-theme='dark'] .lb-2 .lb-name,
+.lb-2 .lb-rank,
 .lb-2 .lb-name {
-  color: #E5F0DC !important;
+  color: #E2F0DE !important;
 }
 
+.dark .lb-2 .lb-points,
+[data-theme='dark'] .lb-2 .lb-points,
 .lb-2 .lb-points {
-  color: #A8D96B !important;
+  color: #A8D66A !important;
 }
 
-/* 3rd Place */
+.dark .lb-3,
+[data-theme='dark'] .lb-3,
 .lb-3 {
-  background: #0B2D1A !important;
-  border: 1px solid #235535 !important;
+  background: #0E3420 !important;
+  border: 1px solid #2B633F !important;
 }
 
-.lb-3 .lb-rank {
-  color: #B8C8B5 !important;
-}
-
+.dark .lb-3 .lb-rank,
+[data-theme='dark'] .lb-3 .lb-rank,
+.dark .lb-3 .lb-name,
+[data-theme='dark'] .lb-3 .lb-name,
+.lb-3 .lb-rank,
 .lb-3 .lb-name {
-  color: #DDE9D7 !important;
+  color: #D7E8D3 !important;
 }
 
+.dark .lb-3 .lb-points,
+[data-theme='dark'] .lb-3 .lb-points,
 .lb-3 .lb-points {
-  color: #9DCF63 !important;
+  color: #9BCF65 !important;
+}
+
+/* Leaderboard Ranking Cards — Light Theme Override */
+html:not(.dark):not([data-theme='dark']) .lb-1 {
+  background: #E8F5E9 !important;
+  border: 1px solid #8BC9A0 !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-1 .lb-rank,
+html:not(.dark):not([data-theme='dark']) .lb-1 .lb-name {
+  color: #174B2B !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-1 .lb-points {
+  color: #287A43 !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-2 {
+  background: #F0F8F1 !important;
+  border: 1px solid #A1D2AF !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-2 .lb-rank,
+html:not(.dark):not([data-theme='dark']) .lb-2 .lb-name {
+  color: #205A34 !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-2 .lb-points {
+  color: #32834B !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-3 {
+  background: #E5F2E8 !important;
+  border: 1px solid #76B98D !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-3 .lb-rank,
+html:not(.dark):not([data-theme='dark']) .lb-3 .lb-name {
+  color: #194F2D !important;
+}
+
+html:not(.dark):not([data-theme='dark']) .lb-3 .lb-points {
+  color: #2E7545 !important;
 }
 
 /* Other Places */
