@@ -125,10 +125,7 @@ export default function JudgesResults() {
       }))
     }
 
-    return Array.from({ length: 6 }, (_, i) => {
-      const letter = String.fromCharCode(65 + i)
-      return { id: `anon_${prog.id}_${letter}`, name: `Performance ${letter}`, code: letter }
-    })
+    return []
   }
 
   const getStudentObj = (id) => {
@@ -766,107 +763,126 @@ export default function JudgesResults() {
       )}
 
       {/* ── Submit / Edit result modal ── */}
-      {editOpen && editProg && (
-        <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
-          <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
-            <p className="text-mutedText text-sm mb-4 truncate">{editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}</p>
+      {editOpen && editProg && (() => {
+        const cands = getCandidatesForProg(editProg, progAssignments || {})
+        const hasCandidates = cands.length > 0 && entryRows.length > 0
 
-            {/* Column Headers: Place label removed from UI */}
-            <div className="grid grid-cols-12 gap-3 text-xs font-bold text-mutedText px-1 mb-2">
-              <span className="col-span-7">Code Letter</span>
-              <span className="col-span-3 text-center">Points</span>
-              <span className="col-span-2 text-center">Grade</span>
-            </div>
+        return (
+          <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/70 overflow-y-auto" onClick={() => !saving && closeEdit()}>
+            <div className="bg-card rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl border border-secondary/30 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-poppins font-bold text-mainText mb-1">{isFirstTime ? 'Submit Result' : 'Edit Result'}</h3>
+              <p className="text-mutedText text-sm mb-4 truncate">
+                {editProg.name} · {editProg.category}{getProgrammeType(editProg) ? ` · ${getProgrammeType(editProg)}` : ''}
+                <span className="ml-2 font-mono text-xs text-accent">({cands.length} registered candidate{cands.length === 1 ? '' : 's'})</span>
+              </p>
 
-            {/* Scrollable list of placement rows for all candidates */}
-            <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
-              {entryRows.map((row, i) => {
-                const grade = calcGrade(row.points)
-                const cands = getCandidatesForProg(editProg, progAssignments || {})
-                const assignedCodes = Array.from(new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))).sort()
-
-                const selectedCodesInOtherRows = new Set(
-                  entryRows
-                    .filter((_, idx) => idx !== i)
-                    .map(r => (r.code || '').trim().toUpperCase())
-                    .filter(Boolean)
-                )
-
-                return (
-                  <div key={i} className="grid grid-cols-12 gap-3 items-center mb-3">
-                    {/* Select Dropdown for Code Letter */}
-                    <div className="col-span-7">
-                      <select
-                        className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
-                        value={row.code || ''}
-                        onChange={e => updateRowField(i, 'code', e.target.value)}
-                      >
-                        <option value="" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA]">
-                          Select Code ▼
-                        </option>
-                        {assignedCodes.map(code => {
-                          const isTaken = selectedCodesInOtherRows.has(code)
-                          return (
-                            <option
-                              key={code}
-                              value={code}
-                              disabled={isTaken}
-                              className={`bg-[#FFFFFF] dark:bg-[#092619] ${
-                                isTaken
-                                  ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
-                                  : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
-                              }`}
-                            >
-                              {code}{isTaken ? ' (Selected)' : ''}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    </div>
-
-                    {/* Points Input */}
-                    <div className="col-span-3">
-                      <input
-                        type="number"
-                        placeholder="Pts"
-                        min="0"
-                        max="10"
-                        className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-center text-sm font-bold focus:border-[#62C744]"
-                        value={row.points}
-                        onChange={e => updateRowField(i, 'points', e.target.value)}
-                      />
-                    </div>
-
-                    {/* Grade Display */}
-                    <div className="col-span-2 flex justify-center">
-                      <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${
-                        grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
-                        grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
-                        grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
-                        grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
-                        'bg-orange-500/15 text-orange-400 border border-orange-500/40'
-                      }`}>
-                        {grade}
-                      </div>
-                    </div>
+              {!hasCandidates ? (
+                <div className="bg-secondary/15 rounded-xl p-6 text-center text-mutedText text-sm border border-secondary/30 my-4">
+                  No registered candidates for this programme.
+                </div>
+              ) : (
+                <>
+                  {/* Column Headers: Place label removed from UI */}
+                  <div className="grid grid-cols-12 gap-3 text-xs font-bold text-mutedText px-1 mb-2">
+                    <span className="col-span-7">Code Letter</span>
+                    <span className="col-span-3 text-center">Points</span>
+                    <span className="col-span-2 text-center">Grade</span>
                   </div>
-                )
-              })}
-            </div>
 
-            {editError && <p className="text-red-400 text-sm mt-2 font-semibold">{editError}</p>}
-            <div className="flex gap-2 mt-4 pt-3 border-t border-secondary/30 shrink-0">
-              <button onClick={handleSaveEdit} disabled={saving} className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold hover:bg-primary/90 transition text-sm">
-                {saving ? 'Saving...' : 'Save & Lock Result'}
-              </button>
-              <button onClick={() => !saving && closeEdit()} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold transition text-sm">
-                Cancel
-              </button>
+                  {/* Scrollable list of placement rows for all candidates */}
+                  <div className="overflow-y-auto max-h-[50vh] pr-1 space-y-1 my-1 custom-scrollbar">
+                    {entryRows.map((row, i) => {
+                      const grade = calcGrade(row.points)
+                      const assignedCodes = Array.from(new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))).sort()
+
+                      const selectedCodesInOtherRows = new Set(
+                        entryRows
+                          .filter((_, idx) => idx !== i)
+                          .map(r => (r.code || '').trim().toUpperCase())
+                          .filter(Boolean)
+                      )
+
+                      return (
+                        <div key={i} className="grid grid-cols-12 gap-3 items-center mb-3">
+                          {/* Select Dropdown for Code Letter */}
+                          <div className="col-span-7">
+                            <select
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
+                              value={row.code || ''}
+                              onChange={e => updateRowField(i, 'code', e.target.value)}
+                            >
+                              <option value="" className="bg-[#FFFFFF] dark:bg-[#092619] text-[#64806F] dark:text-[#B8D9BA]">
+                                Select Code ▼
+                              </option>
+                              {assignedCodes.map(code => {
+                                const isTaken = selectedCodesInOtherRows.has(code)
+                                return (
+                                  <option
+                                    key={code}
+                                    value={code}
+                                    disabled={isTaken}
+                                    className={`bg-[#FFFFFF] dark:bg-[#092619] ${
+                                      isTaken
+                                        ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
+                                        : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
+                                    }`}
+                                  >
+                                    {code}{isTaken ? ' (Selected)' : ''}
+                                  </option>
+                                )
+                              })}
+                            </select>
+                          </div>
+
+                          {/* Points Input */}
+                          <div className="col-span-3">
+                            <input
+                              type="number"
+                              placeholder="Pts"
+                              min="0"
+                              max="10"
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-center text-sm font-bold focus:border-[#62C744]"
+                              value={row.points}
+                              onChange={e => updateRowField(i, 'points', e.target.value)}
+                            />
+                          </div>
+
+                          {/* Grade Display */}
+                          <div className="col-span-2 flex justify-center">
+                            <div className={`flex items-center justify-center w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold ${
+                              grade === '-' ? 'bg-secondary/15 border border-secondary/30 text-mutedText' :
+                              grade === 'A+' ? 'bg-success/15 text-success border border-success/40' :
+                              grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247] border border-[#71C247]/40' :
+                              grade === 'B' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/40' :
+                              'bg-orange-500/15 text-orange-400 border border-orange-500/40'
+                            }`}>
+                              {grade}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+
+              {editError && <p className="text-red-400 text-sm mt-2 font-semibold">{editError}</p>}
+              <div className="flex gap-2 mt-4 pt-3 border-t border-secondary/30 shrink-0">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={saving || !hasCandidates}
+                  className="flex-1 bg-primary text-white rounded-xl p-3 font-semibold hover:bg-primary/90 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {saving ? 'Saving...' : 'Save & Lock Result'}
+                </button>
+                <button onClick={() => !saving && closeEdit()} className="bg-secondary/15 text-mainText rounded-xl p-3 font-semibold transition text-sm">
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
