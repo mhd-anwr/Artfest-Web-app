@@ -142,10 +142,66 @@ function latestPerProgramme(results) {
   return Object.values(map)
 }
 
+export const attachTeamNamesToResults = async (resultsList) => {
+  if (!resultsList) return resultsList
+  const isSingle = !Array.isArray(resultsList)
+  const list = isSingle ? [resultsList] : resultsList
+  if (list.length === 0) return resultsList
+
+  try {
+    const [students, teams] = await Promise.all([
+      fetchAllRows('students', 'id, team, chestNo, name'),
+      getTeams(),
+    ])
+
+    const studentMap = {}
+    students.forEach(s => { studentMap[s.id] = s })
+
+    const teamMap = {}
+    teams.forEach(t => { teamMap[t.id] = t.name; teamMap[t.name] = t.name })
+
+    const formatEntry = (e) => {
+      if (!e) return e
+      const s = studentMap[e.studentId || e.candidateId]
+      const teamId = s?.team || e.teamId || e.team
+      const teamName = teamMap[teamId] || teamId || e.teamName || e.team || ''
+      const chestNo = s?.chestNo || e.chestNo || ''
+      return {
+        ...e,
+        team: teamName,
+        teamName: teamName,
+        teamId: teamId,
+        chestNo: chestNo,
+      }
+    }
+
+    const processed = list.map(r => {
+      if (!r) return r
+      const entries = Array.isArray(r.entries) ? r.entries.map(formatEntry) : []
+      const first = formatEntry(r.first || entries[0] || null)
+      const second = formatEntry(r.second || entries[1] || null)
+      const third = formatEntry(r.third || entries[2] || null)
+
+      return {
+        ...r,
+        entries,
+        first,
+        second,
+        third,
+      }
+    })
+
+    return isSingle ? processed[0] : processed
+  } catch (err) {
+    console.warn('attachTeamNamesToResults error:', err)
+    return resultsList
+  }
+}
+
 export const getResultByProgrammeId = async (programmeId) => {
   const { data, error } = await supabase.from('results').select('*').eq('programmeId', programmeId).order('updatedAt', { ascending: false, nullsFirst: false }).limit(1)
   if (error) { console.error('getResultByProgrammeId error:', error); return null }
-  return data?.[0] || null
+  return await attachTeamNamesToResults(data?.[0] || null)
 }
 
 export const getAllResults = async () => {
@@ -164,7 +220,8 @@ export const getAllResults = async () => {
   })
 
   const latest = latestPerProgramme(validResults)
-  return latest.sort((a, b) => (b.resultNo || 0) - (a.resultNo || 0))
+  const sorted = latest.sort((a, b) => (b.resultNo || 0) - (a.resultNo || 0))
+  return await attachTeamNamesToResults(sorted)
 }
 
 export const getAllMasterResultsForAdmin = async () => {
@@ -194,7 +251,7 @@ export const getAllMasterResultsForAdmin = async () => {
     }
   })
 
-  return masterResults
+  return await attachTeamNamesToResults(masterResults)
 }
 
 export const getTeams = async () => {

@@ -28,13 +28,13 @@ export default function PosterGeneratorModal({ result, onClose }) {
     let third = { name: '', team: '' }
 
     if (Array.isArray(result?.entries) && result.entries.length > 0) {
-      if (result.entries[0]) first = { name: result.entries[0].name || '', team: result.entries[0].team || '' }
-      if (result.entries[1]) second = { name: result.entries[1].name || '', team: result.entries[1].team || '' }
-      if (result.entries[2]) third = { name: result.entries[2].name || '', team: result.entries[2].team || '' }
+      if (result.entries[0]) first = { name: result.entries[0].name || '', team: result.entries[0].teamName || result.entries[0].team || '' }
+      if (result.entries[1]) second = { name: result.entries[1].name || '', team: result.entries[1].teamName || result.entries[1].team || '' }
+      if (result.entries[2]) third = { name: result.entries[2].name || '', team: result.entries[2].teamName || result.entries[2].team || '' }
     } else {
-      if (result?.first) first = { name: result.first.name || '', team: result.first.team || '' }
-      if (result?.second) second = { name: result.second.name || '', team: result.second.team || '' }
-      if (result?.third) third = { name: result.third.name || '', team: result.third.team || '' }
+      if (result?.first) first = { name: result.first.name || '', team: result.first.teamName || result.first.team || '' }
+      if (result?.second) second = { name: result.second.name || '', team: result.second.teamName || result.second.team || '' }
+      if (result?.third) third = { name: result.third.name || '', team: result.third.teamName || result.third.team || '' }
     }
 
     return {

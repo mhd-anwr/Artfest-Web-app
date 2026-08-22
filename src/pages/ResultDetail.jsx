@@ -97,10 +97,15 @@ export default function ResultDetail() {
               <StudentAvatar src={getPhoto(data)} name={data.name} className="w-10 h-10 sm:w-12 sm:h-12" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] sm:text-xs font-bold" style={{ color }}>{label}</p>
-                <p className="text-mainText font-medium text-sm sm:text-base truncate">
+                <p className="text-mainText font-semibold text-sm sm:text-base truncate">
                   {getChest(data) ? <span className="text-accent font-bold mr-1.5">#{getChest(data)}</span> : null}
                   {data.name}
                 </p>
+                {(data.teamName || data.team) && (
+                  <p className="text-xs sm:text-sm font-medium text-[#115F32] dark:text-[#8ED06C] mt-0.5 truncate">
+                    {data.teamName || data.team}
+                  </p>
+                )}
               </div>
               <span className="text-accent font-bold text-sm sm:text-base shrink-0 ml-1">{data.points || 0} points</span>
             </div>

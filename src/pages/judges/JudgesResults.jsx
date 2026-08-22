@@ -52,6 +52,7 @@ export default function JudgesResults() {
   const [saving, setSaving] = useState(false)
 
   const [entryRows, setEntryRows] = useState([])
+  const [teams, setTeams] = useState([])
 
   const navigate = useNavigate()
   const toast = useToast()
@@ -68,6 +69,7 @@ export default function JudgesResults() {
   useEffect(() => {
     getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
     getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
+    getTeams().then(setTeams).catch(err => console.error('Failed to load teams:', err))
     getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
     loadResults()
   }, [])
@@ -458,6 +460,9 @@ export default function JudgesResults() {
       }
     }
 
+    const teamMap = {}
+    teams.forEach(t => { teamMap[t.id] = t.name; teamMap[t.name] = t.name })
+
     const entries = activeRows.map((row, idx) => {
       const trimmedCode = (row.code || '').trim().toUpperCase()
 
@@ -490,10 +495,17 @@ export default function JudgesResults() {
       const gr = (row.grade || '').trim() || 'No Grade'
       const placeStr = row.place && row.place.trim() ? row.place.trim() : getOrdinalLabel(idx)
 
+      const sObj = getStudentObj(studentId) || cands.find(c => c.id === studentId)
+      const teamId = sObj?.team || sObj?.teamId || null
+      const teamName = teamId ? (teamMap[teamId] || teamId) : ''
+
       return {
         candidateId: studentId,
         studentId: studentId,
         name: studentName,
+        team: teamName,
+        teamName: teamName,
+        teamId: teamId,
         codeLetter: trimmedCode,
         code: trimmedCode,
         candidateNo: idx + 1,
