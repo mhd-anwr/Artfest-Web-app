@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
 import { getProgrammes, getResultNoMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
-import { Plus, X, Printer, Pencil, Trash2, Upload } from 'lucide-react'
+import { Plus, X, Printer, Pencil, Trash2, Upload, ChevronLeft, ChevronRight } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
 import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
@@ -40,6 +40,8 @@ export default function AdminProgrammes() {
   const [editResultNo, setEditResultNo] = useState('')
   const [editFinished, setEditFinished] = useState(false)
   const [viewProg, setViewProg] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState('All')
   const navigate = useNavigate()
   const toast = useToast()
 
@@ -218,6 +220,23 @@ export default function AdminProgrammes() {
     ...PARTICIPATION_TYPES.map(t => ({ value: t, label: t, icon: <span className="w-2.5 h-2.5 rounded-full bg-gray-400" /> })),
   ]
 
+  const filteredList = useMemo(() => {
+    return programmes
+      .filter(p => (!progFilter || p.category === progFilter)
+        && (!progTypeFilter || (p.programmeType || p.type || '') === progTypeFilter)
+        && (!partFilter || (p.participationType || p.participation_type || '') === partFilter))
+      .sort((a, b) => (resultNoMap[a.id] || Number.MAX_SAFE_INTEGER) - (resultNoMap[b.id] || Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name))
+  }, [programmes, progFilter, progTypeFilter, partFilter, resultNoMap])
+
+  const totalItems = filteredList.length
+  const effectivePageSize = pageSize === 'All' ? totalItems || 1 : Number(pageSize)
+  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize))
+  const page = Math.min(currentPage, totalPages)
+
+  const startIndex = (page - 1) * effectivePageSize
+  const endIndex = Math.min(totalItems, startIndex + effectivePageSize)
+  const visibleProgrammes = filteredList.slice(startIndex, endIndex)
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -247,7 +266,7 @@ export default function AdminProgrammes() {
           label="All Categories"
           options={catOptions}
           value={progFilter}
-          onChange={setProgFilter}
+          onChange={v => { setProgFilter(v); setCurrentPage(1) }}
           className="flex-1"
         />
         <FilterDropdown
@@ -255,7 +274,7 @@ export default function AdminProgrammes() {
           label="All Types"
           options={typeOptions}
           value={progTypeFilter}
-          onChange={setProgTypeFilter}
+          onChange={v => { setProgTypeFilter(v); setCurrentPage(1) }}
           className="flex-1"
         />
         <FilterDropdown
@@ -263,42 +282,78 @@ export default function AdminProgrammes() {
           label="All Participation"
           options={partOptions}
           value={partFilter}
-          onChange={setPartFilter}
+          onChange={v => { setPartFilter(v); setCurrentPage(1) }}
           className="flex-1"
         />
       </div>
-      <div className="flex flex-col gap-3">
-        {programmes
-          .filter(p => (!progFilter || p.category === progFilter)
-            && (!progTypeFilter || (p.programmeType || p.type || '') === progTypeFilter)
-            && (!partFilter || (p.participationType || p.participation_type || '') === partFilter))
-          .sort((a, b) => (resultNoMap[a.id] || Number.MAX_SAFE_INTEGER) - (resultNoMap[b.id] || Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name))
-          .map(prog => (
-            <div key={prog.id} className="bg-card rounded-xl p-4 flex justify-between items-center shadow-sm border border-secondary/30">
-              <div className="cursor-pointer flex-1 min-w-0" onClick={() => setViewProg(prog)}>
-                <p className="text-mainText font-medium text-sm sm:text-base truncate">
-                  {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
-                  {prog.name}
-                </p>
-                <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
-                <button
-                  onClick={() => toggleFinished(prog)}
-                  className={`prog-toggle ${prog.isFinished ? 'toggle-on' : 'toggle-off'} w-12 h-6 sm:w-14 sm:h-7 shrink-0`}
-                  title={prog.isFinished ? 'Finished' : 'Not finished'}
-                >
-                  <span className="prog-toggle-thumb" />
-                </button>
-                <KebabMenu
-                  items={[
-                    { label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(prog) },
-                    { label: 'Delete', icon: <Trash2 size={15} />, danger: true, onClick: () => handleDelete(prog) },
-                  ]}
-                />
-              </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 bg-card rounded-xl p-3 border border-secondary/30 text-xs sm:text-sm">
+        <span className="text-mutedText font-medium">
+          Showing <span className="text-mainText font-bold">{totalItems > 0 ? startIndex + 1 : 0}–{endIndex}</span> of <span className="text-mainText font-bold">{totalItems}</span> programmes
+        </span>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-mutedText">
+            <span>Per page:</span>
+            <select
+              value={pageSize}
+              onChange={e => { setPageSize(e.target.value); setCurrentPage(1) }}
+              className="bg-black/20 text-mainText border border-secondary/40 rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer"
+            >
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="All">All ({totalItems})</option>
+            </select>
+          </label>
+          {pageSize !== 'All' && totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                disabled={page <= 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-mutedText font-semibold px-2">Page {page} of {totalPages}</span>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
-          ))}
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {visibleProgrammes.map(prog => (
+          <div key={prog.id} className="bg-card rounded-xl p-4 flex justify-between items-center shadow-sm border border-secondary/30">
+            <div className="cursor-pointer flex-1 min-w-0" onClick={() => setViewProg(prog)}>
+              <p className="text-mainText font-medium text-sm sm:text-base truncate">
+                {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
+                {prog.name}
+              </p>
+              <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
+              <button
+                onClick={() => toggleFinished(prog)}
+                className={`prog-toggle ${prog.isFinished ? 'toggle-on' : 'toggle-off'} w-12 h-6 sm:w-14 sm:h-7 shrink-0`}
+                title={prog.isFinished ? 'Finished' : 'Not finished'}
+              >
+                <span className="prog-toggle-thumb" />
+              </button>
+              <KebabMenu
+                items={[
+                  { label: 'Edit', icon: <Pencil size={15} />, onClick: () => startEdit(prog) },
+                  { label: 'Delete', icon: <Trash2 size={15} />, danger: true, onClick: () => handleDelete(prog) },
+                ]}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Add Modal */}

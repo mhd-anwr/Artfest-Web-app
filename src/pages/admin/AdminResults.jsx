@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Eye, Search, Trophy, Image, Sparkles } from 'lucide-react'
-import { getAllResults, getProgrammes, getStudents, getTeams } from '../../supabase/queries'
+import { Eye, Search, Trophy, Image, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { getAllMasterResultsForAdmin, getProgrammes, getStudents, getTeams } from '../../supabase/queries'
 import AdminResultPoster from './AdminResultPoster'
 import PosterGeneratorModal from '../../components/PosterGeneratorModal'
 
@@ -15,13 +15,15 @@ export default function AdminResults() {
   const [search, setSearch] = useState('')
   const [showPoster, setShowPoster] = useState(false)
   const [selectedPosterResult, setSelectedPosterResult] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState('All')
 
   const loadAll = () => {
     Promise.all([
       getProgrammes(),
       getStudents(),
       getTeams(),
-      getAllResults(),
+      getAllMasterResultsForAdmin(),
     ]).then(([progData, studentData, teamData, resultData]) => {
       setProgrammes(progData)
       setStudents(studentData)
@@ -57,6 +59,15 @@ export default function AdminResults() {
       return name.includes(q) || number.includes(q)
     })
   }, [results, programmeMap, search])
+
+  const totalItems = filteredResults.length
+  const effectivePageSize = pageSize === 'All' ? totalItems || 1 : Number(pageSize)
+  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize))
+  const page = Math.min(currentPage, totalPages)
+
+  const startIndex = (page - 1) * effectivePageSize
+  const endIndex = Math.min(totalItems, startIndex + effectivePageSize)
+  const visibleResults = filteredResults.slice(startIndex, endIndex)
 
   const buildPlacementRows = (result) => {
     const rows = []
@@ -190,9 +201,49 @@ export default function AdminResults() {
           </label>
         </div>
 
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 bg-card rounded-xl p-3 border border-secondary/30 text-xs sm:text-sm">
+          <span className="text-mutedText font-medium">
+            Showing <span className="text-mainText font-bold">{totalItems > 0 ? startIndex + 1 : 0}–{endIndex}</span> of <span className="text-mainText font-bold">{totalItems}</span> result records
+          </span>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-mutedText">
+              <span>Per page:</span>
+              <select
+                value={pageSize}
+                onChange={e => { setPageSize(e.target.value); setCurrentPage(1) }}
+                className="bg-black/20 text-mainText border border-secondary/40 rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer"
+              >
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="All">All ({totalItems})</option>
+              </select>
+            </label>
+            {pageSize !== 'All' && totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span className="text-mutedText font-semibold px-2">Page {page} of {totalPages}</span>
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="space-y-3">
-          {filteredResults.length === 0 && <p className="text-mutedText text-center">No matching results found.</p>}
-          {filteredResults.map(result => {
+          {totalItems === 0 && <p className="text-mutedText text-center">No matching results found.</p>}
+          {visibleResults.map(result => {
             const prog = programmeMap[result.programmeId]
             const isExpanded = expandedResultId === result.id
             return (
