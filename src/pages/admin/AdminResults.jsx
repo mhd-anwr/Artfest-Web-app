@@ -140,8 +140,8 @@ export default function AdminResults() {
             <Trophy size={22} className="text-accent" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Results (Read Only)</h2>
-            <p className="text-mutedText text-sm">Admin preview only. Judges remain the only write path for results.</p>
+            <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Results ({results.length})</h2>
+            <p className="text-mutedText text-sm">Showing all {results.length} programme result records (1 per programme).</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -221,7 +221,10 @@ export default function AdminProgrammes() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Programmes</h2>
+        <div>
+          <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Programmes ({programmes.length})</h2>
+          <p className="text-mutedText text-xs sm:text-sm mt-0.5">Showing all {programmes.length} programmes dynamically from database</p>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setBulkImportOpen(true)}

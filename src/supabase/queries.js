@@ -57,10 +57,41 @@ const clearLocalSessionState = (studentId) => {
   localStorage.removeItem(`student_session_expires_${studentId}`)
 }
 
+export async function fetchAllRows(table, selectStr = '*', orderColumn = null) {
+  let allRows = []
+  let page = 0
+  const pageSize = 1000
+  let hasMore = true
+
+  while (hasMore) {
+    const from = page * pageSize
+    const to = from + pageSize - 1
+    let query = supabase.from(table).select(selectStr).range(from, to)
+    if (orderColumn) {
+      query = query.order(orderColumn, { ascending: true })
+    }
+    const { data, error } = await query
+    if (error) {
+      console.error(`fetchAllRows error on ${table}:`, error)
+      break
+    }
+    if (data && data.length > 0) {
+      allRows = allRows.concat(data)
+      if (data.length < pageSize) {
+        hasMore = false
+      } else {
+        page += 1
+      }
+    } else {
+      hasMore = false
+    }
+  }
+
+  return allRows
+}
+
 export const getStudents = async () => {
-  const { data, error } = await supabase.from('students').select('*').order('createdAt', { ascending: false })
-  if (error) console.error(error)
-  return data || []
+  return await fetchAllRows('students', '*', 'name')
 }
 
 export const getStudentById = async (id) => {
@@ -70,13 +101,7 @@ export const getStudentById = async (id) => {
 }
 
 export const getProgrammes = async () => {
-  const { data, error } = await supabase
-    .from('programmes')
-    .select('*')
-    .order('name', { ascending: true })
-    .range(0, 4999)
-  if (error) console.error('getProgrammes error:', error)
-  return data || []
+  return await fetchAllRows('programmes', '*', 'name')
 }
 
 export const getProgrammeById = async (id) => {
@@ -124,15 +149,14 @@ export const getResultByProgrammeId = async (programmeId) => {
 }
 
 export const getAllResults = async () => {
-  const [resultsRes, progsRes] = await Promise.all([
-    supabase.from('results').select('*').range(0, 4999),
-    supabase.from('programmes').select('id, isFinished').range(0, 4999),
+  const [results, progs] = await Promise.all([
+    fetchAllRows('results', '*'),
+    fetchAllRows('programmes', 'id, isFinished'),
   ])
-  if (resultsRes.error) { console.error('getAllResults error:', resultsRes.error); return [] }
   const progMap = {}
-  ;(progsRes.data || []).forEach(p => { progMap[p.id] = p })
+  progs.forEach(p => { progMap[p.id] = p })
 
-  const validResults = (resultsRes.data || []).filter(r => {
+  const validResults = results.filter(r => {
     const prog = progMap[r.programmeId]
     if (!prog || !prog.isFinished) return false
     const hasWinners = Boolean(r.first || (Array.isArray(r.entries) && r.entries.length > 0))
@@ -144,15 +168,10 @@ export const getAllResults = async () => {
 }
 
 export const getAllMasterResultsForAdmin = async () => {
-  const [resultsRes, progsRes] = await Promise.all([
-    supabase.from('results').select('*').range(0, 4999),
-    supabase.from('programmes').select('*').order('name', { ascending: true }).range(0, 4999),
+  const [results, progs] = await Promise.all([
+    fetchAllRows('results', '*'),
+    fetchAllRows('programmes', '*', 'name'),
   ])
-  if (resultsRes.error) console.error('getAllMasterResultsForAdmin results error:', resultsRes.error)
-  if (progsRes.error) console.error('getAllMasterResultsForAdmin progs error:', progsRes.error)
-
-  const progs = progsRes.data || []
-  const results = resultsRes.data || []
 
   const resultMap = {}
   results.forEach(r => {
