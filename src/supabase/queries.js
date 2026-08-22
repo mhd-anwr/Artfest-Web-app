@@ -109,14 +109,9 @@ export const getAllResults = async () => {
 
   const validResults = (resultsRes.data || []).filter(r => {
     const prog = progMap[r.programmeId]
-    if (!prog) return false
-    return (
-      prog.isFinished ||
-      r.locked ||
-      (r.entries && r.entries.length > 0) ||
-      Boolean(r.first || r.second || r.third) ||
-      (!r.first && !r.second && !r.third && (r.resultNo || 0) > 0)
-    )
+    if (!prog || !prog.isFinished) return false
+    const hasWinners = Boolean(r.first || (Array.isArray(r.entries) && r.entries.length > 0))
+    return hasWinners
   })
 
   const latest = latestPerProgramme(validResults)

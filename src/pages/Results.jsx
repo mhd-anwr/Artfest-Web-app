@@ -27,6 +27,7 @@ export default function Results() {
   const [programmes, setProgrammes] = useState([])
   const [resultNoMap, setResultNoMap] = useState({})
   const [gradeMap, setGradeMap] = useState({})
+  const [resultProgIds, setResultProgIds] = useState(new Set())
   const [orderedCategories, setOrderedCategories] = useState(PROGRAMME_CATEGORIES)
   const [category, setCategory] = useState('')
   const [unfinishedOnly, setUnfinishedOnly] = useState(false)
@@ -40,13 +41,18 @@ export default function Results() {
     getAllResults().then(results => {
       const noMap = {}
       const gMap = {}
+      const progIds = new Set()
       results.forEach(r => {
-        if (r.programmeId) noMap[r.programmeId] = r.resultNo
+        if (r.programmeId) {
+          noMap[r.programmeId] = r.resultNo
+          progIds.add(r.programmeId)
+        }
         const points = r.first?.points
         gMap[r.programmeId] = points != null ? gradeFrom(points) : '-'
       })
       setResultNoMap(noMap)
       setGradeMap(gMap)
+      setResultProgIds(progIds)
     })
   }, [])
 
@@ -69,9 +75,9 @@ export default function Results() {
 
   const filtered = programmes.filter(p => {
     if (unfinishedOnly) {
-      return !p.isFinished
+      return !p.isFinished && !resultProgIds.has(p.id)
     }
-    if (!p.isFinished) return false
+    if (!p.isFinished || !resultProgIds.has(p.id)) return false
     return category ? p.category === category : true
   })
 
