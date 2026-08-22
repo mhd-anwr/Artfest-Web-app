@@ -27,7 +27,7 @@ const navItems = [
   { label: 'Categories', path: '/admin/categories', icon: Layers },
   { label: 'Teams', path: '/admin/teams', icon: Trophy },
   { label: 'Participants', path: '/admin/students', icon: Users },
-  { label: 'Spotlight / Gallery', path: '/admin/spotlight', icon: GalleryHorizontalEnd },
+  { label: 'Gallery', path: '/admin/spotlight', icon: GalleryHorizontalEnd },
   { label: 'Results', path: '/admin/results', icon: FileText },
   {
     label: 'Frames',

@@ -106,18 +106,12 @@ export default function ResultDetail() {
             </div>
           ))}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+          <div className="mt-2">
             <button
               onClick={() => setShowTemplatePosters(true)}
-              className="btn-result w-full p-3.5 text-sm sm:text-base font-bold bg-primary text-white hover:opacity-90 flex items-center justify-center gap-2"
+              className="btn-result w-full p-3.5 text-sm sm:text-base font-bold bg-primary text-white hover:opacity-90 flex items-center justify-center gap-2 shadow-sm"
             >
-              <Trophy size={18} /> View Generated Posters
-            </button>
-            <button
-              onClick={() => setShowPoster(true)}
-              className="w-full p-3.5 text-sm sm:text-base font-semibold rounded-xl bg-card border border-secondary/40 text-mainText hover:bg-secondary/20 flex items-center justify-center gap-2"
-            >
-              <Download size={18} /> Classic Poster
+              <Download size={18} /> Download Posters
             </button>
           </div>
         </div>

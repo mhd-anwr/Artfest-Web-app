@@ -272,7 +272,7 @@ export default function AdminResults() {
                       }}
                       className="inline-flex items-center gap-1.5 bg-primary/20 hover:bg-primary text-accent hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition border border-primary/30"
                     >
-                      <Sparkles size={14} /> View Posters
+                      <Sparkles size={14} /> Download Posters
                     </button>
                     <div className="flex items-center gap-1 text-mutedText text-xs font-semibold pl-2">
                       <Eye size={15} /> {isExpanded ? 'Collapse' : 'Preview'}

@@ -29,7 +29,7 @@ export const getCategories = async () => {
 export const getResultNoMap = async () => {
   const results = await getAllResults()
   const map = {}
-  ;(results || []).forEach(r => { if (r.programmeId) map[r.programmeId] = r.resultNo })
+    ; (results || []).forEach(r => { if (r.programmeId) map[r.programmeId] = r.resultNo })
   return map
 }
 
@@ -498,10 +498,10 @@ export const getTeamCategoryPoints = async () => {
       const placements = Array.isArray(result.entries) && result.entries.length > 0
         ? result.entries.map(e => ({ studentId: e.studentId, points: Number(e.points) || 0 }))
         : [
-            result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
-            result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
-            result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
-          ]
+          result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
+          result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
+          result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
+        ]
 
       for (const p of placements) {
         if (!p?.studentId) continue
@@ -575,10 +575,10 @@ export const getIndividualCategoryPoints = async () => {
     const placements = Array.isArray(result.entries) && result.entries.length > 0
       ? result.entries.map(e => ({ studentId: e.studentId, points: Number(e.points) || 0 }))
       : [
-          result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
-          result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
-          result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
-        ]
+        result.first && { studentId: result.first.studentId, points: Number(result.first.points) || 0 },
+        result.second && { studentId: result.second.studentId, points: Number(result.second.points) || 0 },
+        result.third && { studentId: result.third.studentId, points: Number(result.third.points) || 0 },
+      ]
 
     for (const p of placements) {
       if (!p?.studentId) continue
@@ -714,7 +714,7 @@ const DEFAULT_POSTER_TEMPLATES = [
       { id: 'l1', type: 'text', key: 'category', prefix: 'CATEGORY: ', font_family: 'Sora', font_size: 24, font_weight: '700', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 120 },
       { id: 'l2', type: 'text', key: 'programme_name', prefix: '', font_family: 'Sora', font_size: 52, font_weight: '800', text_align: 'center', color: '#D4FFB8', line_height: 1.2, width: 960, x: 60, y: 170 },
       { id: 'l3', type: 'text', key: 'result_no', prefix: 'RESULT #', font_family: 'Sora', font_size: 28, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 250 },
-      
+
       { id: 'l4', type: 'text', key: 'first_place_label', prefix: '🥇 1ST PLACE', font_family: 'Sora', font_size: 22, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 380 },
       { id: 'l5', type: 'text', key: 'first_name', prefix: '', font_family: 'Sora', font_size: 44, font_weight: '800', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 415 },
       { id: 'l6', type: 'text', key: 'first_team', prefix: '', font_family: 'Sora', font_size: 26, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 470 },
@@ -745,7 +745,7 @@ export const getPosterTemplates = async () => {
 
   const local = typeof window !== 'undefined' ? localStorage.getItem('artfest_poster_templates') : null
   if (local) {
-    try { return JSON.parse(local) } catch {}
+    try { return JSON.parse(local) } catch { }
   }
   return DEFAULT_POSTER_TEMPLATES
 }

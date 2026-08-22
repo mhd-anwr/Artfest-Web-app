@@ -40,7 +40,7 @@ const themes = {
   },
 }
 
-const ranks = ['1st', '2nd', '3rd']
+const ranks = ['1ST', '2ND', '3RD']
 
 function calcGrade(points) {
   const p = Number(points)

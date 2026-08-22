@@ -4,7 +4,7 @@ import { Download, LogOut, Trophy, Pencil, X, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../supabase/client'
 import { getStudentById, getProgrammes, getCategories, getStudentSessionState, clearStudentSession, getAllResults, getTeams, STUDENT_CATEGORIES } from '../supabase/queries'
 import StudentAvatar from '../components/StudentAvatar'
-import ResultPoster from '../components/ResultPoster'
+import PosterGeneratorModal from '../components/PosterGeneratorModal'
 import ThemeToggle from '../components/ThemeToggle'
 
 const ringRadius = 52
@@ -565,11 +565,12 @@ export default function StudentDashboard() {
       )}
 
       {selectedPoster && (
-        <ResultPoster
-          programme={selectedPoster.programme}
-          result={selectedPoster.result}
-          studentPhotos={studentPhotos}
-          chestNos={chestNos}
+        <PosterGeneratorModal
+          result={{
+            ...selectedPoster.result,
+            programmeName: selectedPoster.programme.name,
+            category: selectedPoster.programme.category,
+          }}
           onClose={() => setSelectedPoster(null)}
         />
       )}
