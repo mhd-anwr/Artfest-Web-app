@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
-import { getProgrammes, getResultNoMap, getCategories, getTeams, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
+import { getProgrammes, getResultNoMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
 import { Plus, X, Printer, Pencil, Trash2, Upload } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
@@ -61,6 +61,8 @@ export default function AdminProgrammes() {
       return toast('Failed to add programme: ' + (progErr?.message || 'the database rejected the insert (permission denied).'), 'error')
     }
     const addedId = newProg[0].id
+    await ensureResultMasterRow(addedId, name)
+
     if (addResultNo) {
       const { data: rpcData, error: noErr } = await supabase.rpc('admin_set_result_no', {
         p_programme_id: addedId,

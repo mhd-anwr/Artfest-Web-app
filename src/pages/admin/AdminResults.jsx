@@ -123,7 +123,7 @@ export default function AdminResults() {
       try {
         localStorage.removeItem('artfest_results')
         localStorage.removeItem('artfest_judge_drafts')
-      } catch (e) {}
+      } catch (e) { }
 
       alert("HARD RESET COMPLETE! Results system reset to 0.")
       loadAll()
@@ -153,11 +153,10 @@ export default function AdminResults() {
           </button>
           <button
             onClick={() => setShowPoster(s => !s)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base shrink-0 ${
-              showPoster
-                ? 'bg-card border border-secondary/40 text-mainText hover:bg-white/10'
-                : 'bg-primary text-white hover:bg-primary/90'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition text-sm sm:text-base shrink-0 ${showPoster
+              ? 'bg-card border border-secondary/40 text-mainText hover:bg-white/10'
+              : 'bg-primary text-white hover:bg-primary/90'
+              }`}
           >
             <Image size={16} className="sm:w-[18px] sm:h-[18px]" /> {showPoster ? 'Hide Legacy Poster' : 'Legacy Poster'}
           </button>

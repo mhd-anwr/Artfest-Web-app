@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase/client'
 import { parseProgrammeFile, validateProgrammes, APPROVED_CATEGORIES } from '../utils/programmeBulkParser'
-import { PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../supabase/queries'
+import { PROGRAMME_TYPES, PARTICIPATION_TYPES, ensureResultMasterRow } from '../supabase/queries'
 import { X, Upload, FileText, CheckCircle2, AlertTriangle, Trash2, RefreshCw, Download, FileCheck } from 'lucide-react'
 
 export default function ProgrammeBulkImportModal({

@@ -70,8 +70,12 @@ export const getStudentById = async (id) => {
 }
 
 export const getProgrammes = async () => {
-  const { data, error } = await supabase.from('programmes').select('*').order('name', { ascending: true })
-  if (error) console.error(error)
+  const { data, error } = await supabase
+    .from('programmes')
+    .select('*')
+    .order('name', { ascending: true })
+    .range(0, 4999)
+  if (error) console.error('getProgrammes error:', error)
   return data || []
 }
 
@@ -79,6 +83,27 @@ export const getProgrammeById = async (id) => {
   const { data, error } = await supabase.from('programmes').select('*').eq('id', id).single()
   if (error) console.error(error)
   return data
+}
+
+export const ensureResultMasterRow = async (programmeId, programmeName) => {
+  if (!programmeId) return null
+  const { data: existing } = await supabase.from('results').select('*').eq('programmeId', programmeId).maybeSingle()
+  if (existing) return existing
+
+  const now = new Date().toISOString()
+  const payload = {
+    programmeId,
+    name: programmeName || '',
+    entries: [],
+    first: null,
+    second: null,
+    third: null,
+    locked: false,
+    updatedAt: now,
+  }
+  const { data: inserted, error } = await supabase.from('results').insert(payload).select().maybeSingle()
+  if (error) console.error('ensureResultMasterRow error:', error)
+  return inserted
 }
 
 function latestPerProgramme(results) {
@@ -100,8 +125,8 @@ export const getResultByProgrammeId = async (programmeId) => {
 
 export const getAllResults = async () => {
   const [resultsRes, progsRes] = await Promise.all([
-    supabase.from('results').select('*'),
-    supabase.from('programmes').select('id, isFinished'),
+    supabase.from('results').select('*').range(0, 4999),
+    supabase.from('programmes').select('id, isFinished').range(0, 4999),
   ])
   if (resultsRes.error) { console.error('getAllResults error:', resultsRes.error); return [] }
   const progMap = {}
@@ -116,6 +141,41 @@ export const getAllResults = async () => {
 
   const latest = latestPerProgramme(validResults)
   return latest.sort((a, b) => (b.resultNo || 0) - (a.resultNo || 0))
+}
+
+export const getAllMasterResultsForAdmin = async () => {
+  const [resultsRes, progsRes] = await Promise.all([
+    supabase.from('results').select('*').range(0, 4999),
+    supabase.from('programmes').select('*').order('name', { ascending: true }).range(0, 4999),
+  ])
+  if (resultsRes.error) console.error('getAllMasterResultsForAdmin results error:', resultsRes.error)
+  if (progsRes.error) console.error('getAllMasterResultsForAdmin progs error:', progsRes.error)
+
+  const progs = progsRes.data || []
+  const results = resultsRes.data || []
+
+  const resultMap = {}
+  results.forEach(r => {
+    if (r.programmeId) resultMap[r.programmeId] = r
+  })
+
+  const masterResults = progs.map(prog => {
+    const res = resultMap[prog.id]
+    if (res) return res
+    return {
+      id: `temp-${prog.id}`,
+      programmeId: prog.id,
+      name: prog.name,
+      entries: [],
+      first: null,
+      second: null,
+      third: null,
+      locked: false,
+      updatedAt: new Date().toISOString(),
+    }
+  })
+
+  return masterResults
 }
 
 export const getTeams = async () => {
