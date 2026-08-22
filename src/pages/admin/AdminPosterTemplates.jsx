@@ -40,18 +40,22 @@ export default function AdminPosterTemplates() {
       background_type: 'gradient',
       background_value: 'linear-gradient(135deg, #061A0D 0%, #115F32 100%)',
       layers: [
-        { id: 'l1', type: 'text', key: 'category', prefix: 'CATEGORY: ', font_family: 'Sora', font_size: 24, font_weight: '700', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 120 },
-        { id: 'l2', type: 'text', key: 'programme_name', prefix: '', font_family: 'Sora', font_size: 52, font_weight: '800', text_align: 'center', color: '#D4FFB8', line_height: 1.2, width: 960, x: 60, y: 170 },
-        { id: 'l3', type: 'text', key: 'result_no', prefix: 'RESULT #', font_family: 'Sora', font_size: 28, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 250 },
-        { id: 'l4', type: 'text', key: 'first_place_label', prefix: '🥇 1ST PLACE', font_family: 'Sora', font_size: 22, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 380 },
-        { id: 'l5', type: 'text', key: 'first_name', prefix: '', font_family: 'Sora', font_size: 44, font_weight: '800', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 415 },
-        { id: 'l6', type: 'text', key: 'first_team', prefix: '', font_family: 'Sora', font_size: 26, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 470 },
-        { id: 'l7', type: 'text', key: 'second_place_label', prefix: '🥈 2ND PLACE', font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 560 },
-        { id: 'l8', type: 'text', key: 'second_name', prefix: '', font_family: 'Sora', font_size: 36, font_weight: '700', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 590 },
-        { id: 'l9', type: 'text', key: 'second_team', prefix: '', font_family: 'Sora', font_size: 22, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 635 },
-        { id: 'l10', type: 'text', key: 'third_place_label', prefix: '🥉 3RD PLACE', font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#71C247', line_height: 1.2, width: 900, x: 90, y: 720 },
-        { id: 'l11', type: 'text', key: 'third_name', prefix: '', font_family: 'Sora', font_size: 36, font_weight: '700', text_align: 'center', color: '#FFFFFF', line_height: 1.2, width: 900, x: 90, y: 750 },
-        { id: 'l12', type: 'text', key: 'third_team', prefix: '', font_family: 'Sora', font_size: 22, font_weight: '600', text_align: 'center', color: '#8ED06C', line_height: 1.2, width: 900, x: 90, y: 795 },
+        { id: 'l3', type: 'text', key: 'result_no', prefix: 'RESULT #', font_family: 'Sora', font_size: 28, font_weight: '700', text_align: 'left', color: '#71C247', line_height: 1.2, width: 900, x: 133, y: 248 },
+        { id: 'l2', type: 'text', key: 'programme_name', prefix: '', font_family: 'Sora', font_size: 52, font_weight: '800', text_align: 'left', color: '#D4FFB8', line_height: 1.2, width: 977, x: 130, y: 276 },
+        { id: 'l1', type: 'text', key: 'category', prefix: '', font_family: 'Sora', font_size: 24, font_weight: '700', text_align: 'left', color: '#8ED06C', line_height: 1.2, width: 364, x: 133, y: 336 },
+
+        { id: 'l4', type: 'text', key: 'first_place_label', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#D4FFB8', line_height: 1.2, width: 140, x: 133, y: 480 },
+        { id: 'l5', type: 'text', key: 'first_name', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#FFFFFF', line_height: 1.2, width: 750, x: 320, y: 480 },
+        { id: 'l6', type: 'text', key: 'first_team', prefix: '', font_family: 'Sora', font_size: 24, font_weight: '600', text_align: 'left', color: '#8ED06C', line_height: 1.2, width: 750, x: 320, y: 525 },
+
+        { id: 'l7', type: 'text', key: 'second_place_label', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#D4FFB8', line_height: 1.2, width: 140, x: 133, y: 630 },
+        { id: 'l8', type: 'text', key: 'second_name', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#FFFFFF', line_height: 1.2, width: 750, x: 320, y: 630 },
+        { id: 'l9', type: 'text', key: 'second_team', prefix: '', font_family: 'Sora', font_size: 24, font_weight: '600', text_align: 'left', color: '#8ED06C', line_height: 1.2, width: 750, x: 320, y: 675 },
+
+        { id: 'l10', type: 'text', key: 'third_place_label', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#D4FFB8', line_height: 1.2, width: 140, x: 133, y: 780 },
+        { id: 'l11', type: 'text', key: 'third_name', prefix: '', font_family: 'Sora', font_size: 38, font_weight: '800', text_align: 'left', color: '#FFFFFF', line_height: 1.2, width: 750, x: 320, y: 780 },
+        { id: 'l12', type: 'text', key: 'third_team', prefix: '', font_family: 'Sora', font_size: 24, font_weight: '600', text_align: 'left', color: '#8ED06C', line_height: 1.2, width: 750, x: 320, y: 825 },
+
         { id: 'l13', type: 'text', key: 'festival_footer', prefix: "RENDEZVOUS '26 ART FESTIVAL", font_family: 'Sora', font_size: 20, font_weight: '700', text_align: 'center', color: '#4EBA16', line_height: 1.2, width: 900, x: 90, y: 1220 },
       ],
     }
