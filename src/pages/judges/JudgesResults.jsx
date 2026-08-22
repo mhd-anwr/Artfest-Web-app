@@ -66,30 +66,10 @@ export default function JudgesResults() {
   }
 
   useEffect(() => {
-    async function checkReset() {
-      if (window.location.search.includes('hard_reset=true')) {
-        console.log("HARD RESET TRIGGERED IN JUDGES RESULTS")
-        const { data: progs } = await judgeClient.from('programmes').select('id')
-        if (progs) {
-          for (const p of progs) {
-            await judgeClient.from('results').delete().eq('programmeId', p.id)
-            await judgeClient.from('programmes').update({ isFinished: false }).eq('id', p.id)
-          }
-        }
-        const { data: allRes } = await judgeClient.from('results').select('id')
-        if (allRes && allRes.length > 0) {
-          for (const r of allRes) {
-            await judgeClient.from('results').delete().eq('id', r.id)
-          }
-        }
-        console.log("HARD RESET FINISHED IN JUDGES RESULTS")
-      }
-      getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
-      getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
-      getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
-      loadResults()
-    }
-    checkReset()
+    getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
+    getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
+    getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
+    loadResults()
   }, [])
 
   const getCandidatesForProg = (prog, currentAssignments = null) => {
@@ -561,23 +541,28 @@ export default function JudgesResults() {
     }
 
     if (error) {
-      if (error.message?.includes('entries') || error.code === 'PGRST204') {
-        const msg = 'Missing "entries" column in Supabase. Please run add_entries_column_to_results.sql in Supabase SQL Editor.'
-        setEditError(msg)
-        toast(msg, 'error')
-      } else {
-        setEditError(error?.message || 'Failed to submit the result.')
-      }
+      console.error('Result save error:', error)
+      const errorMsg = error?.message || 'Failed to submit the result.'
+      setEditError(errorMsg)
+      toast(errorMsg, 'error')
       setSaving(false)
       return
     }
+
+    // Sync programme.isFinished = true in database so all result listings & previews display the result
+    await judgeClient.from('programmes').update({ isFinished: true }).eq('id', editProg.id).catch(err => console.error('Prog update error:', err))
+    await supabase.from('programmes').update({ isFinished: true }).eq('id', editProg.id).catch(err => console.error('Prog update error:', err))
+
+    // Update local programmes state
+    setProgrammes(prev => prev.map(p => p.id === editProg.id ? { ...p, isFinished: true } : p))
 
     toast(isFirstTime ? 'Result submitted successfully!' : 'Result updated successfully!')
     setSaving(false)
     closeEdit()
 
-    const resultsRes = await judgeClient.from('results').select('*')
-    if (resultsRes.data) setSavedResults(resultsRes.data)
+    // Reload all programmes & results to keep everything 100% in sync
+    getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
+    loadResults()
   }
 
   return (

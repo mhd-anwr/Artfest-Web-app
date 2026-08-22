@@ -103,14 +103,20 @@ export const getAllResults = async () => {
     supabase.from('results').select('*'),
     supabase.from('programmes').select('id, isFinished'),
   ])
-  if (resultsRes.error) { console.error(resultsRes.error); return [] }
+  if (resultsRes.error) { console.error('getAllResults error:', resultsRes.error); return [] }
   const progMap = {}
   ;(progsRes.data || []).forEach(p => { progMap[p.id] = p })
 
   const validResults = (resultsRes.data || []).filter(r => {
     const prog = progMap[r.programmeId]
     if (!prog) return false
-    return prog.isFinished || (!r.first && !r.second && !r.third && (r.resultNo || 0) > 0)
+    return (
+      prog.isFinished ||
+      r.locked ||
+      (r.entries && r.entries.length > 0) ||
+      Boolean(r.first || r.second || r.third) ||
+      (!r.first && !r.second && !r.third && (r.resultNo || 0) > 0)
+    )
   })
 
   const latest = latestPerProgramme(validResults)

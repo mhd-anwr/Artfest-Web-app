@@ -31,27 +31,7 @@ export default function AdminResults() {
   }
 
   useEffect(() => {
-    async function checkReset() {
-      if (window.location.search.includes('hard_reset=true')) {
-        console.log("HARD RESET TRIGGERED IN ADMIN RESULTS")
-        const { data: progs } = await supabase.from('programmes').select('id')
-        if (progs) {
-          for (const p of progs) {
-            await supabase.from('results').delete().eq('programmeId', p.id)
-            await supabase.from('programmes').update({ isFinished: false }).eq('id', p.id)
-          }
-        }
-        const { data: allRes } = await supabase.from('results').select('id')
-        if (allRes && allRes.length > 0) {
-          for (const r of allRes) {
-            await supabase.from('results').delete().eq('id', r.id)
-          }
-        }
-        console.log("HARD RESET FINISHED IN ADMIN RESULTS")
-      }
-      loadAll()
-    }
-    checkReset()
+    loadAll()
   }, [])
 
   const teamMap = useMemo(() => {
