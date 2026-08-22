@@ -6,6 +6,7 @@ import {
   deleteGalleryFooter,
   uploadFrameImage,
 } from '../../supabase/queries'
+import { clearCompositorCache } from '../../utils/imageCompositor'
 import { Plus, Trash2, CheckCircle, Image as ImageIcon, PanelBottom, X, Sparkles } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 
@@ -19,8 +20,8 @@ export default function AdminGalleryFooters() {
   const toast = useToast()
 
   const loadFooters = async () => {
-    setLoading(true)
     try {
+      setLoading(true)
       const data = await getGalleryFooters()
       setFooters(data || [])
     } catch (e) {
@@ -45,6 +46,7 @@ export default function AdminGalleryFooters() {
       if (!imageUrl) throw new Error('Upload returned empty URL')
 
       await createGalleryFooter({ name: name.trim(), image_url: imageUrl })
+      clearCompositorCache()
       toast('Gallery footer created successfully!')
       setName('')
       setFile(null)
@@ -61,6 +63,7 @@ export default function AdminGalleryFooters() {
     if (isCurrentlyActive) return
     try {
       await setActiveGalleryFooter(id)
+      clearCompositorCache()
       toast('Active gallery footer updated!')
       loadFooters()
     } catch (e) {
@@ -72,6 +75,7 @@ export default function AdminGalleryFooters() {
     if (!window.confirm(`Delete gallery footer overlay "${footerName}"?`)) return
     try {
       await deleteGalleryFooter(id)
+      clearCompositorCache()
       toast('Gallery footer deleted')
       loadFooters()
     } catch (e) {

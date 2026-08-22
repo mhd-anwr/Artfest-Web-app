@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSpotlight, getActiveGalleryFooter } from '../supabase/queries'
+import { getCompositedGalleryImage, downloadCompositedImage } from '../utils/imageCompositor'
 import { Download, Images, ChevronLeft, X, Maximize2 } from 'lucide-react'
 import { useToast } from '../components/Toast'
 
@@ -22,6 +23,71 @@ const groupByAlbum = (images) => {
     .sort((a, b) => b.newest - a.newest)
 }
 
+function GalleryCardItem({ img, activeFooterUrl, onClick, onDownload }) {
+  const [displayUrl, setDisplayUrl] = useState(img.imageURL)
+
+  useEffect(() => {
+    let isMounted = true
+    if (activeFooterUrl) {
+      getCompositedGalleryImage(img.imageURL, activeFooterUrl).then(url => {
+        if (isMounted) setDisplayUrl(url)
+      })
+    } else {
+      setDisplayUrl(img.imageURL)
+    }
+    return () => { isMounted = false }
+  }, [img.imageURL, activeFooterUrl])
+
+  return (
+    <div className="group relative cursor-pointer" onClick={onClick}>
+      <div className="relative overflow-hidden rounded-xl border border-secondary/30">
+        <img
+          src={displayUrl}
+          alt={img.caption || ''}
+          className="w-full h-36 sm:h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDownload(img.imageURL, `spotlight_${img.id}.jpg`)
+          }}
+          aria-label={`Download ${img.caption || 'image'}`}
+          className="absolute bottom-2 right-2 z-20 bg-black/60 hover:bg-black/80 p-1.5 sm:p-2 rounded-lg transition shadow-md"
+        >
+          <Download size={14} className="md:w-[18px] md:h-[18px]" color="white" />
+        </button>
+      </div>
+      {img.caption && (
+        <p className="text-mutedText text-xs sm:text-sm mt-1.5 truncate">{img.caption}</p>
+      )}
+    </div>
+  )
+}
+
+function LightboxImage({ photo, activeFooterUrl }) {
+  const [displayUrl, setDisplayUrl] = useState(photo.imageURL)
+
+  useEffect(() => {
+    let isMounted = true
+    if (activeFooterUrl) {
+      getCompositedGalleryImage(photo.imageURL, activeFooterUrl).then(url => {
+        if (isMounted) setDisplayUrl(url)
+      })
+    } else {
+      setDisplayUrl(photo.imageURL)
+    }
+    return () => { isMounted = false }
+  }, [photo.imageURL, activeFooterUrl])
+
+  return (
+    <img
+      src={displayUrl}
+      alt={photo.caption || 'Gallery Photo'}
+      className="max-h-[80vh] max-w-full object-contain rounded-2xl"
+    />
+  )
+}
+
 export default function Gallery() {
   const [images, setImages] = useState([])
   const [activeFooter, setActiveFooter] = useState(null)
@@ -37,13 +103,7 @@ export default function Gallery() {
 
   const handleDownloadImage = async (url, name) => {
     try {
-      const res = await fetch(url)
-      const blob = await res.blob()
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = name || 'spotlight.jpg'
-      a.click()
-      URL.revokeObjectURL(a.href)
+      await downloadCompositedImage(url, activeFooter?.image_url, name || 'spotlight.jpg')
     } catch {
       toast('Download failed, try again', 'error')
     }
@@ -86,37 +146,13 @@ export default function Gallery() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 stagger-grid">
                   {album.imgs.map(img => (
-                    <div key={img.id} className="group relative cursor-pointer" onClick={() => setSelectedPhoto(img)}>
-                      <div className="relative overflow-hidden rounded-xl border border-secondary/30">
-                        <img
-                          src={img.imageURL}
-                          alt={img.caption || ''}
-                          className="w-full h-36 sm:h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        {activeFooter?.image_url && (
-                          <div className="absolute bottom-1.5 left-0 right-0 z-10 pointer-events-none px-2 flex justify-center">
-                            <img
-                              src={activeFooter.image_url}
-                              alt="Gallery Footer Overlay"
-                              className="w-full h-auto max-h-10 sm:max-h-14 object-contain drop-shadow"
-                            />
-                          </div>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDownloadImage(img.imageURL, `spotlight_${img.id}.jpg`)
-                          }}
-                          aria-label={`Download ${img.caption || 'image'}`}
-                          className="absolute bottom-2 right-2 z-20 bg-black/60 hover:bg-black/80 p-1.5 sm:p-2 rounded-lg transition"
-                        >
-                          <Download size={14} className="md:w-[18px] md:h-[18px]" color="white" />
-                        </button>
-                      </div>
-                      {img.caption && (
-                        <p className="text-mutedText text-xs sm:text-sm mt-1.5 truncate">{img.caption}</p>
-                      )}
-                    </div>
+                    <GalleryCardItem
+                      key={img.id}
+                      img={img}
+                      activeFooterUrl={activeFooter?.image_url}
+                      onClick={() => setSelectedPhoto(img)}
+                      onDownload={handleDownloadImage}
+                    />
                   ))}
                 </div>
               </section>
@@ -139,22 +175,18 @@ export default function Gallery() {
               <X size={26} />
             </button>
 
-            {/* Photo Container with Footer Overlay */}
+            {/* Photo Container */}
             <div className="relative overflow-hidden rounded-2xl border border-white/20 shadow-2xl flex items-center justify-center bg-black max-h-[80vh]">
-              <img
-                src={selectedPhoto.imageURL}
-                alt={selectedPhoto.caption || 'Gallery Photo'}
-                className="max-h-[80vh] max-w-full object-contain"
-              />
-              {activeFooter?.image_url && (
-                <div className="absolute bottom-3 left-0 right-0 z-10 pointer-events-none px-4 flex justify-center">
-                  <img
-                    src={activeFooter.image_url}
-                    alt="Gallery Footer Overlay"
-                    className="w-[90%] sm:w-[85%] h-auto max-h-14 sm:max-h-20 object-contain drop-shadow-md"
-                  />
-                </div>
-              )}
+              <LightboxImage photo={selectedPhoto} activeFooterUrl={activeFooter?.image_url} />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDownloadImage(selectedPhoto.imageURL, `spotlight_${selectedPhoto.id}.jpg`)
+                }}
+                className="absolute bottom-3 right-3 z-30 bg-black/70 hover:bg-black/90 p-2 rounded-xl text-white transition flex items-center gap-2 text-xs sm:text-sm font-semibold border border-white/20"
+              >
+                <Download size={16} /> Download Photo
+              </button>
             </div>
 
             {selectedPhoto.caption && (

@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { getFeaturedSpotlight, getSpotlight, getTeamCategoryPoints } from '../supabase/queries'
+import { getFeaturedSpotlight, getSpotlight, getTeamCategoryPoints, getActiveGalleryFooter } from '../supabase/queries'
+import { getCompositedGalleryImage } from '../utils/imageCompositor'
 import { ArrowRight, ExternalLink, Users, CalendarDays, UserCheck, Layers } from 'lucide-react'
 import HeroAnimation from '../components/HeroAnimation'
 import useScrollReveal from '../hooks/useScrollReveal'
@@ -13,9 +14,9 @@ const HERO_ANIMATION_ENABLED = false
 
 const stats = [
   { value: '3', label: 'Teams', icon: Users },
-  { value: '3', label: 'Days', icon: CalendarDays },
-  { value: '120+', label: 'Participants', icon: UserCheck },
-  { value: '150+', label: 'Programmes', icon: Layers },
+  { value: '185+', label: 'Programmes', icon: CalendarDays },
+  { value: '90+', label: 'Participants', icon: UserCheck },
+  { value: '4', label: 'Categories', icon: Layers },
 ]
 
 const teamMembers = [
@@ -29,9 +30,36 @@ const teamMembers = [
   { name: 'Farhan Musthafa', role: 'Software Developer', initials: 'FM', tint: 'from-[#115F32] to-[#71C247]', photo: '/team/faruuunn.jpg' }
 ]
 
+function HomeGalleryCard({ img, activeFooterUrl }) {
+  const [displayUrl, setDisplayUrl] = useState(img.imageURL)
+
+  useEffect(() => {
+    let isMounted = true
+    if (activeFooterUrl) {
+      getCompositedGalleryImage(img.imageURL, activeFooterUrl).then(url => {
+        if (isMounted) setDisplayUrl(url)
+      })
+    } else {
+      setDisplayUrl(img.imageURL)
+    }
+    return () => { isMounted = false }
+  }, [img.imageURL, activeFooterUrl])
+
+  return (
+    <div className="relative overflow-hidden rounded-xl aspect-[4/3]">
+      <img
+        src={displayUrl}
+        alt={img.caption || ''}
+        className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105"
+      />
+    </div>
+  )
+}
+
 export default function Home() {
   const [featured, setFeatured] = useState([])
   const [allImages, setAllImages] = useState([])
+  const [activeFooter, setActiveFooter] = useState(null)
   const [teamData, setTeamData] = useState([])
   const [scrollY, setScrollY] = useState(0)
   const location = useLocation()
@@ -90,6 +118,7 @@ export default function Home() {
   useEffect(() => {
     getFeaturedSpotlight().then(setFeatured)
     getSpotlight().then(setAllImages)
+    getActiveGalleryFooter().then(setActiveFooter)
     getTeamCategoryPoints().then(({ teamData: data }) => {
       const sorted = [...data].sort((a, b) => b.totalPoints - a.totalPoints)
       setTeamData(sorted)
@@ -334,13 +363,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 stagger-grid">
               {allImages.slice(0, 8).map(img => (
-                <div key={img.id} className="relative overflow-hidden rounded-xl aspect-[4/3]">
-                  <img
-                    src={img.imageURL}
-                    alt={img.caption || ''}
-                    className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105"
-                  />
-                </div>
+                <HomeGalleryCard key={img.id} img={img} activeFooterUrl={activeFooter?.image_url} />
               ))}
             </div>
           </div>
