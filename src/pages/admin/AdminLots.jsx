@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck, ArrowLeft, Check, AlertCircle } from 'lucide-react'
+import { Shuffle, RefreshCw, Hash, Type, Dice5, UserCheck, ArrowLeft, Check, AlertCircle, RotateCcw } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import ThemeToggle from '../../components/ThemeToggle'
 import { getProgrammes, getStudents, getCategories, getTeams, getCodeAssignments, saveCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
@@ -61,6 +61,24 @@ export default function AdminLots() {
   const [assignmentsMap, setAssignmentsMap] = useState({})
   const [savingAssignments, setSavingAssignments] = useState(false)
   const [validationError, setValidationError] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+
+  const handleResetClick = () => {
+    const hasSelections = Object.values(assignmentsMap).some(Boolean)
+    if (hasSelections) {
+      setShowResetConfirm(true)
+    } else {
+      setAssignmentsMap({})
+      setValidationError('')
+    }
+  }
+
+  const confirmReset = () => {
+    setAssignmentsMap({})
+    setValidationError('')
+    setShowResetConfirm(false)
+    toast('Code-letter selections reset.')
+  }
 
   const toast = useToast()
 
@@ -513,18 +531,57 @@ export default function AdminLots() {
               })}
             </div>
 
-            <div className="flex gap-3 pt-2 border-t border-secondary/20">
+            <div className="flex items-center gap-3 pt-3 border-t border-secondary/20">
               <button
+                type="button"
+                onClick={handleResetClick}
+                disabled={savingAssignments}
+                className="bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-500/30 rounded-xl py-3 px-4 sm:px-5 font-semibold text-sm sm:text-base transition flex items-center justify-center gap-2 shrink-0 disabled:opacity-50 cursor-pointer"
+                title="Reset current code-letter selections"
+              >
+                <RotateCcw size={16} />
+                <span>Reset</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleSaveAssignments}
                 disabled={savingAssignments}
-                className="flex-1 bg-primary text-white rounded-xl py-3 px-4 font-semibold text-sm sm:text-base hover:bg-primary/90 transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
+                className="flex-1 min-w-0 bg-primary text-white rounded-xl py-3 px-4 font-semibold text-sm sm:text-base hover:bg-primary/90 transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-60 cursor-pointer"
               >
                 <Check size={18} />
-                {savingAssignments ? 'Saving Assignments...' : 'Assign Code Letters'}
+                <span>{savingAssignments ? 'Saving Assignments...' : 'Assign Code Letters'}</span>
               </button>
             </div>
           </div>
         </>
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" onClick={() => setShowResetConfirm(false)}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-sm border border-secondary/30 shadow-2xl space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-poppins font-bold text-mainText">Reset Selections?</h3>
+            <p className="text-mutedText text-sm leading-relaxed">
+              Reset all current code-letter selections for this programme? Unsaved form selections will be cleared.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 bg-secondary/15 hover:bg-secondary/25 text-mainText rounded-xl py-2.5 px-4 font-semibold text-sm transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmReset}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-2.5 px-4 font-semibold text-sm transition shadow-md cursor-pointer"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
