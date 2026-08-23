@@ -82,48 +82,58 @@ export default function AdminDashboard() {
     { label: 'Total Programmes', value: counts.programmes, icon: BookOpen },
   ]
 
+  const statGradients = [
+    { bg: 'bg-gradient-to-br from-[#013157] to-[#017D8B]', text: 'text-white', subtext: 'text-[#D8EDE4]', iconBg: 'bg-white/10 text-[#01B998]', border: 'border-[#017D8B]/50' },
+    { bg: 'bg-gradient-to-br from-[#017D8B] to-[#01B998]', text: 'text-white', subtext: 'text-white/80', iconBg: 'bg-white/15 text-white', border: 'border-[#01B998]/50' },
+    { bg: 'bg-gradient-to-br from-[#01B998] to-[#19BB47]', text: 'text-[#011D33]', subtext: 'text-[#011D33]/80', iconBg: 'bg-[#011D33]/15 text-[#011D33]', border: 'border-[#19BB47]/50' },
+    { bg: 'bg-gradient-to-br from-[#19BB47] to-[#64D431]', text: 'text-[#011D33]', subtext: 'text-[#011D33]/80', iconBg: 'bg-[#011D33]/15 text-[#011D33]', border: 'border-[#64D431]/50' },
+  ]
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8]">Dashboard</h1>
-          <p className="text-[#31583F] dark:text-[#8ED06C] text-sm mt-0.5">Overview of the festival site</p>
+          <h1 className="text-xl sm:text-2xl font-poppins font-bold text-white">Dashboard</h1>
+          <p className="text-[#D8EDE4] text-sm mt-0.5">Overview of the festival site</p>
         </div>
         <ThemeToggle />
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-        {stats.map(({ label, value, icon: Icon }) => (
-          <div
-            key={label}
-            className="bg-white dark:bg-[#0B2A17] rounded-[18px] p-4 sm:p-5 shadow-[0_4px_14px_rgba(17,95,50,0.06)] dark:shadow-none border border-[#115F32] dark:border-[#71C247]/25 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#F7FBF5] dark:bg-[#123D22] flex items-center justify-center shrink-0 border border-[rgba(17,95,50,0.20)] dark:border-[#71C247]/20">
-                <Icon size={20} className="sm:w-[22px] sm:h-[22px] text-[#228C22] dark:text-[#71C247]" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl sm:text-3xl font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8] leading-none">{value}</p>
-                <p className="text-[11px] sm:text-xs text-[#31583F] dark:text-[#8ED06C] mt-1 truncate">{label}</p>
+        {stats.map(({ label, value, icon: Icon }, idx) => {
+          const style = statGradients[idx % statGradients.length]
+          return (
+            <div
+              key={label}
+              className={`${style.bg} ${style.border} rounded-2xl p-4 sm:p-5 shadow-lg transition-transform hover:-translate-y-1`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${style.iconBg} flex items-center justify-center shrink-0`}>
+                  <Icon size={22} />
+                </div>
+                <div className="min-w-0">
+                  <p className={`text-2xl sm:text-3xl font-poppins font-extrabold ${style.text} leading-none`}>{value}</p>
+                  <p className={`text-[11px] sm:text-xs font-semibold ${style.subtext} mt-1 truncate`}>{label}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Team Points Status */}
-      <div className="bg-white dark:bg-[#0B2A17] rounded-[18px] shadow-[0_4px_14px_rgba(17,95,50,0.06)] dark:shadow-none border border-[#115F32] dark:border-[#71C247]/25 overflow-hidden mb-8">
+      <div className="bg-[#013157] rounded-2xl shadow-xl border border-[#017D8B]/40 overflow-hidden mb-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[rgba(17,95,50,0.15)] dark:border-[#71C247]/20 bg-white dark:bg-[#0B2A17]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-[#017D8B]/30 bg-[#01233D]/60">
           <div>
             <div className="flex items-center gap-2.5">
-              <Sparkles size={20} className="text-[#228C22] dark:text-[#71C247]" />
-              <h2 className="font-poppins font-bold text-[#115F32] dark:text-[#D4FFB8] text-base sm:text-lg">
+              <Sparkles size={20} className="text-[#01B998]" />
+              <h2 className="font-poppins font-bold text-white text-base sm:text-lg">
                 Team Points Status (After {teamTotalPubCount} results)
               </h2>
             </div>
-            <p className="text-[#31583F] dark:text-[#8ED06C] text-xs sm:text-sm mt-0.5">A summary of total points scored by each team.</p>
+            <p className="text-[#D8EDE4] text-xs sm:text-sm mt-0.5">A summary of total points scored by each team.</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">

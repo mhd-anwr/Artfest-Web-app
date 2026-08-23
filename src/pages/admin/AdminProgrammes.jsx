@@ -239,22 +239,22 @@ export default function AdminProgrammes() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Programmes ({programmes.length})</h2>
-          <p className="text-mutedText text-xs sm:text-sm mt-0.5">Showing all {programmes.length} programmes dynamically from database</p>
+          <h2 className="text-xl sm:text-2xl font-poppins font-bold text-white">Programmes ({programmes.length})</h2>
+          <p className="text-[#D8EDE4] text-xs sm:text-sm mt-0.5">Showing all {programmes.length} programmes dynamically from database</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setBulkImportOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 bg-black/20 hover:bg-black/40 text-mainText border border-secondary/40 px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#013157] hover:bg-[#012847] text-white border border-[#017D8B] px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-sm shadow-sm"
           >
             <Upload size={16} className="sm:w-[18px] sm:h-[18px]" /> Import File
           </button>
-          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
+          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#E2FA04] text-[#011D33] px-3 sm:px-4 py-2 rounded-xl font-extrabold shadow-md hover:-translate-y-0.5 hover:opacity-95 transition-all text-xs sm:text-sm">
             <Plus size={16} className="sm:w-[18px] sm:h-[18px]" /> Add Programme
           </button>
-          <button onClick={() => navigate('/admin/print')} className="flex items-center gap-2 bg-success hover:bg-success/90 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold transition text-xs sm:text-base">
+          <button onClick={() => navigate('/admin/print')} className="flex items-center gap-2 bg-gradient-to-r from-[#01B998] to-[#19BB47] text-[#011D33] px-3 sm:px-4 py-2 rounded-xl font-extrabold shadow-md hover:-translate-y-0.5 hover:opacity-95 transition-all text-xs sm:text-sm">
             <Printer size={16} className="sm:w-[18px] sm:h-[18px]" /> Print
           </button>
         </div>
@@ -287,17 +287,17 @@ export default function AdminProgrammes() {
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 bg-card rounded-xl p-3 border border-secondary/30 text-xs sm:text-sm">
-        <span className="text-mutedText font-medium">
-          Showing <span className="text-mainText font-bold">{totalItems > 0 ? startIndex + 1 : 0}–{endIndex}</span> of <span className="text-mainText font-bold">{totalItems}</span> programmes
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 bg-[#013157] rounded-xl p-3 border border-[#017D8B]/40 text-xs sm:text-sm shadow-md">
+        <span className="text-[#D8EDE4] font-medium">
+          Showing <span className="text-white font-bold">{totalItems > 0 ? startIndex + 1 : 0}–{endIndex}</span> of <span className="text-white font-bold">{totalItems}</span> programmes
         </span>
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-mutedText">
+          <label className="flex items-center gap-2 text-[#D8EDE4]">
             <span>Per page:</span>
             <select
               value={pageSize}
               onChange={e => { setPageSize(e.target.value); setCurrentPage(1) }}
-              className="bg-black/20 text-mainText border border-secondary/40 rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer"
+              className="bg-[#01233D] text-white border border-[#017D8B]/50 rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer"
             >
               <option value="50">50</option>
               <option value="100">100</option>
@@ -310,15 +310,15 @@ export default function AdminProgrammes() {
               <button
                 disabled={page <= 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+                className="p-1 rounded-lg border border-[#017D8B]/40 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
               >
                 <ChevronLeft size={16} />
               </button>
-              <span className="text-mutedText font-semibold px-2">Page {page} of {totalPages}</span>
+              <span className="text-[#D8EDE4] font-semibold px-2">Page {page} of {totalPages}</span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className="p-1 rounded-lg border border-secondary/40 text-mainText disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
+                className="p-1 rounded-lg border border-[#017D8B]/40 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10"
               >
                 <ChevronRight size={16} />
               </button>
@@ -329,13 +329,13 @@ export default function AdminProgrammes() {
 
       <div className="flex flex-col gap-3">
         {visibleProgrammes.map(prog => (
-          <div key={prog.id} className="bg-card rounded-xl p-4 flex justify-between items-center shadow-sm border border-secondary/30">
+          <div key={prog.id} className="bg-[#013157] hover:bg-[#013862] rounded-xl p-4 flex justify-between items-center shadow-lg border border-[#017D8B]/40 hover:border-[#01B998]/60 transition-all duration-200">
             <div className="cursor-pointer flex-1 min-w-0" onClick={() => setViewProg(prog)}>
-              <p className="text-mainText font-medium text-sm sm:text-base truncate">
-                {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
+              <p className="text-white font-bold text-sm sm:text-base truncate hover:text-[#64D431] transition">
+                {resultNoMap[prog.id] ? <span className="text-[#01B998] font-black text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
                 {prog.name}
               </p>
-              <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
+              <p className="text-[#01B998] text-xs sm:text-sm mt-0.5">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
               <button

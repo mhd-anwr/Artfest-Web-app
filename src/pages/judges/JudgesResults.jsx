@@ -645,67 +645,78 @@ function JudgesResultsInner() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* ── Top Header Bar ── */}
-      <div className="flex items-center justify-between mb-6 border-b border-secondary/30 pb-4">
-        <button onClick={() => navigate('/judges')} className="flex items-center gap-2 text-mainText hover:text-accent font-semibold transition text-sm">
-          <ArrowLeft size={18} /> Back to Dashboard
-        </button>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <button onClick={handleLogout} className="flex items-center gap-1.5 text-red-400 hover:text-red-300 font-semibold text-xs sm:text-sm transition bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">
-            <LogOut size={15} /> Sign out
+    <div className="min-h-screen bg-[#01233D] text-white p-4 sm:p-6 md:p-8 relative overflow-hidden">
+      {/* Atmospheric radial background glows */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#017D8B]/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-32 w-96 h-96 bg-[#01B998]/15 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-[#19BB47]/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        {/* ── Top Header Bar ── */}
+        <div className="flex items-center justify-between mb-6 border-b border-[#017D8B]/30 pb-4">
+          <button onClick={() => navigate('/judges')} className="flex items-center gap-2 bg-[#013157] hover:bg-[#012847] border border-[#017D8B] text-white font-semibold transition text-sm px-4 py-2 rounded-xl shadow-sm">
+            <ArrowLeft size={18} /> Back to Dashboard
           </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button onClick={handleLogout} className="flex items-center gap-1.5 text-red-400 hover:text-red-300 font-semibold text-xs sm:text-sm transition bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">
+              <LogOut size={15} /> Sign out
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Judge Panel — Submit Results</h2>
-        <p className="text-mutedText text-xs sm:text-sm mt-1">Select code letter, points, and grade for each programme participant.</p>
-      </div>
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-poppins font-bold text-white flex items-center gap-3">
+            Judge Panel — Submit Results <span className="w-2.5 h-2.5 rounded-full bg-[#01B998] inline-block animate-pulse" />
+          </h2>
+          <p className="text-[#D8EDE4] text-xs sm:text-sm mt-1">Select code letter, points, and grade for each programme participant.</p>
+        </div>
 
-      {/* Category filter */}
-      <div className="max-w-xs mx-auto mb-5">
-        <FilterDropdown
-          dark
-          label="All Categories"
-          options={catOptions}
-          value={categoryFilter}
-          onChange={setCategoryFilter}
-        />
-      </div>
+        {/* Category filter */}
+        <div className="max-w-xs mx-auto mb-6">
+          <FilterDropdown
+            dark
+            label="All Categories"
+            options={catOptions}
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+          />
+        </div>
 
-      {/* ── Not Submitted / Pending Programmes ── */}
-      <div className="mb-8">
-        <h3 className="text-lg font-poppins font-bold text-mainText mb-3 flex items-center gap-2">
-          Pending Submissions ({notSubmitted.length})
-        </h3>
-        {notSubmitted.length === 0 ? (
-          <div className="bg-card rounded-2xl p-6 text-center text-mutedText text-sm border border-secondary/30">
-            All programmes in this view have been submitted and locked.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {notSubmitted.map(prog => (
-              <div key={prog.id} className="bg-card rounded-xl p-4 shadow-sm border border-secondary/30 flex flex-col justify-between">
-                <div className="mb-3">
-                  <p className="text-mainText font-semibold text-sm sm:text-base truncate">
-                    {resultNoMap[prog.id] ? <span className="text-accent font-bold text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
-                    {prog.name}
-                  </p>
-                  <p className="text-mutedText text-xs mt-0.5">{prog.category}{getProgrammeType(prog) ? ` · ${getProgrammeType(prog)}` : ''}</p>
+        {/* ── Not Submitted / Pending Programmes ── */}
+        <div className="mb-8">
+          <h3 className="text-lg font-poppins font-bold text-white mb-4 flex items-center gap-2">
+            <span className="w-2 h-5 rounded-full bg-gradient-to-b from-[#01B998] to-[#19BB47]" />
+            Pending Submissions ({notSubmitted.length})
+          </h3>
+          {notSubmitted.length === 0 ? (
+            <div className="bg-[#013157]/80 rounded-2xl p-6 text-center text-[#D8EDE4] text-sm border border-[#017D8B]/40">
+              All programmes in this view have been submitted and locked.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {notSubmitted.map(prog => (
+                <div key={prog.id} className="bg-[#013157]/90 hover:bg-[#013157] rounded-xl p-5 shadow-lg border border-[#017D8B]/40 hover:border-[#19BB47]/60 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between group">
+                  <div className="mb-4">
+                    <p className="text-white font-bold text-sm sm:text-base truncate group-hover:text-[#64D431] transition">
+                      {resultNoMap[prog.id] ? <span className="text-[#01B998] font-black text-base sm:text-lg mr-2">#{resultNoMap[prog.id]}</span> : null}
+                      {prog.name}
+                    </p>
+                    <p className="text-[#01B998] text-xs mt-1 font-medium">{prog.category}{getProgrammeType(prog) ? ` · ${getProgrammeType(prog)}` : ''}</p>
+                  </div>
+                  <button
+                    onClick={() => openNewEntry(prog)}
+                    className="w-full bg-gradient-to-r from-[#01B998] via-[#19BB47] to-[#AEE515] text-[#011D33] rounded-xl py-2.5 font-extrabold text-xs sm:text-sm hover:opacity-95 transition-all active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <Award size={15} /> Submit Result
+                  </button>
                 </div>
-                <button
-                  onClick={() => openNewEntry(prog)}
-                  className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-2 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5"
-                >
-                  <Award size={14} /> Submit Result
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       {/* ── Locked / Saved Results ── */}
       <div>
