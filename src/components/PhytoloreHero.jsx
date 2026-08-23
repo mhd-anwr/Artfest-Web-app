@@ -8,8 +8,10 @@ import lensImg from '../assets/hero/lens.jpg'
 import seedPodImg from '../assets/hero/seed_pod.jpg'
 import treeSliceImg from '../assets/hero/tree_slice.jpg'
 import herbariumImg from '../assets/hero/herbarium.jpg'
+import heroBgImg from '../assets/hero/hero_bg.jpg'
 
 // Official Rendezvous'26 Gradient Palette
+// #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
 const RENDEZVOUS_GRADIENT_STOPS = [
   { stop: 0.00, color: '#013157' },
   { stop: 0.16, color: '#017D8B' },
@@ -25,7 +27,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
   const containerRef = useRef(null)
   const navigate = useNavigate()
 
-  // 11-step entrance sequence state (1 to 11)
+  // 11-step cinematic entrance sequence state (1 to 11)
   const [entranceStep, setEntranceStep] = useState(1)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, targetX: 0, targetY: 0, canvasX: 0, canvasY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -35,23 +37,23 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     []
   )
 
-  // 11-Step Entrance Timers
+  // 11-Step Cinematic Entrance Sequence Timers
   useEffect(() => {
     if (prefersReducedMotion) {
       setEntranceStep(11)
       return
     }
 
-    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Deep blue/green glow
-    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic ribbon
+    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Deep blue/green atmospheric glow
+    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic ribbon & spore particles
     const t3 = setTimeout(() => setEntranceStep(4), 950)   // 🍃 Object 01: Large Leaf
     const t4 = setTimeout(() => setEntranceStep(5), 1400)  // 🌰 Object 03: Seed Pod
-    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Slice
-    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Sheet
-    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Magnifying Lens
-    const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo
+    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Cross-Section
+    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Specimen
+    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Physical Magnifying Lens
+    const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo Mask
     const t9 = setTimeout(() => setEntranceStep(10), 3650) // DECODING
-    const t10 = setTimeout(() => setEntranceStep(11), 4200)// PHYTOLORE & Settle into idle focus
+    const t10 = setTimeout(() => setEntranceStep(11), 4200)// PHYTOLORE & Settle into continuous idle & focus lens
 
     return () => {
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
@@ -60,7 +62,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }
   }, [prefersReducedMotion])
 
-  // Mouse & Touch Interaction Tracking
+  // Mouse & Touch Tracking for Multi-Layer Parallax & Lens Physics
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!containerRef.current) return
@@ -120,7 +122,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }
   }, [])
 
-  // Canvas 2D / 3D Specimen Rendering Engine (Organic Ribbon, Atmospheric Haze, Pollen & Optical Decode)
+  // Canvas 2D / 3D Specimen Render Engine (Organic Ribbon, Atmospheric Haze, Pollen Spores & Optical Decode)
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -135,7 +137,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     let lerpX = 0
     let lerpY = 0
 
-    // Smooth physical lens lerp position
+    // Smooth physical lens position lerp
     let lensX = 0
     let lensY = 0
 
@@ -153,14 +155,14 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     window.addEventListener('resize', handleResize)
 
     // Floating Spore / Pollen Particles
-    const pollen = Array.from({ length: 26 }, () => ({
+    const pollen = Array.from({ length: 32 }, () => ({
       x: Math.random(),
       y: Math.random(),
-      size: Math.random() * 2 + 1,
-      speedY: Math.random() * 0.0003 + 0.0001,
-      swaySpeed: Math.random() * 0.001 + 0.0005,
+      size: Math.random() * 2.2 + 1,
+      speedY: Math.random() * 0.00035 + 0.00012,
+      swaySpeed: Math.random() * 0.0012 + 0.0006,
       phase: Math.random() * Math.PI * 2,
-      opacity: Math.random() * 0.4 + 0.2,
+      opacity: Math.random() * 0.45 + 0.2,
     }))
 
     const render = () => {
@@ -169,19 +171,19 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       lerpX += (mousePos.targetX - lerpX) * 0.05
       lerpY += (mousePos.targetY - lerpY) * 0.05
 
-      // Leaf center position in pixels
-      const leafCenterX = width * 0.22 + lerpX * 25
+      // Leaf center position in canvas coordinates
+      const leafCenterX = width * 0.23 + lerpX * 25
       const leafCenterY = height * 0.38 + lerpY * 18
 
-      // Lens physical target (follows cursor when hovered, floats near leaf otherwise)
-      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.29 + Math.sin(time * 0.4) * 15
-      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.45 + Math.cos(time * 0.35) * 15
+      // Lens physical target position (follows mouse smoothly with inertia)
+      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.28 + Math.sin(time * 0.45) * 16
+      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.38) * 16
 
       lensX += (targetLensX - lensX) * 0.06
       lensY += (targetLensY - lensY) * 0.06
 
       const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
-      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
+      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.34))
 
       ctx.clearRect(0, 0, width, height)
 
@@ -195,7 +197,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         width * 0.85
       )
       bgGrad.addColorStop(0, '#031D28')
-      bgGrad.addColorStop(0.5, '#011724')
+      bgGrad.addColorStop(0.55, '#011724')
       bgGrad.addColorStop(1, '#02090D')
       ctx.fillStyle = bgGrad
       ctx.fillRect(0, 0, width, height)
@@ -224,7 +226,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.lineCap = 'round'
         ctx.shadowColor = '#64D431'
         ctx.shadowBlur = 18
-        ctx.globalAlpha = 0.75
+        ctx.globalAlpha = 0.78
         ctx.stroke()
         ctx.restore()
       }
@@ -238,15 +240,15 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
         ctx.clip()
 
-        // Luminous radial glow inside lens
+        // Luminous radial glow inside glass lens
         const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
-        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.28)')
-        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.15)')
+        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.3)')
+        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.16)')
         lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
         ctx.fillStyle = lensGlow
         ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
 
-        // Draw luminous sharp leaf vein network inside lens region
+        // Draw sharp luminous golden/emerald leaf vein structure inside lens region
         ctx.translate(leafCenterX, leafCenterY)
         const leafScale = Math.min(width, height) * 0.35
 
@@ -266,21 +268,21 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.moveTo(0, vy)
           ctx.quadraticCurveTo(-leafScale * 0.3, vy - 20, -leafScale * 0.45, vy - 35)
           ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2
+          ctx.lineWidth = 2.2
           ctx.stroke()
 
           ctx.beginPath()
           ctx.moveTo(0, vy)
           ctx.quadraticCurveTo(leafScale * 0.3, vy - 20, leafScale * 0.45, vy - 35)
           ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2
+          ctx.lineWidth = 2.2
           ctx.stroke()
         }
 
         ctx.restore()
       }
 
-      // ── 4. FLOATING SPORE PARTICLES ──
+      // ── 4. FLOATING SPORE / POLLEN PARTICLES ──
       if (entranceStep >= 4) {
         ctx.save()
         pollen.forEach((p) => {
@@ -341,7 +343,17 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       ref={containerRef}
       className="relative w-full h-screen overflow-hidden bg-[#02090D] select-none flex flex-col justify-between"
     >
-      {/* Background Interactive WebGL/Canvas (Atmosphere, Ribbon, Pollen & Optical Decode) */}
+      {/* 1. Photorealistic Full Composite Base Background matching Reference Screenshot */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center transition-opacity duration-1000"
+        style={{
+          backgroundImage: `url(${heroBgImg})`,
+          opacity: entranceStep >= 2 ? 0.45 : 0,
+          filter: 'brightness(0.85) contrast(1.1)'
+        }}
+      />
+
+      {/* 2. Interactive Canvas Layer (Ribbon, Pollen Spores & Optical Decode Lens) */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
@@ -363,7 +375,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         </span>
       </div>
 
-      {/* ── 3D PHOTOREALISTIC SPECIMEN OBJECTS LAYER ── */}
+      {/* ── 3D PHOTOREALISTIC SPECIMEN OBJECTS LAYER (Matching Reference Image) ── */}
 
       {/* 🍃 OBJECT 01 — LARGE REALISTIC LEAF (Observation - Top Left) */}
       <div
@@ -375,7 +387,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ...layerTransform(0.35),
           opacity: entranceStep >= 4 ? 1 : 0,
           transform: `${layerTransform(0.35).transform || ''} scale(${entranceStep >= 4 ? 1 : 0.85}) rotate(-12deg)`,
-          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 25px rgba(1,185,152,0.3))'
+          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.85)) drop-shadow(0 0 25px rgba(1,185,152,0.35))'
         }}
       >
         <img
@@ -395,7 +407,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ...layerTransform(0.28),
           opacity: entranceStep >= 5 ? 1 : 0,
           transform: `${layerTransform(0.28).transform || ''} scale(${entranceStep >= 5 ? 1 : 0.8}) rotate(15deg)`,
-          filter: 'drop-shadow(0 20px 35px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(100,212,49,0.35))'
+          filter: 'drop-shadow(0 20px 35px rgba(0,0,0,0.85)) drop-shadow(0 0 22px rgba(100,212,49,0.35))'
         }}
       >
         <img
