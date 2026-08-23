@@ -341,7 +341,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
             transform: `${layerTransform(0.16).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
           }}
         >
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
             <span className="block text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
               PHYTOLORE
