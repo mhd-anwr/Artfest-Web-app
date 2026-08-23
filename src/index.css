@@ -604,20 +604,20 @@ header .nav-brand-subtitle span {
 
 [data-theme='dark'] .nav-link,
 .dark .nav-link {
-  color: #FFFFFF !important;
+  color: #D4FFB8 !important;
 }
 
 [data-theme='dark'] .nav-link:hover,
 .dark .nav-link:hover {
   color: #FFFFFF !important;
-  background: rgba(1, 185, 152, 0.18);
+  background: rgba(142, 208, 108, 0.15);
 }
 
 [data-theme='dark'] .nav-link.active,
 .dark .nav-link.active {
   color: #FFFFFF !important;
-  background: rgba(25, 187, 71, 0.25);
-  border: 1px solid rgba(1, 185, 152, 0.4);
+  background: rgba(142, 208, 108, 0.22);
+  border: 1px solid rgba(212, 255, 184, 0.30);
   font-weight: 700;
 }
 
@@ -1143,10 +1143,10 @@ html:not(.dark):not([data-theme='dark']) .lb-3 .lb-points {
   position: absolute;
   top: 0;
   left: 0;
-  width: 420px;
-  height: 420px;
+  width: 560px;
+  height: 560px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(1, 185, 152, 0.22) 0%, rgba(100, 212, 49, 0.08) 45%, transparent 70%);
+  background: var(--cursor-glow);
   pointer-events: none;
   transform: translate(-50%, -50%);
   opacity: 0;

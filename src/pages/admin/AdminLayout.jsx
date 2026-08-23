@@ -129,16 +129,16 @@ export default function AdminLayout() {
                     }}
                     className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       active
-                        ? 'bg-gradient-to-r from-[#19BB47] to-[#AEE515] text-[#011D33] font-bold shadow-md'
-                        : 'text-[#D8EDE4] hover:bg-[#017D8B]/30 hover:text-white'
+                        ? 'bg-[#228C22] text-[#FFFFFF] border border-[#C8F7A8]/30 shadow-sm font-bold'
+                        : 'text-[#FFFFFF] hover:bg-[#228C22]/40 hover:text-[#FFFFFF]'
                     }`}
                   >
-                    <Icon size={18} className={active ? 'text-[#011D33] shrink-0' : 'text-[#01B998] group-hover:text-white shrink-0'} />
-                    <span className={active ? 'flex-1 truncate text-left font-bold text-[#011D33]' : 'flex-1 truncate text-left text-white'}>{item.label}</span>
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${framesExpanded ? 'rotate-180 text-[#011D33]' : 'text-[#01B998]'}`} />
+                    <Icon size={18} className={active ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
+                    <span className={active ? 'flex-1 truncate text-left font-bold text-[#FFFFFF]' : 'flex-1 truncate text-left text-[#FFFFFF]'}>{item.label}</span>
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${framesExpanded ? 'rotate-180 text-[#FFFFFF]' : 'text-[#C8F7A8]'}`} />
                   </button>
                   {framesExpanded && (
-                    <div className="pl-4 space-y-1 border-l border-[#017D8B]/40 ml-3">
+                    <div className="pl-4 space-y-1 border-l border-[#C8F7A8]/20 ml-3">
                       {item.children.map(sub => {
                         const SubIcon = sub.icon
                         return (
@@ -149,14 +149,14 @@ export default function AdminLayout() {
                             className={({ isActive }) =>
                               `group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                                 isActive
-                                  ? 'bg-[#19BB47] text-[#011D33] font-bold'
-                                  : 'text-[#D8EDE4] hover:bg-[#017D8B]/30 hover:text-white'
+                                  ? 'bg-[#228C22]/80 text-[#FFFFFF] font-bold border border-[#C8F7A8]/20'
+                                  : 'text-[#FFFFFF]/90 hover:bg-[#228C22]/30 hover:text-[#FFFFFF]'
                               }`
                             }
                           >
                             {({ isActive }) => (
                               <>
-                                <SubIcon size={14} className={isActive ? 'text-[#011D33] shrink-0' : 'text-[#01B998] group-hover:text-white shrink-0'} />
+                                <SubIcon size={14} className={isActive ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
                                 <span className="flex-1 truncate">{sub.label}</span>
                               </>
                             )}
@@ -178,16 +178,16 @@ export default function AdminLayout() {
                 className={({ isActive }) =>
                   `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#19BB47] to-[#AEE515] text-[#011D33] font-bold shadow-md'
-                      : 'text-[#D8EDE4] hover:bg-[#017D8B]/30 hover:text-white'
+                      ? 'bg-[#228C22] text-[#FFFFFF] border border-[#C8F7A8]/30 shadow-sm font-bold'
+                      : 'text-[#FFFFFF] hover:bg-[#228C22]/40 hover:text-[#FFFFFF]'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon size={18} className={isActive ? 'text-[#011D33] shrink-0' : 'text-[#01B998] group-hover:text-white shrink-0'} />
-                    <span className={isActive ? 'flex-1 truncate font-bold text-[#011D33]' : 'flex-1 truncate text-white'}>{item.label}</span>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#011D33]' : 'bg-transparent'}`} />
+                    <Icon size={18} className={isActive ? 'text-[#FFFFFF] shrink-0' : 'text-[#C8F7A8] group-hover:text-[#FFFFFF] shrink-0'} />
+                    <span className={isActive ? 'flex-1 truncate font-bold text-[#FFFFFF]' : 'flex-1 truncate text-[#FFFFFF]'}>{item.label}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#C8F7A8]' : 'bg-transparent'}`} />
                   </>
                 )}
               </NavLink>
@@ -196,15 +196,15 @@ export default function AdminLayout() {
         </nav>
 
         {/* Admin user */}
-        <div className="admin-user-footer p-4 border-t border-[#017D8B]/30 bg-black/20">
+        <div className="admin-user-footer p-4 border-t border-[#228C22]/30 bg-black/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#01B998] to-[#19BB47] text-[#011D33] flex items-center justify-center font-bold text-sm shrink-0 border border-[#AEE515]/40">
+            <div className="w-9 h-9 rounded-full bg-[#228C22] text-[#FFFFFF] flex items-center justify-center font-bold text-sm shrink-0 border border-[#C8F7A8]/40">
               {(adminEmail || 'A').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate">{adminEmail || 'Admin'}</p>
+              <p className="text-sm font-semibold text-[#FFFFFF] truncate">{adminEmail || 'Admin'}</p>
             </div>
-            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-[#01B998] hover:text-white hover:bg-[#017D8B]/40 transition">
+            <button onClick={handleLogout} aria-label="Logout" title="Logout" className="p-2 rounded-lg text-[#C8F7A8] hover:text-[#FFFFFF] hover:bg-[#228C22]/40 transition">
               <LogOut size={18} />
             </button>
           </div>
@@ -218,7 +218,7 @@ export default function AdminLayout() {
             <div className="mb-4">
               <button
                 onClick={() => navigate('/admin')}
-                className="inline-flex items-center gap-2 bg-[#013157] hover:bg-[#012847] border border-[#017D8B] rounded-xl px-4 py-2 text-sm sm:text-base font-semibold text-white shadow-sm transition"
+                className="inline-flex items-center gap-2 bg-white hover:bg-[#F1F8EE] dark:bg-[#0B2A17] dark:hover:bg-[#123D22] border border-[#115F32]/14 dark:border-[#71C247]/25 rounded-xl px-4 py-2 text-sm sm:text-base font-semibold text-[#115F32] dark:text-[#D4FFB8] shadow-sm transition"
               >
                 <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> Back to Dashboard
               </button>
