@@ -334,9 +334,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           }}
         >
           <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap">
-            <span className="text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
-              PHYTOLORE
+              DECODING PHYTOLORE
             </span>
           </h1>
         </div>
