@@ -32,7 +32,7 @@ export default class HeroErrorBoundary extends React.Component {
             </div>
             <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap mb-2">
               <span className="text-white">DECODING</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#228C22] via-[#71C247] to-[#D4FFB8]">
                 PHYTOLORE
               </span>
             </h1>

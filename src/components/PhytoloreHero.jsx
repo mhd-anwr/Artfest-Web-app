@@ -5,16 +5,14 @@ import { ArrowRight } from 'lucide-react'
 // Hero Background Asset
 import heroBgImg from "../assets/hero/hero_bg.jpg"
 import rendezvousWordmark from "../assets/hero/rendezvous-wordmark.png"
-// Official Rendezvous'26 Gradient Palette
-// #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
+// Official Green Festival Design System Palette
 const RENDEZVOUS_GRADIENT_STOPS = [
-  { stop: 0.00, color: '#013157' },
-  { stop: 0.16, color: '#017D8B' },
-  { stop: 0.33, color: '#01B998' },
-  { stop: 0.50, color: '#19BB47' },
-  { stop: 0.66, color: '#64D431' },
-  { stop: 0.83, color: '#AEE515' },
-  { stop: 1.00, color: '#E2FA04' },
+  { stop: 0.00, color: '#0B2A17' },
+  { stop: 0.20, color: '#115F32' },
+  { stop: 0.40, color: '#228C22' },
+  { stop: 0.60, color: '#4EBA16' },
+  { stop: 0.80, color: '#71C247' },
+  { stop: 1.00, color: '#D4FFB8' },
 ]
 
 export default function PhytoloreHero({ onScrollToAbout }) {
@@ -205,7 +203,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.strokeStyle = ribbonGrad
           ctx.lineWidth = Math.min(width * 0.022, 22)
           ctx.lineCap = 'round'
-          ctx.shadowColor = '#64D431'
+          ctx.shadowColor = '#71C247'
           ctx.shadowBlur = 18
           ctx.globalAlpha = 0.78
           ctx.stroke()
@@ -235,9 +233,9 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
             ctx.beginPath()
             ctx.arc(px, py, p.size, 0, Math.PI * 2)
-            ctx.fillStyle = p.size > 2 ? '#AEE515' : '#19BB47'
+            ctx.fillStyle = p.size > 2 ? '#8ED06C' : '#228C22'
             ctx.globalAlpha = p.opacity
-            ctx.shadowColor = '#64D431'
+            ctx.shadowColor = '#71C247'
             ctx.shadowBlur = p.size * 3
             ctx.fill()
           })
@@ -334,7 +332,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           }}
         >
           <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#228C22] via-[#71C247] to-[#D4FFB8] drop-shadow-[0_0_35px_rgba(113,194,71,0.4)]">
               DECODING PHYTOLORE
             </span>
           </h1>
@@ -351,7 +349,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         >
           <button
             onClick={() => navigate('/results')}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-white cta-gradient hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
           >
             <span>Results</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -359,7 +357,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
           <button
             onClick={onScrollToAbout}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/50 hover:bg-black/70 border border-[#01B998]/40 hover:border-[#64D431] transition-all backdrop-blur-md cursor-pointer pointer-events-auto shadow-lg"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/50 hover:bg-black/70 border border-[#71C247]/40 hover:border-[#8ED06C] transition-all backdrop-blur-md cursor-pointer pointer-events-auto shadow-lg"
           >
             About
           </button>
