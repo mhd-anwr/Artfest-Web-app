@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
 // Photorealistic 3D Specimen Assets
-import leafImg from '../assets/hero/leaf.jpg'
+import leafImg from '../assets/heroo.jpg'
 import lensImg from '../assets/hero/lens.jpg'
 import seedPodImg from '../assets/hero/seed_pod.jpg'
 import treeSliceImg from '../assets/hero/tree_slice.jpg'
