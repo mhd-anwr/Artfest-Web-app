@@ -168,151 +168,151 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       try {
         time += 0.012
 
-      lerpX += (mousePos.targetX - lerpX) * 0.05
-      lerpY += (mousePos.targetY - lerpY) * 0.05
+        lerpX += (mousePos.targetX - lerpX) * 0.05
+        lerpY += (mousePos.targetY - lerpY) * 0.05
 
-      // Leaf center position in canvas coordinates
-      const leafCenterX = width * 0.24 + lerpX * 25
-      const leafCenterY = height * 0.38 + lerpY * 18
+        // Leaf center position in canvas coordinates
+        const leafCenterX = width * 0.24 + lerpX * 25
+        const leafCenterY = height * 0.38 + lerpY * 18
 
-      // Lens target position with lerp inertia
-      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.28 + Math.sin(time * 0.45) * 16
-      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.38) * 16
+        // Lens target position with lerp inertia
+        const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.28 + Math.sin(time * 0.45) * 16
+        const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.38) * 16
 
-      lensX += (targetLensX - lensX) * 0.06
-      lensY += (targetLensY - lensY) * 0.06
+        lensX += (targetLensX - lensX) * 0.06
+        lensY += (targetLensY - lensY) * 0.06
 
-      const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
-      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
+        const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
+        const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
 
-      ctx.clearRect(0, 0, width, height)
+        ctx.clearRect(0, 0, width, height)
 
-      // ── 1. CINEMATIC DARK BOTANICAL ATMOSPHERE RADIAL GLOW ──
-      const bgGrad = ctx.createRadialGradient(
-        width * 0.5 + lerpX * 20,
-        height * 0.4 + lerpY * 15,
-        width * 0.1,
-        width * 0.5,
-        height * 0.5,
-        width * 0.85
-      )
-      bgGrad.addColorStop(0, 'rgba(1, 125, 139, 0.15)')
-      bgGrad.addColorStop(0.55, 'rgba(1, 49, 87, 0.08)')
-      bgGrad.addColorStop(1, 'rgba(2, 9, 13, 0)')
-      ctx.fillStyle = bgGrad
-      ctx.fillRect(0, 0, width, height)
+        // ── 1. CINEMATIC DARK BOTANICAL ATMOSPHERE RADIAL GLOW ──
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.5 + lerpX * 20,
+          height * 0.4 + lerpY * 15,
+          width * 0.1,
+          width * 0.5,
+          height * 0.5,
+          width * 0.85
+        )
+        bgGrad.addColorStop(0, 'rgba(1, 125, 139, 0.15)')
+        bgGrad.addColorStop(0.55, 'rgba(1, 49, 87, 0.08)')
+        bgGrad.addColorStop(1, 'rgba(2, 9, 13, 0)')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
 
-      // ── 2. OBJECT 06 — ORGANIC GRADIENT RIBBON ──
-      if (entranceStep >= 3) {
-        ctx.save()
-        const ribbonGrad = ctx.createLinearGradient(0, height * 0.85, width, height * 0.15)
-        RENDEZVOUS_GRADIENT_STOPS.forEach(s => ribbonGrad.addColorStop(s.stop, s.color))
-
-        ctx.beginPath()
-        const rSX = width * -0.05 + lerpX * 30
-        const rSY = height * 0.8 + Math.sin(time * 0.4) * 18 + lerpY * 20
-        const rCP1X = width * 0.3 + Math.cos(time * 0.5) * 30 + lerpX * 35
-        const rCP1Y = height * 0.95 + Math.sin(time * 0.3) * 25 + lerpY * 30
-        const rCP2X = width * 0.7 + Math.sin(time * 0.6) * 30 + lerpX * 45
-        const rCP2Y = height * 0.15 + Math.cos(time * 0.4) * 25 + lerpY * 20
-        const rEX = width * 1.05 + lerpX * 50
-        const rEY = height * 0.4 + Math.sin(time * 0.5) * 18 + lerpY * 25
-
-        ctx.moveTo(rSX, rSY)
-        ctx.bezierCurveTo(rCP1X, rCP1Y, rCP2X, rCP2Y, rEX, rEY)
-
-        ctx.strokeStyle = ribbonGrad
-        ctx.lineWidth = Math.min(width * 0.022, 22)
-        ctx.lineCap = 'round'
-        ctx.shadowColor = '#64D431'
-        ctx.shadowBlur = 18
-        ctx.globalAlpha = 0.78
-        ctx.stroke()
-        ctx.restore()
-      }
-
-      // ── 3. OPTICAL DECODE EFFECT (Luminous Vein Glow inside Lens over Leaf) ──
-      if (entranceStep >= 8 && revealIntensity > 0) {
-        ctx.save()
-        const lensRadius = Math.min(width * 0.16, 130)
-
-        ctx.beginPath()
-        ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
-        ctx.clip()
-
-        // Luminous radial glow inside glass lens
-        const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
-        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.3)')
-        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.16)')
-        lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
-        ctx.fillStyle = lensGlow
-        ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
-
-        // Draw sharp luminous golden/emerald leaf vein structure inside lens region
-        ctx.translate(leafCenterX, leafCenterY)
-        const leafScale = Math.min(width, height) * 0.35
-
-        ctx.beginPath()
-        ctx.moveTo(-leafScale * 0.2, -leafScale * 0.6)
-        ctx.lineTo(leafScale * 0.2, leafScale * 0.6)
-        ctx.strokeStyle = '#E2FA04'
-        ctx.lineWidth = 3.5
-        ctx.shadowColor = '#AEE515'
-        ctx.shadowBlur = 16
-        ctx.stroke()
-
-        const veinCount = 8
-        for (let v = 1; v <= veinCount; v++) {
-          const vy = -leafScale * 0.5 + (v * leafScale) / (veinCount + 1)
-          ctx.beginPath()
-          ctx.moveTo(0, vy)
-          ctx.quadraticCurveTo(-leafScale * 0.3, vy - 20, -leafScale * 0.45, vy - 35)
-          ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2
-          ctx.stroke()
+        // ── 2. OBJECT 06 — ORGANIC GRADIENT RIBBON ──
+        if (entranceStep >= 3) {
+          ctx.save()
+          const ribbonGrad = ctx.createLinearGradient(0, height * 0.85, width, height * 0.15)
+          RENDEZVOUS_GRADIENT_STOPS.forEach(s => ribbonGrad.addColorStop(s.stop, s.color))
 
           ctx.beginPath()
-          ctx.moveTo(0, vy)
-          ctx.quadraticCurveTo(leafScale * 0.3, vy - 20, leafScale * 0.45, vy - 35)
-          ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2
+          const rSX = width * -0.05 + lerpX * 30
+          const rSY = height * 0.8 + Math.sin(time * 0.4) * 18 + lerpY * 20
+          const rCP1X = width * 0.3 + Math.cos(time * 0.5) * 30 + lerpX * 35
+          const rCP1Y = height * 0.95 + Math.sin(time * 0.3) * 25 + lerpY * 30
+          const rCP2X = width * 0.7 + Math.sin(time * 0.6) * 30 + lerpX * 45
+          const rCP2Y = height * 0.15 + Math.cos(time * 0.4) * 25 + lerpY * 20
+          const rEX = width * 1.05 + lerpX * 50
+          const rEY = height * 0.4 + Math.sin(time * 0.5) * 18 + lerpY * 25
+
+          ctx.moveTo(rSX, rSY)
+          ctx.bezierCurveTo(rCP1X, rCP1Y, rCP2X, rCP2Y, rEX, rEY)
+
+          ctx.strokeStyle = ribbonGrad
+          ctx.lineWidth = Math.min(width * 0.022, 22)
+          ctx.lineCap = 'round'
+          ctx.shadowColor = '#64D431'
+          ctx.shadowBlur = 18
+          ctx.globalAlpha = 0.78
           ctx.stroke()
+          ctx.restore()
         }
 
-        ctx.restore()
-      }
-
-      // ── 4. FLOATING SPORE / POLLEN PARTICLES ──
-      if (entranceStep >= 4) {
-        ctx.save()
-        pollen.forEach((p) => {
-          p.y -= p.speedY
-          if (p.y < -0.05) p.y = 1.05
-          p.phase += p.swaySpeed
-
-          let px = (p.x + Math.sin(p.phase) * 0.02) * width + lerpX * 30
-          let py = p.y * height + lerpY * 20
-
-          if (isHovered) {
-            const dx = lensX - px
-            const dy = lensY - py
-            const dist = Math.hypot(dx, dy)
-            if (dist < 200 && dist > 5) {
-              px += (dx / dist) * 0.7
-              py += (dy / dist) * 0.7
-            }
-          }
+        // ── 3. OPTICAL DECODE EFFECT (Luminous Vein Glow inside Lens over Leaf) ──
+        if (entranceStep >= 8 && revealIntensity > 0) {
+          ctx.save()
+          const lensRadius = Math.min(width * 0.16, 130)
 
           ctx.beginPath()
-          ctx.arc(px, py, p.size, 0, Math.PI * 2)
-          ctx.fillStyle = p.size > 2 ? '#AEE515' : '#19BB47'
-          ctx.globalAlpha = p.opacity
-          ctx.shadowColor = '#64D431'
-          ctx.shadowBlur = p.size * 3
-          ctx.fill()
-        })
-        ctx.restore()
-      }
+          ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
+          ctx.clip()
+
+          // Luminous radial glow inside glass lens
+          const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
+          lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.3)')
+          lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.16)')
+          lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
+          ctx.fillStyle = lensGlow
+          ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
+
+          // Draw sharp luminous golden/emerald leaf vein structure inside lens region
+          ctx.translate(leafCenterX, leafCenterY)
+          const leafScale = Math.min(width, height) * 0.35
+
+          ctx.beginPath()
+          ctx.moveTo(-leafScale * 0.2, -leafScale * 0.6)
+          ctx.lineTo(leafScale * 0.2, leafScale * 0.6)
+          ctx.strokeStyle = '#E2FA04'
+          ctx.lineWidth = 3.5
+          ctx.shadowColor = '#AEE515'
+          ctx.shadowBlur = 16
+          ctx.stroke()
+
+          const veinCount = 8
+          for (let v = 1; v <= veinCount; v++) {
+            const vy = -leafScale * 0.5 + (v * leafScale) / (veinCount + 1)
+            ctx.beginPath()
+            ctx.moveTo(0, vy)
+            ctx.quadraticCurveTo(-leafScale * 0.3, vy - 20, -leafScale * 0.45, vy - 35)
+            ctx.strokeStyle = '#AEE515'
+            ctx.lineWidth = 2
+            ctx.stroke()
+
+            ctx.beginPath()
+            ctx.moveTo(0, vy)
+            ctx.quadraticCurveTo(leafScale * 0.3, vy - 20, leafScale * 0.45, vy - 35)
+            ctx.strokeStyle = '#AEE515'
+            ctx.lineWidth = 2
+            ctx.stroke()
+          }
+
+          ctx.restore()
+        }
+
+        // ── 4. FLOATING SPORE / POLLEN PARTICLES ──
+        if (entranceStep >= 4) {
+          ctx.save()
+          pollen.forEach((p) => {
+            p.y -= p.speedY
+            if (p.y < -0.05) p.y = 1.05
+            p.phase += p.swaySpeed
+
+            let px = (p.x + Math.sin(p.phase) * 0.02) * width + lerpX * 30
+            let py = p.y * height + lerpY * 20
+
+            if (isHovered) {
+              const dx = lensX - px
+              const dy = lensY - py
+              const dist = Math.hypot(dx, dy)
+              if (dist < 200 && dist > 5) {
+                px += (dx / dist) * 0.7
+                py += (dy / dist) * 0.7
+              }
+            }
+
+            ctx.beginPath()
+            ctx.arc(px, py, p.size, 0, Math.PI * 2)
+            ctx.fillStyle = p.size > 2 ? '#AEE515' : '#19BB47'
+            ctx.globalAlpha = p.opacity
+            ctx.shadowColor = '#64D431'
+            ctx.shadowBlur = p.size * 3
+            ctx.fill()
+          })
+          ctx.restore()
+        }
       } catch (err) {
         console.warn('Canvas render error in PhytoloreHero:', err)
       }
