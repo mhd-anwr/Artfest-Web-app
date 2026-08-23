@@ -5,6 +5,7 @@ import { getCompositedGalleryImage } from '../utils/imageCompositor'
 import { ArrowRight, ExternalLink, Users, CalendarDays, UserCheck, Layers } from 'lucide-react'
 import HeroAnimation from '../components/HeroAnimation'
 import PhytoloreHero from '../components/PhytoloreHero'
+import HeroErrorBoundary from '../components/HeroErrorBoundary'
 import useScrollReveal from '../hooks/useScrollReveal'
 import ThemeToggle from '../components/ThemeToggle'
 import LoginControl from '../components/LoginControl'
@@ -172,7 +173,9 @@ export default function Home() {
       </header>
 
       {/* ── Full-Viewport Phytolore Hero ── */}
-      <PhytoloreHero onScrollToAbout={() => scrollTo(aboutRef)} />
+      <HeroErrorBoundary>
+        <PhytoloreHero onScrollToAbout={() => scrollTo(aboutRef)} />
+      </HeroErrorBoundary>
 
       {/* ── Content Below Hero ── */}
       <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto relative z-20">

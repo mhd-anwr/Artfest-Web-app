@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
 // Photorealistic 3D Specimen Assets
-// import leafImg from '../assets/hero/leaf.jpg'
-// import lensImg from '../assets/hero/lens.jpg'
-// import seedPodImg from '../assets/hero/seed_pod.jpg'
-// import treeSliceImg from '../assets/hero/tree_slice.jpg'
-// import herbariumImg from '../assets/hero/herbarium.jpg'
-// import heroBgImg from '../assets/hero/hero_bg.jpg'
+import leafImg from '../assets/hero/leaf.jpg'
+import lensImg from '../assets/hero/lens.jpg'
+import seedPodImg from '../assets/hero/seed_pod.jpg'
+import treeSliceImg from '../assets/hero/tree_slice.jpg'
+import herbariumImg from '../assets/hero/herbarium.jpg'
+import heroBgImg from '../assets/hero/hero_bg.jpg'
 
 // Official Rendezvous'26 Gradient Palette
 // #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
@@ -165,7 +165,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }))
 
     const render = () => {
-      time += 0.012
+      try {
+        time += 0.012
 
       lerpX += (mousePos.targetX - lerpX) * 0.05
       lerpY += (mousePos.targetY - lerpY) * 0.05
@@ -310,7 +311,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.shadowBlur = p.size * 3
           ctx.fill()
         })
-        ctx.restore()
+      } catch (err) {
+        console.warn('Canvas render error in PhytoloreHero:', err)
       }
 
       if (!prefersReducedMotion) {
@@ -393,6 +395,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           src={leafImg}
           alt="Realistic Botanical Leaf Specimen"
           className="w-full h-auto rounded-3xl object-contain mix-blend-screen"
+          onError={(e) => { e.currentTarget.style.opacity = '0' }}
         />
       </div>
 
@@ -413,6 +416,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           src={seedPodImg}
           alt="Realistic Seed Pod Specimen"
           className="w-full h-auto rounded-3xl object-contain mix-blend-screen"
+          onError={(e) => { e.currentTarget.style.opacity = '0' }}
         />
       </div>
 
@@ -433,6 +437,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           src={treeSliceImg}
           alt="Realistic Tree Cross-Section Specimen"
           className="w-full h-auto rounded-full object-contain mix-blend-screen"
+          onError={(e) => { e.currentTarget.style.opacity = '0' }}
         />
       </div>
 
@@ -453,6 +458,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           src={herbariumImg}
           alt="Realistic Herbarium Specimen Sheet"
           className="w-full h-auto rounded-2xl object-contain border border-[#01B998]/30 shadow-2xl"
+          onError={(e) => { e.currentTarget.style.opacity = '0' }}
         />
       </div>
 
@@ -473,6 +479,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           src={lensImg}
           alt="Realistic Physical Magnifying Lens Specimen"
           className="w-full h-auto object-contain mix-blend-screen"
+          onError={(e) => { e.currentTarget.style.opacity = '0' }}
         />
       </div>
 
