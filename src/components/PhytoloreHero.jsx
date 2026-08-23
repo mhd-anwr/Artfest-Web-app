@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
 // Hero Background Asset
-import heroBgImg from "../assets/hero/hero_bg.png"
+import heroBgImg from "../assets/hero/hero_bg.jpg"
 // Official Rendezvous'26 Gradient Palette
 // #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
 const RENDEZVOUS_GRADIENT_STOPS = [
@@ -280,8 +280,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center transition-opacity duration-1000"
         style={{
           backgroundImage: `url(${heroBgImg})`,
-          opacity: entranceStep >= 2 ? 0.7 : 0,
-          filter: 'brightness(0.7) contrast(1.15)'
+          opacity: entranceStep >= 2 ? 0.9 : 0,
+          filter: 'brightness(0.9) contrast(1.1)'
         }}
       />
 
