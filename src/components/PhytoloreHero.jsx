@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 
 // Hero Background Asset
 import heroBgImg from "../assets/hero/hero_bg.jpg"
+import rendezvousWordmark from "../assets/hero/rendezvous-wordmark.png"
 // Official Rendezvous'26 Gradient Palette
 // #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
 const RENDEZVOUS_GRADIENT_STOPS = [
@@ -312,22 +313,22 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
       <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
 
-        {/* 1. RENDEZVOUS'26 Official Logo Mask Badge (Step 09) */}
+        {/* 1. RENDEZVOUS'26 Official Wordmark Image (Step 09) */}
         <div
-          className="mb-4 sm:mb-6 transition-all duration-1000"
+          className="mb-2 sm:mb-3 transition-all duration-1000 flex justify-center"
           style={{
             ...layerTransform(0.12),
             opacity: entranceStep >= 9 ? 1 : 0,
-            transform: `${layerTransform(0.12).transform || ''} scale(${entranceStep >= 9 ? 1 : 0.92})`,
+            transform: `${layerTransform(0.12).transform || ''} translateY(${entranceStep >= 9 ? 0 : 12}px)`,
           }}
         >
-          <div
-            role="img"
-            aria-label="ISRA Rendezvous'26 logo"
-            className="hero-logo-mask w-full max-w-[260px] sm:max-w-md md:max-w-lg lg:max-w-xl h-14 sm:h-22 md:h-28 lg:h-36 mx-auto select-none"
+          <img
+            src={rendezvousWordmark}
+            alt="Rendezvous'26 Official Wordmark"
+            className="w-36 sm:w-44 md:w-52 lg:w-56 h-auto object-contain select-none pointer-events-none"
             style={{
-              backgroundColor: '#AEE515',
-              filter: 'drop-shadow(0 0 18px rgba(100, 212, 49, 0.4))'
+              filter: 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(100, 212, 49, 0.35))',
+              mixBlendMode: 'screen',
             }}
           />
         </div>
