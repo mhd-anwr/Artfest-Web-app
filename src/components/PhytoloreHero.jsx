@@ -311,6 +311,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.shadowBlur = p.size * 3
           ctx.fill()
         })
+        ctx.restore()
+      }
       } catch (err) {
         console.warn('Canvas render error in PhytoloreHero:', err)
       }
