@@ -301,17 +301,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         }}
       />
 
-      {/* Top Curatorial Badge */}
-      <div className="relative z-20 pt-20 sm:pt-24 px-4 text-center pointer-events-none">
-        <span className="inline-block text-[10px] sm:text-xs font-mono uppercase tracking-[0.35em] text-[#01B998] opacity-85">
-          ISRA RENDEZVOUS’26 · CURATORIAL EDITION
-        </span>
-      </div>
-
-
-
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
-      <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
+      <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full pt-16 sm:pt-20">
 
         {/* 1. RENDEZVOUS'26 Official Wordmark Image — Edge-Aligned (Step 09) */}
         <div
@@ -348,10 +339,6 @@ export default function PhytoloreHero({ onScrollToAbout }) {
               PHYTOLORE
             </span>
           </h1>
-
-          <p className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md text-center">
-            OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
-          </p>
         </div>
 
         {/* 3. Action Buttons (Step 11) */}
