@@ -4,6 +4,7 @@ import { getFeaturedSpotlight, getSpotlight, getTeamCategoryPoints, getActiveGal
 import { getCompositedGalleryImage } from '../utils/imageCompositor'
 import { ArrowRight, ExternalLink, Users, CalendarDays, UserCheck, Layers } from 'lucide-react'
 import HeroAnimation from '../components/HeroAnimation'
+import PhytoloreHero from '../components/PhytoloreHero'
 import useScrollReveal from '../hooks/useScrollReveal'
 import ThemeToggle from '../components/ThemeToggle'
 import LoginControl from '../components/LoginControl'
@@ -170,79 +171,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Full-Viewport Hero ── */}
-      <section className="relative h-screen w-full overflow-hidden">
-        {HERO_ANIMATION_ENABLED && (
-          <HeroAnimation spotlightImages={featured.length > 0 ? featured : allImages} />
-        )}
-
-        <div className="aurora-layer" style={!prefersReduced ? { transform: `translateY(${Math.min(scrollY * 0.05, 30)}px)` } : {}}>
-          <div className="aurora-blob aurora-a" />
-          <div className="aurora-blob aurora-b" />
-          <div className="aurora-blob aurora-c" />
-        </div>
-
-        <div className="sparkle-field">
-          {sparkles.map(s => (
-            <span
-              key={s.id}
-              className="sparkle"
-              style={{
-                left: `${s.left}%`,
-                width: s.size,
-                height: s.size,
-                animationDuration: `${s.duration}s`,
-                animationDelay: `${s.delay}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <div
-            className="mb-4 flex justify-center w-full"
-            style={!prefersReduced ? {
-              transform: `translateY(${-Math.min(scrollY * 0.15, 28)}px) scale(${1 - Math.min(scrollY * 0.0003, 0.04)})`,
-              opacity: Math.max(1 - scrollY * 0.0018, 0.5)
-            } : {}}
-          >
-            <div
-              role="img"
-              aria-label="ISRA Rendezvous'26 logo"
-              className="hero-logo-mask w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl h-16 sm:h-24 md:h-32 lg:h-40 select-none"
-            />
-          </div>
-          <p
-            className="text-lg md:text-xl text-textMute font-display italic mb-10 max-w-xl"
-            style={!prefersReduced ? {
-              transform: `translateY(${-Math.min(scrollY * 0.12, 22)}px)`,
-              opacity: Math.max(1 - scrollY * 0.0022, 0.4)
-            } : {}}
-          >
-            - Decoding Phytolore -
-          </p>
-          <div
-            className="flex flex-col sm:flex-row gap-4"
-            style={!prefersReduced ? {
-              transform: `translateY(${-Math.min(scrollY * 0.08, 16)}px)`,
-              opacity: Math.max(1 - scrollY * 0.0026, 0.3)
-            } : {}}
-          >
-            <button
-              onClick={() => navigate('/results')}
-              className="cta-gradient px-8 py-3 font-semibold font-inter"
-            >
-              Results
-            </button>
-            <button
-              onClick={() => scrollTo(aboutRef)}
-              className="px-8 py-3 bg-card border border-subtle text-mainText rounded-full font-semibold font-inter hover:bg-lavender transition"
-            >
-              About
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* ── Full-Viewport Phytolore Hero ── */}
+      <PhytoloreHero onScrollToAbout={() => scrollTo(aboutRef)} />
 
       {/* ── Content Below Hero ── */}
       <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto relative z-20">
