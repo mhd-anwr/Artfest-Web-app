@@ -313,49 +313,45 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
       <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
 
-        {/* Unified Headline & Wordmark Block */}
-        <div className="inline-flex flex-col items-center justify-center max-w-full mx-auto my-2">
-
-          {/* 1. RENDEZVOUS'26 Official Wordmark Image — Edge-Aligned (Step 09) */}
-          <div
-            className="w-full flex justify-center mb-2 sm:mb-3 transition-all duration-1000"
+        {/* 1. RENDEZVOUS'26 Official Wordmark Image — Edge-Aligned (Step 09) */}
+        <div
+          className="mb-2 sm:mb-3 transition-all duration-1000 flex justify-center w-full"
+          style={{
+            ...layerTransform(0.12),
+            opacity: entranceStep >= 9 ? 1 : 0,
+            transform: `${layerTransform(0.12).transform || ''} translateY(${entranceStep >= 9 ? 0 : 12}px)`,
+          }}
+        >
+          <img
+            src={rendezvousWordmark}
+            alt="Rendezvous'26 Official Wordmark"
+            className="w-full max-w-[200px] xs:max-w-[240px] sm:max-w-[320px] md:max-w-[480px] lg:max-w-[580px] xl:max-w-[620px] h-auto object-contain select-none pointer-events-none"
             style={{
-              ...layerTransform(0.12),
-              opacity: entranceStep >= 9 ? 1 : 0,
-              transform: `${layerTransform(0.12).transform || ''} translateY(${entranceStep >= 9 ? 0 : 12}px)`,
+              filter: 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(100, 212, 49, 0.35))',
+              mixBlendMode: 'screen',
             }}
-          >
-            <img
-              src={rendezvousWordmark}
-              alt="Rendezvous'26 Official Wordmark"
-              className="w-[102%] max-w-none h-auto object-contain select-none pointer-events-none"
-              style={{
-                filter: 'brightness(0) invert(1) drop-shadow(0 0 14px rgba(100, 212, 49, 0.35))',
-                mixBlendMode: 'screen',
-              }}
-            />
-          </div>
+          />
+        </div>
 
-          {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10 & 11) — Single Horizontal Line */}
-          <div
-            className="transition-all duration-1000 my-1 sm:my-2 w-full flex flex-col items-center justify-center"
-            style={{
-              ...layerTransform(0.16),
-              opacity: entranceStep >= 10 ? 1 : 0,
-              transform: `${layerTransform(0.16).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
-            }}
-          >
-            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap">
-              <span className="text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
-                PHYTOLORE
-              </span>
-            </h1>
+        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10 & 11) — Single Horizontal Line */}
+        <div
+          className="transition-all duration-1000 my-1 sm:my-2 w-full flex flex-col items-center justify-center"
+          style={{
+            ...layerTransform(0.16),
+            opacity: entranceStep >= 10 ? 1 : 0,
+            transform: `${layerTransform(0.16).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
+          }}
+        >
+          <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap">
+            <span className="text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
+              PHYTOLORE
+            </span>
+          </h1>
 
-            <p className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md text-center">
-              OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
-            </p>
-          </div>
+          <p className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md text-center">
+            OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
+          </p>
         </div>
 
         {/* 3. Action Buttons (Step 11) */}

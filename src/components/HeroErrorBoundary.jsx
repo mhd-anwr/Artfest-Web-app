@@ -18,14 +18,14 @@ export default class HeroErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <section className="relative w-full h-screen min-h-[500px] bg-[#02090D] flex flex-col items-center justify-center text-center p-6 text-white select-none">
-          <div className="max-w-2xl mx-auto z-10 inline-flex flex-col items-center justify-center">
+          <div className="max-w-2xl mx-auto z-10 flex flex-col items-center justify-center">
             <div className="w-full flex justify-center mb-2 sm:mb-3">
               <img
                 src="/rendezvous-wordmark.png"
                 alt="Rendezvous'26 Official Wordmark"
-                className="w-[102%] max-w-none h-auto object-contain select-none"
+                className="w-full max-w-[200px] xs:max-w-[240px] sm:max-w-[320px] md:max-w-[480px] lg:max-w-[580px] xl:max-w-[620px] h-auto object-contain select-none"
                 style={{
-                  filter: 'brightness(0) invert(1) drop-shadow(0 0 14px rgba(100, 212, 49, 0.35))',
+                  filter: 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(100, 212, 49, 0.35))',
                   mixBlendMode: 'screen',
                 }}
               />
