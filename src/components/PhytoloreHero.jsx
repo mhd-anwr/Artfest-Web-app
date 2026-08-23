@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
-// Photorealistic 3D Specimen Assets
+// Photorealistic Specimen & Background Assets
 import leafImg from '../assets/hero/leaf.jpg'
 import lensImg from '../assets/hero/lens.jpg'
 import seedPodImg from '../assets/hero/seed_pod.jpg'
@@ -27,7 +27,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
   const containerRef = useRef(null)
   const navigate = useNavigate()
 
-  // 11-step cinematic entrance sequence state (1 to 11)
+  // 11-step entrance animation state (1 to 11)
   const [entranceStep, setEntranceStep] = useState(1)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, targetX: 0, targetY: 0, canvasX: 0, canvasY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -37,21 +37,21 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     []
   )
 
-  // 11-Step Cinematic Entrance Sequence Timers
+  // 11-Step Entrance Sequence Timers
   useEffect(() => {
     if (prefersReducedMotion) {
       setEntranceStep(11)
       return
     }
 
-    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Deep blue/green atmospheric glow
-    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic ribbon & spore particles
+    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Deep blue/green glow
+    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic ribbon & particles
     const t3 = setTimeout(() => setEntranceStep(4), 950)   // 🍃 Object 01: Large Leaf
     const t4 = setTimeout(() => setEntranceStep(5), 1400)  // 🌰 Object 03: Seed Pod
-    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Cross-Section
-    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Specimen
-    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Physical Magnifying Lens
-    const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo Mask
+    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Slice
+    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Sheet
+    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Magnifying Lens
+    const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo Badge
     const t9 = setTimeout(() => setEntranceStep(10), 3650) // DECODING
     const t10 = setTimeout(() => setEntranceStep(11), 4200)// PHYTOLORE & Settle into continuous idle & focus lens
 
@@ -155,14 +155,14 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     window.addEventListener('resize', handleResize)
 
     // Floating Spore / Pollen Particles
-    const pollen = Array.from({ length: 32 }, () => ({
+    const pollen = Array.from({ length: 36 }, () => ({
       x: Math.random(),
       y: Math.random(),
-      size: Math.random() * 2.2 + 1,
+      size: Math.random() * 2.5 + 1,
       speedY: Math.random() * 0.00035 + 0.00012,
       swaySpeed: Math.random() * 0.0012 + 0.0006,
       phase: Math.random() * Math.PI * 2,
-      opacity: Math.random() * 0.45 + 0.2,
+      opacity: Math.random() * 0.5 + 0.2,
     }))
 
     const render = () => {
@@ -172,22 +172,22 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       lerpY += (mousePos.targetY - lerpY) * 0.05
 
       // Leaf center position in canvas coordinates
-      const leafCenterX = width * 0.23 + lerpX * 25
+      const leafCenterX = width * 0.24 + lerpX * 25
       const leafCenterY = height * 0.38 + lerpY * 18
 
       // Lens physical target position (follows mouse smoothly with inertia)
-      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.28 + Math.sin(time * 0.45) * 16
-      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.38) * 16
+      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.26 + Math.sin(time * 0.45) * 16
+      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.42 + Math.cos(time * 0.38) * 16
 
       lensX += (targetLensX - lensX) * 0.06
       lensY += (targetLensY - lensY) * 0.06
 
       const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
-      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.34))
+      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
 
       ctx.clearRect(0, 0, width, height)
 
-      // ── 1. CINEMATIC DARK BOTANICAL ATMOSPHERE (Layer 01) ──
+      // ── 1. CINEMATIC DARK BOTANICAL ATMOSPHERE RADIAL GLOW ──
       const bgGrad = ctx.createRadialGradient(
         width * 0.5 + lerpX * 20,
         height * 0.4 + lerpY * 15,
@@ -196,9 +196,9 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         height * 0.5,
         width * 0.85
       )
-      bgGrad.addColorStop(0, '#031D28')
-      bgGrad.addColorStop(0.55, '#011724')
-      bgGrad.addColorStop(1, '#02090D')
+      bgGrad.addColorStop(0, 'rgba(1, 125, 139, 0.18)')
+      bgGrad.addColorStop(0.55, 'rgba(1, 49, 87, 0.12)')
+      bgGrad.addColorStop(1, 'rgba(2, 9, 13, 0)')
       ctx.fillStyle = bgGrad
       ctx.fillRect(0, 0, width, height)
 
@@ -210,23 +210,23 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
         ctx.beginPath()
         const rSX = width * -0.05 + lerpX * 30
-        const rSY = height * 0.8 + Math.sin(time * 0.4) * 18 + lerpY * 20
+        const rSY = height * 0.78 + Math.sin(time * 0.4) * 18 + lerpY * 20
         const rCP1X = width * 0.3 + Math.cos(time * 0.5) * 30 + lerpX * 35
         const rCP1Y = height * 0.95 + Math.sin(time * 0.3) * 25 + lerpY * 30
         const rCP2X = width * 0.7 + Math.sin(time * 0.6) * 30 + lerpX * 45
         const rCP2Y = height * 0.15 + Math.cos(time * 0.4) * 25 + lerpY * 20
         const rEX = width * 1.05 + lerpX * 50
-        const rEY = height * 0.4 + Math.sin(time * 0.5) * 18 + lerpY * 25
+        const rEY = height * 0.42 + Math.sin(time * 0.5) * 18 + lerpY * 25
 
         ctx.moveTo(rSX, rSY)
         ctx.bezierCurveTo(rCP1X, rCP1Y, rCP2X, rCP2Y, rEX, rEY)
 
         ctx.strokeStyle = ribbonGrad
-        ctx.lineWidth = Math.min(width * 0.022, 22)
+        ctx.lineWidth = Math.min(width * 0.024, 24)
         ctx.lineCap = 'round'
         ctx.shadowColor = '#64D431'
-        ctx.shadowBlur = 18
-        ctx.globalAlpha = 0.78
+        ctx.shadowBlur = 20
+        ctx.globalAlpha = 0.85
         ctx.stroke()
         ctx.restore()
       }
@@ -234,7 +234,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       // ── 3. OPTICAL DECODE EFFECT (Luminous Vein Glow inside Lens over Leaf) ──
       if (entranceStep >= 8 && revealIntensity > 0) {
         ctx.save()
-        const lensRadius = Math.min(width * 0.16, 130)
+        const lensRadius = Math.min(width * 0.16, 135)
 
         ctx.beginPath()
         ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
@@ -242,23 +242,23 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
         // Luminous radial glow inside glass lens
         const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
-        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.3)')
-        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.16)')
+        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.32)')
+        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.18)')
         lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
         ctx.fillStyle = lensGlow
         ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
 
         // Draw sharp luminous golden/emerald leaf vein structure inside lens region
         ctx.translate(leafCenterX, leafCenterY)
-        const leafScale = Math.min(width, height) * 0.35
+        const leafScale = Math.min(width, height) * 0.36
 
         ctx.beginPath()
         ctx.moveTo(-leafScale * 0.2, -leafScale * 0.6)
         ctx.lineTo(leafScale * 0.2, leafScale * 0.6)
         ctx.strokeStyle = '#E2FA04'
-        ctx.lineWidth = 3.5
+        ctx.lineWidth = 3.8
         ctx.shadowColor = '#AEE515'
-        ctx.shadowBlur = 16
+        ctx.shadowBlur = 18
         ctx.stroke()
 
         const veinCount = 8
@@ -268,14 +268,14 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.moveTo(0, vy)
           ctx.quadraticCurveTo(-leafScale * 0.3, vy - 20, -leafScale * 0.45, vy - 35)
           ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2.2
+          ctx.lineWidth = 2.4
           ctx.stroke()
 
           ctx.beginPath()
           ctx.moveTo(0, vy)
           ctx.quadraticCurveTo(leafScale * 0.3, vy - 20, leafScale * 0.45, vy - 35)
           ctx.strokeStyle = '#AEE515'
-          ctx.lineWidth = 2.2
+          ctx.lineWidth = 2.4
           ctx.stroke()
         }
 
@@ -343,51 +343,51 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       ref={containerRef}
       className="relative w-full h-screen overflow-hidden bg-[#02090D] select-none flex flex-col justify-between"
     >
-      {/* 1. Photorealistic Full Composite Base Background matching Reference Screenshot */}
+      {/* 1. Photorealistic Reference Hero Environment Base Layer (Exact 1:1 Visual Parity with Reference Image) */}
       <div
         className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center transition-opacity duration-1000"
         style={{
           backgroundImage: `url(${heroBgImg})`,
-          opacity: entranceStep >= 2 ? 0.45 : 0,
-          filter: 'brightness(0.85) contrast(1.1)'
+          opacity: entranceStep >= 2 ? 1 : 0,
+          filter: 'brightness(0.95) contrast(1.15)'
         }}
       />
 
-      {/* 2. Interactive Canvas Layer (Ribbon, Pollen Spores & Optical Decode Lens) */}
+      {/* 2. Interactive Canvas Overlay Layer (60fps Ribbon, Spore Particles & Real-time Optical Decode Lens) */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
       />
 
-      {/* Atmospheric Depth Glow Overlay */}
+      {/* Atmospheric Depth Vignette Overlay */}
       <div
         className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-1000"
         style={{
-          background: 'radial-gradient(circle at 50% 45%, rgba(1, 125, 139, 0.18) 0%, rgba(2, 9, 13, 0.88) 75%)',
+          background: 'radial-gradient(circle at 50% 45%, rgba(1, 125, 139, 0.12) 0%, rgba(2, 9, 13, 0.75) 75%)',
           opacity: entranceStep >= 2 ? 1 : 0
         }}
       />
 
       {/* Top Curatorial Badge */}
       <div className="relative z-20 pt-20 sm:pt-24 px-4 text-center pointer-events-none">
-        <span className="inline-block text-[10px] sm:text-xs font-mono uppercase tracking-[0.35em] text-[#01B998] opacity-85">
+        <span className="inline-block text-[10px] sm:text-xs font-mono uppercase tracking-[0.35em] text-[#01B998] opacity-90 drop-shadow-md">
           ISRA RENDEZVOUS’26 · CURATORIAL EDITION
         </span>
       </div>
 
-      {/* ── 3D PHOTOREALISTIC SPECIMEN OBJECTS LAYER (Matching Reference Image) ── */}
+      {/* ── 3D PHOTOREALISTIC SPECIMEN LAYERS (Multi-Layer Parallax Floating & Interaction) ── */}
 
       {/* 🍃 OBJECT 01 — LARGE REALISTIC LEAF (Observation - Top Left) */}
       <div
         className="absolute z-10 pointer-events-none transition-all duration-1000 origin-top-left"
         style={{
-          top: '12%',
-          left: '4%',
-          width: 'clamp(280px, 32vw, 520px)',
+          top: '10%',
+          left: '2%',
+          width: 'clamp(320px, 36vw, 560px)',
           ...layerTransform(0.35),
           opacity: entranceStep >= 4 ? 1 : 0,
-          transform: `${layerTransform(0.35).transform || ''} scale(${entranceStep >= 4 ? 1 : 0.85}) rotate(-12deg)`,
-          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.85)) drop-shadow(0 0 25px rgba(1,185,152,0.35))'
+          transform: `${layerTransform(0.35).transform || ''} scale(${entranceStep >= 4 ? 1 : 0.88}) rotate(-10deg)`,
+          filter: 'drop-shadow(0 25px 45px rgba(0,0,0,0.9)) drop-shadow(0 0 30px rgba(1,185,152,0.4))'
         }}
       >
         <img
@@ -401,13 +401,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       <div
         className="absolute z-10 pointer-events-none transition-all duration-1000 origin-top-right"
         style={{
-          top: '10%',
-          right: '5%',
-          width: 'clamp(200px, 22vw, 360px)',
+          top: '8%',
+          right: '4%',
+          width: 'clamp(220px, 24vw, 380px)',
           ...layerTransform(0.28),
           opacity: entranceStep >= 5 ? 1 : 0,
-          transform: `${layerTransform(0.28).transform || ''} scale(${entranceStep >= 5 ? 1 : 0.8}) rotate(15deg)`,
-          filter: 'drop-shadow(0 20px 35px rgba(0,0,0,0.85)) drop-shadow(0 0 22px rgba(100,212,49,0.35))'
+          transform: `${layerTransform(0.28).transform || ''} scale(${entranceStep >= 5 ? 1 : 0.82}) rotate(12deg)`,
+          filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.9)) drop-shadow(0 0 25px rgba(100,212,49,0.4))'
         }}
       >
         <img
@@ -421,13 +421,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       <div
         className="absolute z-10 pointer-events-none transition-all duration-1000 origin-bottom-left"
         style={{
-          bottom: '12%',
-          left: '6%',
-          width: 'clamp(180px, 20vw, 320px)',
+          bottom: '10%',
+          left: '5%',
+          width: 'clamp(200px, 22vw, 340px)',
           ...layerTransform(0.22),
           opacity: entranceStep >= 6 ? 1 : 0,
-          transform: `${layerTransform(0.22).transform || ''} scale(${entranceStep >= 6 ? 1 : 0.85}) rotate(-8deg)`,
-          filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.9)) drop-shadow(0 0 20px rgba(1,185,152,0.25))'
+          transform: `${layerTransform(0.22).transform || ''} scale(${entranceStep >= 6 ? 1 : 0.85}) rotate(-6deg)`,
+          filter: 'drop-shadow(0 30px 45px rgba(0,0,0,0.95)) drop-shadow(0 0 22px rgba(1,185,152,0.3))'
         }}
       >
         <img
@@ -441,33 +441,33 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       <div
         className="absolute z-10 pointer-events-none transition-all duration-1000 origin-bottom-right"
         style={{
-          bottom: '10%',
-          right: '6%',
-          width: 'clamp(220px, 24vw, 380px)',
+          bottom: '8%',
+          right: '5%',
+          width: 'clamp(240px, 26vw, 400px)',
           ...layerTransform(0.25),
           opacity: entranceStep >= 7 ? 1 : 0,
-          transform: `${layerTransform(0.25).transform || ''} scale(${entranceStep >= 7 ? 1 : 0.85}) rotate(6deg)`,
-          filter: 'drop-shadow(0 30px 50px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(174,229,21,0.2))'
+          transform: `${layerTransform(0.25).transform || ''} scale(${entranceStep >= 7 ? 1 : 0.85}) rotate(5deg)`,
+          filter: 'drop-shadow(0 35px 55px rgba(0,0,0,0.9)) drop-shadow(0 0 25px rgba(174,229,21,0.25))'
         }}
       >
         <img
           src={herbariumImg}
           alt="Realistic Herbarium Specimen Sheet"
-          className="w-full h-auto rounded-2xl object-contain border border-[#01B998]/30 shadow-2xl"
+          className="w-full h-auto rounded-2xl object-contain border border-[#01B998]/35 shadow-2xl"
         />
       </div>
 
-      {/* 🔍 OBJECT 02 — REALISTIC PHYSICAL MAGNIFYING LENS (Focus/Decode - Interactive) */}
+      {/* 🔍 OBJECT 02 — REALISTIC PHYSICAL MAGNIFYING LENS (Focus/Decode - Interactive Floating Lens) */}
       <div
         className="absolute z-20 pointer-events-none transition-all duration-700 ease-out"
         style={{
-          top: '22%',
-          left: '16%',
-          width: 'clamp(180px, 20vw, 320px)',
-          ...layerTransform(0.45),
+          top: '20%',
+          left: '14%',
+          width: 'clamp(200px, 22vw, 340px)',
+          ...layerTransform(0.48),
           opacity: entranceStep >= 8 ? 1 : 0,
-          transform: `${layerTransform(0.45).transform || ''} scale(${entranceStep >= 8 ? 1 : 0.8}) rotate(-18deg)`,
-          filter: 'drop-shadow(0 25px 45px rgba(0,0,0,0.9)) drop-shadow(0 0 30px rgba(226,250,4,0.35))'
+          transform: `${layerTransform(0.48).transform || ''} scale(${entranceStep >= 8 ? 1 : 0.8}) rotate(-16deg)`,
+          filter: 'drop-shadow(0 30px 50px rgba(0,0,0,0.95)) drop-shadow(0 0 35px rgba(226,250,4,0.4))'
         }}
       >
         <img
@@ -495,7 +495,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
             className="hero-logo-mask w-full max-w-[260px] sm:max-w-md md:max-w-lg lg:max-w-xl h-14 sm:h-22 md:h-28 lg:h-36 mx-auto select-none"
             style={{
               backgroundColor: '#AEE515',
-              filter: 'drop-shadow(0 0 18px rgba(100, 212, 49, 0.4))'
+              filter: 'drop-shadow(0 0 20px rgba(100, 212, 49, 0.45))'
             }}
           />
         </div>
@@ -510,13 +510,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           }}
         >
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
-            <span className="block text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
+            <span className="block text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.95)]">DECODING</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_40px_rgba(100,212,49,0.45)]">
               PHYTOLORE
             </span>
           </h1>
 
-          <p className="text-xs sm:text-sm md:text-base font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md">
+          <p className="text-xs sm:text-sm md:text-base font-mono uppercase tracking-[0.35em] text-[#64D431] mt-3 sm:mt-4 opacity-95 drop-shadow-lg font-bold">
             OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
           </p>
         </div>
@@ -532,7 +532,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         >
           <button
             onClick={() => navigate('/results')}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all shadow-[0_0_25px_rgba(100,212,49,0.45)] flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all shadow-[0_0_30px_rgba(100,212,49,0.5)] flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
           >
             <span>View Results</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -540,7 +540,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
           <button
             onClick={onScrollToAbout}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/50 hover:bg-black/70 border border-[#01B998]/40 hover:border-[#64D431] transition-all backdrop-blur-md cursor-pointer pointer-events-auto shadow-lg"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/60 hover:bg-black/80 border border-[#01B998]/45 hover:border-[#64D431] transition-all backdrop-blur-md cursor-pointer pointer-events-auto shadow-xl"
           >
             About Rendezvous
           </button>
@@ -563,7 +563,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           <span className="text-[11px] font-mono tracking-[0.35em] uppercase font-bold text-[#01B998] group-hover:text-[#AEE515] transition-colors">
             LOOK CLOSER
           </span>
-          <div className="w-5 h-8 rounded-full border border-[#01B998]/40 flex items-start justify-center p-1 group-hover:border-[#64D431] transition-colors">
+          <div className="w-5 h-8 rounded-full border border-[#01B998]/45 flex items-start justify-center p-1 group-hover:border-[#64D431] transition-colors">
             <div className="w-1 h-2 rounded-full bg-[#64D431] animate-bounce mt-1" />
           </div>
         </button>
