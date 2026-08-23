@@ -4,13 +4,16 @@ import { ArrowRight } from 'lucide-react'
 
 // Photorealistic 3D Specimen Assets
 import leafImg from '../assets/hero/leaf.png'
-import lensImg from '../assets/hero/lens.png'
+import lensImg from '<div styleName={} />
+<assets />
+<hero />
+<lens className="pn"></lens>g'
 import seedPodImg from '../assets/hero/seed_pod.png'
 import treeSliceImg from '../assets/hero/tree_slice.png'
 import herbariumImg from '../assets/hero/herbarium.png'
-import heroBgImg from '../assets/hero/hero_bg.png'
+import heroBgImg from '../assets/hero/heroo.jpg'
 
-// Official Rendezvous 26 Gradient Palette
+// Official Rendezvous'26 Gradient Palette
 // #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
 const RENDEZVOUS_GRADIENT_STOPS = [
   { stop: 0.00, color: '#013157' },
@@ -51,7 +54,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     const t5 = setTimeout(() => setEntranceStep(6), 1700)  // 2.0s: 🌰 Object 03: Seed Pod
     const t6 = setTimeout(() => setEntranceStep(7), 2000)  // 2.2s: 📜 Object 05: Herbarium Specimen
     const t7 = setTimeout(() => setEntranceStep(8), 2400)  // 2.5s: 🔍 Object 02: Magnifying Glass
-    const t8 = setTimeout(() => setEntranceStep(9), 2800)  // 2.8s: RENDEZVOUS 26 Logo
+    const t8 = setTimeout(() => setEntranceStep(9), 2800)  // 2.8s: RENDEZVOUS'26 Logo
     const t9 = setTimeout(() => setEntranceStep(10), 3200) // 3.3s: Title DECODING
     const t10 = setTimeout(() => setEntranceStep(11), 3600)// 3.6s: Title PHYTOLORE & Settle into idle focus
 
@@ -488,7 +491,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
       <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
 
-        {/* 1. RENDEZVOUS 26 Official Logo Mask Badge (Step 09) */}
+        {/* 1. RENDEZVOUS'26 Official Logo Mask Badge (Step 09) */}
         <div
           className="mb-4 sm:mb-6 transition-all duration-1000"
           style={{
@@ -499,7 +502,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         >
           <div
             role="img"
-            aria-label="ISRA Rendezvous 26 logo"
+            aria-label="ISRA Rendezvous'26 logo"
             className="hero-logo-mask w-full max-w-[260px] sm:max-w-md md:max-w-lg lg:max-w-xl h-14 sm:h-22 md:h-28 lg:h-36 mx-auto select-none"
             style={{
               backgroundColor: '#AEE515',
