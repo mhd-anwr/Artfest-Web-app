@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
 // Photorealistic 3D Specimen Assets
-import leafImg from '../assets/hero/leaf.jpg'
-import lensImg from '../assets/hero/lens.jpg'
-import seedPodImg from '../assets/hero/seed_pod.jpg'
-import treeSliceImg from '../assets/hero/tree_slice.jpg'
-import herbariumImg from '../assets/hero/herbarium.jpg'
-import heroBgImg from '../assets/hero/hero_bg.jpg'
+// import leafImg from '../assets/hero/leaf.jpg'
+// import lensImg from '../assets/hero/lens.jpg'
+// import seedPodImg from '../assets/hero/seed_pod.jpg'
+// import treeSliceImg from '../assets/hero/tree_slice.jpg'
+// import herbariumImg from '../assets/hero/herbarium.jpg'
+// import heroBgImg from '../assets/hero/hero_bg.jpg'
 
 // Official Rendezvous'26 Gradient Palette
 // #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
@@ -478,7 +478,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
       <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
-        
+
         {/* 1. RENDEZVOUS'26 Official Logo Mask Badge (Step 09) */}
         <div
           className="mb-4 sm:mb-6 transition-all duration-1000"
