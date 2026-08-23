@@ -2,8 +2,14 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 
+// Photorealistic 3D Specimen Assets
+import leafImg from '../assets/hero/leaf.jpg'
+import lensImg from '../assets/hero/lens.jpg'
+import seedPodImg from '../assets/hero/seed_pod.jpg'
+import treeSliceImg from '../assets/hero/tree_slice.jpg'
+import herbariumImg from '../assets/hero/herbarium.jpg'
+
 // Official Rendezvous'26 Gradient Palette
-// #013157 -> #017D8B -> #01B998 -> #19BB47 -> #64D431 -> #AEE515 -> #E2FA04
 const RENDEZVOUS_GRADIENT_STOPS = [
   { stop: 0.00, color: '#013157' },
   { stop: 0.16, color: '#017D8B' },
@@ -19,7 +25,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
   const containerRef = useRef(null)
   const navigate = useNavigate()
 
-  // 11-step entrance animation state (1 to 11)
+  // 11-step entrance sequence state (1 to 11)
   const [entranceStep, setEntranceStep] = useState(1)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, targetX: 0, targetY: 0, canvasX: 0, canvasY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -29,23 +35,23 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     []
   )
 
-  // 11-Step Entrance Sequence Timers
+  // 11-Step Entrance Timers
   useEffect(() => {
     if (prefersReducedMotion) {
       setEntranceStep(11)
       return
     }
 
-    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Atmospheric blue/green glow
-    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic green ribbon emerges
-    const t3 = setTimeout(() => setEntranceStep(4), 950)   // 🍃 Object 01: Large Botanical Leaf
+    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Deep blue/green glow
+    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic ribbon
+    const t3 = setTimeout(() => setEntranceStep(4), 950)   // 🍃 Object 01: Large Leaf
     const t4 = setTimeout(() => setEntranceStep(5), 1400)  // 🌰 Object 03: Seed Pod
-    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Cross-section
-    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Specimen Sheet
-    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Physical Magnifying Lens
+    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Slice
+    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Sheet
+    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Magnifying Lens
     const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo
-    const t9 = setTimeout(() => setEntranceStep(10), 3650) // Title: DECODING PHYTOLORE
-    const t10 = setTimeout(() => setEntranceStep(11), 4200)// Settle into continuous idle & focus lens
+    const t9 = setTimeout(() => setEntranceStep(10), 3650) // DECODING
+    const t10 = setTimeout(() => setEntranceStep(11), 4200)// PHYTOLORE & Settle into idle focus
 
     return () => {
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
@@ -54,7 +60,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }
   }, [prefersReducedMotion])
 
-  // Mouse & Touch Tracking for Parallax & Lens Physics
+  // Mouse & Touch Interaction Tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!containerRef.current) return
@@ -114,7 +120,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }
   }, [])
 
-  // Canvas 2D / 3D Specimen Rendering Engine
+  // Canvas 2D / 3D Specimen Rendering Engine (Organic Ribbon, Atmospheric Haze, Pollen & Optical Decode)
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -126,11 +132,10 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     let height = 0
     let time = 0
 
-    // Smooth Lerp Offsets
     let lerpX = 0
     let lerpY = 0
 
-    // Lens Smooth Physics Positioning (Object 02)
+    // Smooth physical lens lerp position
     let lensX = 0
     let lensY = 0
 
@@ -147,8 +152,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     handleResize()
     window.addEventListener('resize', handleResize)
 
-    // Micro-spores / Pollen Particles
-    const pollen = Array.from({ length: 28 }, () => ({
+    // Floating Spore / Pollen Particles
+    const pollen = Array.from({ length: 26 }, () => ({
       x: Math.random(),
       y: Math.random(),
       size: Math.random() * 2 + 1,
@@ -158,34 +163,29 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       opacity: Math.random() * 0.4 + 0.2,
     }))
 
-    // Main 60fps Render Loop
     const render = () => {
       time += 0.012
 
-      // Lerp mouse coordinates
       lerpX += (mousePos.targetX - lerpX) * 0.05
       lerpY += (mousePos.targetY - lerpY) * 0.05
 
-      // Target position for 🍃 Object 01 (Large Botanical Leaf)
-      const leafCenterX = width * 0.24 + lerpX * 22
-      const leafCenterY = height * 0.36 + lerpY * 16
+      // Leaf center position in pixels
+      const leafCenterX = width * 0.22 + lerpX * 25
+      const leafCenterY = height * 0.38 + lerpY * 18
 
-      // Target position for 🔍 Object 02 (Physical Magnifying Lens)
-      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.31 + Math.sin(time * 0.45) * 15
-      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.35) * 15
+      // Lens physical target (follows cursor when hovered, floats near leaf otherwise)
+      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.29 + Math.sin(time * 0.4) * 15
+      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.45 + Math.cos(time * 0.35) * 15
 
-      // Smooth inertia lerp for physical floating lens
       lensX += (targetLensX - lensX) * 0.06
       lensY += (targetLensY - lensY) * 0.06
 
-      // Distance from lens to leaf center for optical reveal intensity
       const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
-      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.32))
+      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
 
-      // Clear Canvas
       ctx.clearRect(0, 0, width, height)
 
-      // ── 1. BACKGROUND ATMOSPHERE (Layer 01) ──
+      // ── 1. CINEMATIC DARK BOTANICAL ATMOSPHERE (Layer 01) ──
       const bgGrad = ctx.createRadialGradient(
         width * 0.5 + lerpX * 20,
         height * 0.4 + lerpY * 15,
@@ -195,7 +195,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         width * 0.85
       )
       bgGrad.addColorStop(0, '#031D28')
-      bgGrad.addColorStop(0.55, '#011724')
+      bgGrad.addColorStop(0.5, '#011724')
       bgGrad.addColorStop(1, '#02090D')
       ctx.fillStyle = bgGrad
       ctx.fillRect(0, 0, width, height)
@@ -220,308 +220,67 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.bezierCurveTo(rCP1X, rCP1Y, rCP2X, rCP2Y, rEX, rEY)
 
         ctx.strokeStyle = ribbonGrad
-        ctx.lineWidth = Math.min(width * 0.02, 20)
+        ctx.lineWidth = Math.min(width * 0.022, 22)
         ctx.lineCap = 'round'
         ctx.shadowColor = '#64D431'
-        ctx.shadowBlur = 16
+        ctx.shadowBlur = 18
         ctx.globalAlpha = 0.75
         ctx.stroke()
         ctx.restore()
       }
 
-      // ── 3. 🍃 OBJECT 01 — LARGE BOTANICAL LEAF (Observation - Top Left) ──
-      if (entranceStep >= 4) {
+      // ── 3. OPTICAL DECODE EFFECT (Luminous Vein Glow inside Lens over Leaf) ──
+      if (entranceStep >= 8 && revealIntensity > 0) {
         ctx.save()
-        const leafX = leafCenterX
-        const leafY = leafCenterY
-        const leafScale = Math.min(width, height) * 0.32
-        const leafAngle = Math.sin(time * 0.3) * 0.04 + lerpX * 0.05
+        const lensRadius = Math.min(width * 0.16, 130)
 
-        ctx.translate(leafX, leafY)
-        ctx.rotate(leafAngle)
-
-        // Leaf Outer Silhouette Bezier Path
-        ctx.beginPath()
-        ctx.moveTo(0, -leafScale * 0.8)
-        ctx.bezierCurveTo(leafScale * 0.6, -leafScale * 0.4, leafScale * 0.7, leafScale * 0.4, 0, leafScale * 0.8)
-        ctx.bezierCurveTo(-leafScale * 0.7, leafScale * 0.4, -leafScale * 0.6, -leafScale * 0.4, 0, -leafScale * 0.8)
-
-        // Dark Organic Leaf Surface Fill with Cyan/Green Rim Lighting
-        const leafGrad = ctx.createLinearGradient(-leafScale * 0.5, -leafScale * 0.5, leafScale * 0.5, leafScale * 0.5)
-        leafGrad.addColorStop(0, '#011F2D')
-        leafGrad.addColorStop(0.5, '#013157')
-        leafGrad.addColorStop(0.85, '#017D8B')
-        leafGrad.addColorStop(1, '#19BB47')
-
-        ctx.fillStyle = leafGrad
-        ctx.globalAlpha = 0.85
-        ctx.shadowColor = '#01B998'
-        ctx.shadowBlur = 20
-        ctx.fill()
-        ctx.strokeStyle = '#01B998'
-        ctx.lineWidth = 1.5
-        ctx.stroke()
-
-        // Primary Leaf Mid-Rib Line
-        ctx.beginPath()
-        ctx.moveTo(0, -leafScale * 0.75)
-        ctx.lineTo(0, leafScale * 0.75)
-        ctx.strokeStyle = 'rgba(25, 187, 71, 0.45)'
-        ctx.lineWidth = 2.5
-        ctx.stroke()
-
-        // Lateral Veins (Base state: subtle, partially veiled)
-        const veinCount = 7
-        for (let v = 1; v <= veinCount; v++) {
-          const vy = -leafScale * 0.6 + (v * leafScale * 1.2) / (veinCount + 1)
-          const vWidth = (1 - Math.abs(vy) / leafScale) * leafScale * 0.55
-
-          // Left lateral vein
-          ctx.beginPath()
-          ctx.moveTo(0, vy)
-          ctx.quadraticCurveTo(-vWidth * 0.5, vy - 15, -vWidth, vy - 25)
-          ctx.strokeStyle = 'rgba(100, 212, 49, 0.3)'
-          ctx.lineWidth = 1.2
-          ctx.stroke()
-
-          // Right lateral vein
-          ctx.beginPath()
-          ctx.moveTo(0, vy)
-          ctx.quadraticCurveTo(vWidth * 0.5, vy - 15, vWidth, vy - 25)
-          ctx.strokeStyle = 'rgba(100, 212, 49, 0.3)'
-          ctx.lineWidth = 1.2
-          ctx.stroke()
-        }
-
-        ctx.restore()
-      }
-
-      // ── 4. 🌰 OBJECT 03 — SEED POD (Hidden Potential - Top Right) ──
-      if (entranceStep >= 5) {
-        ctx.save()
-        const podX = width * 0.76 + lerpX * 30
-        const podY = height * 0.28 + Math.sin(time * 0.45) * 12 + lerpY * 20
-        const podRadius = Math.min(width, height) * 0.08
-        const podRot = time * 0.2 + lerpX * 0.1
-
-        ctx.translate(podX, podY)
-        ctx.rotate(podRot)
-
-        // Seed Pod Ribbed Shell
-        const podGrad = ctx.createRadialGradient(-podRadius * 0.3, -podRadius * 0.3, 5, 0, 0, podRadius)
-        podGrad.addColorStop(0, '#017D8B')
-        podGrad.addColorStop(0.6, '#013157')
-        podGrad.addColorStop(1, '#02090D')
-
-        ctx.beginPath()
-        ctx.ellipse(0, 0, podRadius * 0.7, podRadius, Math.PI / 6, 0, Math.PI * 2)
-        ctx.fillStyle = podGrad
-        ctx.shadowColor = '#64D431'
-        ctx.shadowBlur = 15
-        ctx.globalAlpha = 0.9
-        ctx.fill()
-        ctx.strokeStyle = '#64D431'
-        ctx.lineWidth = 1.5
-        ctx.stroke()
-
-        // Internal Seed Rib Annotations
-        for (let r = -2; r <= 2; r++) {
-          ctx.beginPath()
-          ctx.ellipse(r * 8, 0, podRadius * 0.2, podRadius * 0.8, Math.PI / 6, 0, Math.PI * 2)
-          ctx.strokeStyle = 'rgba(174, 229, 21, 0.35)'
-          ctx.lineWidth = 1
-          ctx.stroke()
-        }
-
-        ctx.restore()
-      }
-
-      // ── 5. 🌳 OBJECT 04 — TREE CROSS-SECTION (Growth / Memory / Time - Lower Left) ──
-      if (entranceStep >= 6) {
-        ctx.save()
-        const treeX = width * 0.22 + lerpX * 18
-        const treeY = height * 0.78 + Math.cos(time * 0.35) * 8 + lerpY * 15
-        const treeRadius = Math.min(width, height) * 0.095
-
-        ctx.translate(treeX, treeY)
-
-        // Outer Rough Bark
-        ctx.beginPath()
-        ctx.arc(0, 0, treeRadius, 0, Math.PI * 2)
-        const barkGrad = ctx.createRadialGradient(0, 0, treeRadius * 0.7, 0, 0, treeRadius)
-        barkGrad.addColorStop(0, '#011724')
-        barkGrad.addColorStop(0.85, '#013157')
-        barkGrad.addColorStop(1, '#017D8B')
-        ctx.fillStyle = barkGrad
-        ctx.shadowColor = '#01B998'
-        ctx.shadowBlur = 12
-        ctx.fill()
-        ctx.strokeStyle = '#01B998'
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // Concentric Growth Rings (Illuminates when focus lens is near)
-        const ringCount = 6
-        const distToLens = Math.hypot(treeX - lensX, treeY - lensY)
-        const ringGlow = Math.max(0, 1 - distToLens / 180)
-
-        for (let ring = 1; ring <= ringCount; ring++) {
-          const rRadius = (treeRadius * 0.85 * ring) / ringCount
-          ctx.beginPath()
-          ctx.arc(0, 0, rRadius, 0, Math.PI * 2)
-          ctx.strokeStyle = ringGlow > 0.3 ? '#AEE515' : 'rgba(25, 187, 71, 0.4)'
-          ctx.lineWidth = ringGlow > 0.3 ? 1.5 : 1
-          if (ringGlow > 0.3) {
-            ctx.shadowColor = '#E2FA04'
-            ctx.shadowBlur = 8
-          }
-          ctx.stroke()
-        }
-
-        ctx.restore()
-      }
-
-      // ── 6. 📜 OBJECT 05 — BOTANICAL HERBARIUM SPECIMEN (Recorded Knowledge - Lower Right) ──
-      if (entranceStep >= 7) {
-        ctx.save()
-        const sheetX = width * 0.78 + lerpX * 22
-        const sheetY = height * 0.74 + Math.sin(time * 0.3) * 10 + lerpY * 18
-        const sheetW = Math.min(width * 0.22, 170)
-        const sheetH = sheetW * 1.3
-        const sheetAngle = -0.05 + Math.sin(time * 0.25) * 0.02
-
-        ctx.translate(sheetX, sheetY)
-        ctx.rotate(sheetAngle)
-
-        // Dark Paper Sheet Background & Frame
-        ctx.fillStyle = '#011724'
-        ctx.shadowColor = 'rgba(1, 185, 152, 0.3)'
-        ctx.shadowBlur = 14
-        ctx.fillRect(-sheetW / 2, -sheetH / 2, sheetW, sheetH)
-
-        ctx.strokeStyle = 'rgba(1, 125, 139, 0.6)'
-        ctx.lineWidth = 1
-        ctx.strokeRect(-sheetW / 2, -sheetH / 2, sheetW, sheetH)
-
-        // Inner Border Line
-        ctx.strokeStyle = 'rgba(25, 187, 71, 0.25)'
-        ctx.strokeRect(-sheetW / 2 + 8, -sheetH / 2 + 8, sheetW - 16, sheetH - 16)
-
-        // Pressed Leaf Specimen Illustration
-        ctx.beginPath()
-        ctx.moveTo(0, -sheetH * 0.3)
-        ctx.bezierCurveTo(sheetW * 0.25, -sheetH * 0.1, sheetW * 0.2, sheetH * 0.15, 0, sheetH * 0.25)
-        ctx.bezierCurveTo(-sheetW * 0.2, sheetH * 0.15, -sheetW * 0.25, -sheetH * 0.1, 0, -sheetH * 0.3)
-        ctx.fillStyle = 'rgba(25, 187, 71, 0.25)'
-        ctx.fill()
-        ctx.strokeStyle = '#64D431'
-        ctx.lineWidth = 1
-        ctx.stroke()
-
-        // Scientific Annotation Text Lines
-        ctx.fillStyle = '#AEE515'
-        ctx.font = '9px monospace'
-        ctx.fillText('SPECIMEN #042', -sheetW / 2 + 14, sheetH / 2 - 24)
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
-        ctx.font = '8px sans-serif'
-        ctx.fillText('Phytolore Folium', -sheetW / 2 + 14, sheetH / 2 - 12)
-
-        ctx.restore()
-      }
-
-      // ── 7. 🔍 OBJECT 02 — PHYSICAL MAGNIFYING LENS (Focus / Decode) ──
-      if (entranceStep >= 8) {
-        ctx.save()
-        const lensRadius = Math.min(width * 0.18, 140)
-
-        // Optical Lens Magnification / Reveal Zone inside Glass Lens over Leaf
-        if (entranceStep >= 11 && revealIntensity > 0) {
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(lensX, lensY, lensRadius - 4, 0, Math.PI * 2)
-          ctx.clip()
-
-          // Illumination Radial Glow inside Glass Lens
-          const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
-          lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.25)')
-          lensGlow.addColorStop(0.6, 'rgba(174, 229, 21, 0.15)')
-          lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
-          ctx.fillStyle = lensGlow
-          ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
-
-          // Sharpened Luminous Vein Structures inside Lens
-          ctx.translate(leafCenterX, leafCenterY)
-          const leafScale = Math.min(width, height) * 0.32
-
-          ctx.beginPath()
-          ctx.moveTo(0, -leafScale * 0.75)
-          ctx.lineTo(0, leafScale * 0.75)
-          ctx.strokeStyle = '#E2FA04'
-          ctx.lineWidth = 3.5
-          ctx.shadowColor = '#AEE515'
-          ctx.shadowBlur = 14
-          ctx.stroke()
-
-          const veinCount = 7
-          for (let v = 1; v <= veinCount; v++) {
-            const vy = -leafScale * 0.6 + (v * leafScale * 1.2) / (veinCount + 1)
-            const vWidth = (1 - Math.abs(vy) / leafScale) * leafScale * 0.55
-
-            ctx.beginPath()
-            ctx.moveTo(0, vy)
-            ctx.quadraticCurveTo(-vWidth * 0.5, vy - 15, -vWidth, vy - 25)
-            ctx.strokeStyle = '#AEE515'
-            ctx.lineWidth = 2
-            ctx.stroke()
-
-            ctx.beginPath()
-            ctx.moveTo(0, vy)
-            ctx.quadraticCurveTo(vWidth * 0.5, vy - 15, vWidth, vy - 25)
-            ctx.strokeStyle = '#AEE515'
-            ctx.lineWidth = 2
-            ctx.stroke()
-          }
-
-          ctx.restore()
-        }
-
-        // Physical 3D Lens Rim & Metallic Frame with Brand Gradient Reflection
         ctx.beginPath()
         ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
-        const frameGrad = ctx.createLinearGradient(lensX - lensRadius, lensY - lensRadius, lensX + lensRadius, lensY + lensRadius)
-        frameGrad.addColorStop(0, '#017D8B')
-        frameGrad.addColorStop(0.5, '#64D431')
-        frameGrad.addColorStop(1, '#AEE515')
+        ctx.clip()
 
-        ctx.strokeStyle = frameGrad
-        ctx.lineWidth = 6
-        ctx.shadowColor = '#64D431'
-        ctx.shadowBlur = 18
-        ctx.stroke()
+        // Luminous radial glow inside lens
+        const lensGlow = ctx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius)
+        lensGlow.addColorStop(0, 'rgba(226, 250, 4, 0.28)')
+        lensGlow.addColorStop(0.65, 'rgba(174, 229, 21, 0.15)')
+        lensGlow.addColorStop(1, 'rgba(1, 185, 152, 0)')
+        ctx.fillStyle = lensGlow
+        ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius * 2, lensRadius * 2)
 
-        // Inner Glass Rim Specular Highlight
+        // Draw luminous sharp leaf vein network inside lens region
+        ctx.translate(leafCenterX, leafCenterY)
+        const leafScale = Math.min(width, height) * 0.35
+
         ctx.beginPath()
-        ctx.arc(lensX, lensY, lensRadius - 4, Math.PI * 1.2, Math.PI * 1.8)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'
-        ctx.lineWidth = 2
+        ctx.moveTo(-leafScale * 0.2, -leafScale * 0.6)
+        ctx.lineTo(leafScale * 0.2, leafScale * 0.6)
+        ctx.strokeStyle = '#E2FA04'
+        ctx.lineWidth = 3.5
+        ctx.shadowColor = '#AEE515'
+        ctx.shadowBlur = 16
         ctx.stroke()
 
-        // Metallic Handle Stem
-        ctx.beginPath()
-        ctx.moveTo(lensX + lensRadius * 0.7, lensY + lensRadius * 0.7)
-        ctx.lineTo(lensX + lensRadius * 1.25, lensY + lensRadius * 1.25)
-        ctx.strokeStyle = '#013157'
-        ctx.lineWidth = 8
-        ctx.lineCap = 'round'
-        ctx.stroke()
-        ctx.strokeStyle = '#017D8B'
-        ctx.lineWidth = 4
-        ctx.stroke()
+        const veinCount = 8
+        for (let v = 1; v <= veinCount; v++) {
+          const vy = -leafScale * 0.5 + (v * leafScale) / (veinCount + 1)
+          ctx.beginPath()
+          ctx.moveTo(0, vy)
+          ctx.quadraticCurveTo(-leafScale * 0.3, vy - 20, -leafScale * 0.45, vy - 35)
+          ctx.strokeStyle = '#AEE515'
+          ctx.lineWidth = 2
+          ctx.stroke()
+
+          ctx.beginPath()
+          ctx.moveTo(0, vy)
+          ctx.quadraticCurveTo(leafScale * 0.3, vy - 20, leafScale * 0.45, vy - 35)
+          ctx.strokeStyle = '#AEE515'
+          ctx.lineWidth = 2
+          ctx.stroke()
+        }
 
         ctx.restore()
       }
 
-      // ── 8. POLLEN & SPORE PARTICLES ──
+      // ── 4. FLOATING SPORE PARTICLES ──
       if (entranceStep >= 4) {
         ctx.save()
         pollen.forEach((p) => {
@@ -532,7 +291,6 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           let px = (p.x + Math.sin(p.phase) * 0.02) * width + lerpX * 30
           let py = p.y * height + lerpY * 20
 
-          // Drift towards lens focus
           if (isHovered) {
             const dx = lensX - px
             const dy = lensY - py
@@ -567,11 +325,11 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     }
   }, [entranceStep, isHovered, mousePos, prefersReducedMotion])
 
-  // Parallax transform helper
+  // Parallax Layer Transform Helper
   const layerTransform = (multiplier) => {
     if (prefersReducedMotion) return {}
-    const tx = mousePos.targetX * multiplier * 20
-    const ty = mousePos.targetY * multiplier * 15
+    const tx = mousePos.targetX * multiplier * 25
+    const ty = mousePos.targetY * multiplier * 18
     return {
       transform: `translate3d(${tx}px, ${ty}px, 0)`,
       transition: 'transform 0.2s cubic-bezier(0.1, 0.8, 0.3, 1)'
@@ -583,17 +341,17 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       ref={containerRef}
       className="relative w-full h-screen overflow-hidden bg-[#02090D] select-none flex flex-col justify-between"
     >
-      {/* 2D/3D Specimen Interactive Canvas */}
+      {/* Background Interactive WebGL/Canvas (Atmosphere, Ribbon, Pollen & Optical Decode) */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
       />
 
-      {/* Atmospheric Radial Gradient Overlay */}
+      {/* Atmospheric Depth Glow Overlay */}
       <div
         className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-1000"
         style={{
-          background: 'radial-gradient(circle at 50% 45%, rgba(1, 125, 139, 0.16) 0%, rgba(2, 9, 13, 0.85) 75%)',
+          background: 'radial-gradient(circle at 50% 45%, rgba(1, 125, 139, 0.18) 0%, rgba(2, 9, 13, 0.88) 75%)',
           opacity: entranceStep >= 2 ? 1 : 0
         }}
       />
@@ -601,20 +359,122 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       {/* Top Curatorial Badge */}
       <div className="relative z-20 pt-20 sm:pt-24 px-4 text-center pointer-events-none">
         <span className="inline-block text-[10px] sm:text-xs font-mono uppercase tracking-[0.35em] text-[#01B998] opacity-85">
-          ISRA Rendezvous’26 · Curatorial Edition
+          ISRA RENDEZVOUS’26 · CURATORIAL EDITION
         </span>
       </div>
 
-      {/* ── CENTRAL DOMINANT TYPOGRAPHY & BRANDING ── */}
-      <div className="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
+      {/* ── 3D PHOTOREALISTIC SPECIMEN OBJECTS LAYER ── */}
+
+      {/* 🍃 OBJECT 01 — LARGE REALISTIC LEAF (Observation - Top Left) */}
+      <div
+        className="absolute z-10 pointer-events-none transition-all duration-1000 origin-top-left"
+        style={{
+          top: '12%',
+          left: '4%',
+          width: 'clamp(280px, 32vw, 520px)',
+          ...layerTransform(0.35),
+          opacity: entranceStep >= 4 ? 1 : 0,
+          transform: `${layerTransform(0.35).transform || ''} scale(${entranceStep >= 4 ? 1 : 0.85}) rotate(-12deg)`,
+          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 25px rgba(1,185,152,0.3))'
+        }}
+      >
+        <img
+          src={leafImg}
+          alt="Realistic Botanical Leaf Specimen"
+          className="w-full h-auto rounded-3xl object-contain mix-blend-screen"
+        />
+      </div>
+
+      {/* 🌰 OBJECT 03 — REALISTIC SEED POD (Hidden Potential - Top Right) */}
+      <div
+        className="absolute z-10 pointer-events-none transition-all duration-1000 origin-top-right"
+        style={{
+          top: '10%',
+          right: '5%',
+          width: 'clamp(200px, 22vw, 360px)',
+          ...layerTransform(0.28),
+          opacity: entranceStep >= 5 ? 1 : 0,
+          transform: `${layerTransform(0.28).transform || ''} scale(${entranceStep >= 5 ? 1 : 0.8}) rotate(15deg)`,
+          filter: 'drop-shadow(0 20px 35px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(100,212,49,0.35))'
+        }}
+      >
+        <img
+          src={seedPodImg}
+          alt="Realistic Seed Pod Specimen"
+          className="w-full h-auto rounded-3xl object-contain mix-blend-screen"
+        />
+      </div>
+
+      {/* 🌳 OBJECT 04 — REALISTIC TREE CROSS-SECTION (Growth/Memory/Time - Lower Left) */}
+      <div
+        className="absolute z-10 pointer-events-none transition-all duration-1000 origin-bottom-left"
+        style={{
+          bottom: '12%',
+          left: '6%',
+          width: 'clamp(180px, 20vw, 320px)',
+          ...layerTransform(0.22),
+          opacity: entranceStep >= 6 ? 1 : 0,
+          transform: `${layerTransform(0.22).transform || ''} scale(${entranceStep >= 6 ? 1 : 0.85}) rotate(-8deg)`,
+          filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.9)) drop-shadow(0 0 20px rgba(1,185,152,0.25))'
+        }}
+      >
+        <img
+          src={treeSliceImg}
+          alt="Realistic Tree Cross-Section Specimen"
+          className="w-full h-auto rounded-full object-contain mix-blend-screen"
+        />
+      </div>
+
+      {/* 📜 OBJECT 05 — REALISTIC HERBARIUM SPECIMEN (Recorded Knowledge - Lower Right) */}
+      <div
+        className="absolute z-10 pointer-events-none transition-all duration-1000 origin-bottom-right"
+        style={{
+          bottom: '10%',
+          right: '6%',
+          width: 'clamp(220px, 24vw, 380px)',
+          ...layerTransform(0.25),
+          opacity: entranceStep >= 7 ? 1 : 0,
+          transform: `${layerTransform(0.25).transform || ''} scale(${entranceStep >= 7 ? 1 : 0.85}) rotate(6deg)`,
+          filter: 'drop-shadow(0 30px 50px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(174,229,21,0.2))'
+        }}
+      >
+        <img
+          src={herbariumImg}
+          alt="Realistic Herbarium Specimen Sheet"
+          className="w-full h-auto rounded-2xl object-contain border border-[#01B998]/30 shadow-2xl"
+        />
+      </div>
+
+      {/* 🔍 OBJECT 02 — REALISTIC PHYSICAL MAGNIFYING LENS (Focus/Decode - Interactive) */}
+      <div
+        className="absolute z-20 pointer-events-none transition-all duration-700 ease-out"
+        style={{
+          top: '22%',
+          left: '16%',
+          width: 'clamp(180px, 20vw, 320px)',
+          ...layerTransform(0.45),
+          opacity: entranceStep >= 8 ? 1 : 0,
+          transform: `${layerTransform(0.45).transform || ''} scale(${entranceStep >= 8 ? 1 : 0.8}) rotate(-18deg)`,
+          filter: 'drop-shadow(0 25px 45px rgba(0,0,0,0.9)) drop-shadow(0 0 30px rgba(226,250,4,0.35))'
+        }}
+      >
+        <img
+          src={lensImg}
+          alt="Realistic Physical Magnifying Lens Specimen"
+          className="w-full h-auto object-contain mix-blend-screen"
+        />
+      </div>
+
+      {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
+      <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
         
-        {/* 1. RENDEZVOUS'26 Official Logo Asset (Step 09) */}
+        {/* 1. RENDEZVOUS'26 Official Logo Mask Badge (Step 09) */}
         <div
           className="mb-4 sm:mb-6 transition-all duration-1000"
           style={{
-            ...layerTransform(0.18),
+            ...layerTransform(0.12),
             opacity: entranceStep >= 9 ? 1 : 0,
-            transform: `${layerTransform(0.18).transform || ''} scale(${entranceStep >= 9 ? 1 : 0.92})`,
+            transform: `${layerTransform(0.12).transform || ''} scale(${entranceStep >= 9 ? 1 : 0.92})`,
           }}
         >
           <div
@@ -623,29 +483,29 @@ export default function PhytoloreHero({ onScrollToAbout }) {
             className="hero-logo-mask w-full max-w-[260px] sm:max-w-md md:max-w-lg lg:max-w-xl h-14 sm:h-22 md:h-28 lg:h-36 mx-auto select-none"
             style={{
               backgroundColor: '#AEE515',
-              filter: 'drop-shadow(0 0 16px rgba(100, 212, 49, 0.35))'
+              filter: 'drop-shadow(0 0 18px rgba(100, 212, 49, 0.4))'
             }}
           />
         </div>
 
-        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10) */}
+        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10 & 11) */}
         <div
           className="transition-all duration-1000 my-2"
           style={{
-            ...layerTransform(0.22),
+            ...layerTransform(0.16),
             opacity: entranceStep >= 10 ? 1 : 0,
-            transform: `${layerTransform(0.22).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
+            transform: `${layerTransform(0.16).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
           }}
         >
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
-            <span className="block text-white">DECODING</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515]">
+            <span className="block text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
               PHYTOLORE
             </span>
           </h1>
 
-          <p className="text-xs sm:text-sm md:text-base font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90">
-            Observe &nbsp;·&nbsp; Focus &nbsp;·&nbsp; Decode &nbsp;·&nbsp; Reveal
+          <p className="text-xs sm:text-sm md:text-base font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md">
+            OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
           </p>
         </div>
 
@@ -653,14 +513,14 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         <div
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 transition-all duration-1000"
           style={{
-            ...layerTransform(0.25),
+            ...layerTransform(0.20),
             opacity: entranceStep >= 11 ? 1 : 0,
-            transform: `${layerTransform(0.25).transform || ''} translateY(${entranceStep >= 11 ? 0 : 20}px)`
+            transform: `${layerTransform(0.20).transform || ''} translateY(${entranceStep >= 11 ? 0 : 20}px)`
           }}
         >
           <button
             onClick={() => navigate('/results')}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all shadow-[0_0_25px_rgba(100,212,49,0.4)] flex items-center justify-center gap-2 cursor-pointer group"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all shadow-[0_0_25px_rgba(100,212,49,0.45)] flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
           >
             <span>View Results</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -668,7 +528,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
           <button
             onClick={onScrollToAbout}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/40 hover:bg-black/60 border border-[#01B998]/40 hover:border-[#64D431] transition-all backdrop-blur-md cursor-pointer"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-sm sm:text-base text-white bg-black/50 hover:bg-black/70 border border-[#01B998]/40 hover:border-[#64D431] transition-all backdrop-blur-md cursor-pointer pointer-events-auto shadow-lg"
           >
             About Rendezvous
           </button>
@@ -678,7 +538,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
       {/* ── BOTTOM "LOOK CLOSER" SCROLL INDICATOR ── */}
       <div
-        className="relative z-20 pb-6 sm:pb-8 flex flex-col items-center justify-center text-center transition-all duration-1000 pointer-events-auto"
+        className="relative z-30 pb-6 sm:pb-8 flex flex-col items-center justify-center text-center transition-all duration-1000 pointer-events-auto"
         style={{
           opacity: entranceStep >= 11 ? 1 : 0,
           transform: `translateY(${entranceStep >= 11 ? 0 : 15}px)`
