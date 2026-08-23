@@ -318,7 +318,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
             alt="Rendezvous'26 Official Wordmark"
             className="w-full max-w-[200px] xs:max-w-[240px] sm:max-w-[320px] md:max-w-[480px] lg:max-w-[580px] xl:max-w-[620px] h-auto object-contain select-none pointer-events-none"
             style={{
-              filter: 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(100, 212, 49, 0.35))',
+              filter: 'brightness(0) invert(1)',
               mixBlendMode: 'screen',
             }}
           />
