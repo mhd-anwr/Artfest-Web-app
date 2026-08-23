@@ -351,7 +351,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         >
           <button
             onClick={() => navigate('/results')}
-            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all shadow-[0_0_25px_rgba(100,212,49,0.45)] flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
+            className="w-full sm:w-auto px-7 py-3 rounded-full font-bold text-sm sm:text-base text-black bg-gradient-to-r from-[#19BB47] via-[#64D431] to-[#AEE515] hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer group pointer-events-auto"
           >
             <span>Results</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

@@ -133,6 +133,20 @@ html:not(.dark):not([data-theme='dark']) td {
 :root {
   color-scheme: light;
 
+  /* Official Rendezvous'26 Design Tokens */
+  --rv-deep: #013157;
+  --rv-teal: #017D8B;
+  --rv-cyan: #01B998;
+  --rv-green: #19BB47;
+  --rv-lime: #64D431;
+  --rv-yellowgreen: #AEE515;
+  --rv-acid: #E2FA04;
+
+  --rv-gradient-full: linear-gradient(90deg, #013157, #017D8B, #01B998, #19BB47, #64D431, #AEE515, #E2FA04);
+  --rv-gradient-accent: linear-gradient(90deg, #01B998, #19BB47, #64D431, #AEE515);
+  --rv-gradient-btn: linear-gradient(90deg, #19BB47, #64D431, #AEE515);
+  --rv-gradient-divider: linear-gradient(90deg, transparent, #017D8B, #01B998, #19BB47, transparent);
+
   /* Festival Color Tokens */
   --color-primary-dark: #115F32;
   --color-primary: #228C22;
@@ -168,61 +182,75 @@ html:not(.dark):not([data-theme='dark']) td {
   --lot-card-back-text: #D4FFB8;
 
   /* Legacy RGB triplet tokens re-pointed to Green Palette */
-  --main-background: 245 250 243; /* #F5FAF3 */
-  --primary: 17 95 50;            /* #115F32 */
-  --secondary: 247 251 245;       /* #F7FBF5 */
-  --accent: 34 140 34;            /* #228C22 */
-  --main-text: 17 95 50;          /* #115F32 */
-  --muted-text: 82 112 93;         /* #52705D */
-  --success: 78 186 22;           /* #4EBA16 */
-  --card: 255 255 255;            /* #FFFFFF */
-  --ocean-tint: 241 248 238;      /* #F1F8EE */
+  --main-background: 245 250 243;
+  --primary: 17 95 50;
+  --secondary: 247 251 245;
+  --accent: 34 140 34;
+  --main-text: 17 95 50;
+  --muted-text: 82 112 93;
+  --success: 78 186 22;
+  --card: 255 255 255;
+  --ocean-tint: 241 248 238;
 }
 
 [data-theme='dark'],
 .dark {
   color-scheme: dark;
 
-  /* Festival Color Tokens */
-  --color-primary-dark: #061A0D;
-  --color-primary: #115F32;       /* Main/Primary Brand Color */
-  --color-bright: #4EBA16;        /* Strong Accent */
-  --color-fresh: #71C247;         /* Accent */
-  --color-light: #8ED06C;         /* Secondary Text */
-  --color-very-light: #D4FFB8;    /* Primary Text */
+  /* Official Rendezvous'26 Design Tokens */
+  --rv-deep: #013157;
+  --rv-teal: #017D8B;
+  --rv-cyan: #01B998;
+  --rv-green: #19BB47;
+  --rv-lime: #64D431;
+  --rv-yellowgreen: #AEE515;
+  --rv-acid: #E2FA04;
 
-  --bg-page: #061A0D;             /* Primary Dark Background #061A0D */
-  --bg-section-fill: #0B2A17;
-  --card-background: #0B2A17;     /* Main surfaces/cards #0B2A17 */
-  --card-lavender: #123D22;       /* Secondary Surface #123D22 */
-  --card-white: #0B2A17;
-  --card-dark: #061A0D;
-  --text-main: #D4FFB8;           /* Primary Text #D4FFB8 */
-  --text-body: #D4FFB8;
-  --text-muted: #8ED06C;          /* Secondary Text #8ED06C */
-  --text-light: #71C247;          /* Accent #71C247 */
-  --accent-purple: #115F32;       /* Main Brand Green */
-  --accent-purple-deep: #228C22;  /* Brand Green */
-  --accent-purple-soft: rgba(34, 140, 34, 0.25);
-  --border-subtle: rgba(113, 194, 71, 0.25);
-  --btn-result-navy: #115F32;     /* Main Brand Button */
-  --btn-navy-hover: #228C22;      /* Button Hover Accent */
-  --hero-glow: radial-gradient(circle at 50% 0%, #115f32 0%, #061a0d 80%);
-  --cta-gradient: linear-gradient(135deg, #115f32 0%, #228c22 100%);
-  --lot-card-front-bg: #0B2A17;
-  --lot-card-back-bg: #061A0D;
-  --lot-card-front-text: #D4FFB8;
-  --lot-card-back-text: #D4FFB8;
+  --rv-gradient-full: linear-gradient(90deg, #013157, #017D8B, #01B998, #19BB47, #64D431, #AEE515, #E2FA04);
+  --rv-gradient-accent: linear-gradient(90deg, #01B998, #19BB47, #64D431, #AEE515);
+  --rv-gradient-btn: linear-gradient(90deg, #19BB47, #64D431, #AEE515);
+  --rv-gradient-divider: linear-gradient(90deg, transparent, #017D8B, #01B998, #19BB47, transparent);
 
-  --main-background: 6 26 13;     /* #061A0D Primary Dark Background */
-  --primary: 17 95 50;            /* #115F32 MAIN BRAND COLOR */
-  --secondary: 34 140 34;         /* #228C22 Brand Green */
-  --accent: 113 194 71;           /* #71C247 Accent */
-  --main-text: 212 255 184;       /* #D4FFB8 Primary Text */
-  --muted-text: 142 208 108;      /* #8ED06C Secondary Text */
-  --success: 78 186 22;           /* #4EBA16 Strong Accent */
-  --card: 11 42 23;               /* #0B2A17 Main Surfaces/Cards */
-  --ocean-tint: 18 61 34;          /* #123D22 Secondary Surface */
+  /* Festival Color Tokens — Official Rendezvous'26 Dark Palette */
+  --color-primary-dark: #01233D;
+  --color-primary: #01B998;
+  --color-bright: #19BB47;
+  --color-fresh: #64D431;
+  --color-light: #AEE515;
+  --color-very-light: #E2FA04;
+
+  --bg-page: #01233D;
+  --bg-section-fill: #013157;
+  --card-background: #013157;
+  --card-lavender: #012847;
+  --card-white: #013157;
+  --card-dark: #011D33;
+  --text-main: #FFFFFF;
+  --text-body: #E0F7F3;
+  --text-muted: #01B998;
+  --text-light: #64D431;
+  --accent-purple: #01B998;
+  --accent-purple-deep: #19BB47;
+  --accent-purple-soft: rgba(1, 185, 152, 0.25);
+  --border-subtle: rgba(1, 125, 139, 0.4);
+  --btn-result-navy: #19BB47;
+  --btn-navy-hover: #64D431;
+  --hero-glow: radial-gradient(circle at 50% 0%, rgba(1, 125, 139, 0.25) 0%, #01233D 85%);
+  --cta-gradient: linear-gradient(90deg, #19BB47 0%, #64D431 50%, #AEE515 100%);
+  --lot-card-front-bg: #013157;
+  --lot-card-back-bg: #011D33;
+  --lot-card-front-text: #FFFFFF;
+  --lot-card-back-text: #64D431;
+
+  --main-background: 1 35 61;
+  --primary: 1 185 152;
+  --secondary: 25 187 71;
+  --accent: 100 212 49;
+  --main-text: 255 255 255;
+  --muted-text: 1 185 152;
+  --success: 25 187 71;
+  --card: 1 49 87;
+  --ocean-tint: 1 125 139;
 }
 
 /* ── Reusable design-system component classes ── */
@@ -301,9 +329,9 @@ header .nav-brand-subtitle span {
 .dark header .nav-brand-title,
 .dark header .nav-brand-subtitle,
 .dark header .nav-brand-subtitle span {
-  color: #D4FFB8 !important;
+  color: #FFFFFF !important;
   opacity: 1 !important;
-  -webkit-text-fill-color: #D4FFB8 !important;
+  -webkit-text-fill-color: #FFFFFF !important;
   background: transparent !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
