@@ -19,7 +19,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
   const containerRef = useRef(null)
   const navigate = useNavigate()
 
-  // 9-step entrance animation state (1 to 9)
+  // 11-step entrance animation state (1 to 11)
   const [entranceStep, setEntranceStep] = useState(1)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, targetX: 0, targetY: 0, canvasX: 0, canvasY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -29,29 +29,32 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     []
   )
 
-  // 9-Step Entrance Sequence Timers
+  // 11-Step Entrance Sequence Timers
   useEffect(() => {
     if (prefersReducedMotion) {
-      setEntranceStep(9)
+      setEntranceStep(11)
       return
     }
 
-    const t1 = setTimeout(() => setEntranceStep(2), 200)   // Faint deep blue/green glow
-    const t2 = setTimeout(() => setEntranceStep(3), 600)   // Botanical atmosphere & cellular shapes
-    const t3 = setTimeout(() => setEntranceStep(4), 1100)  // Object 01: Large Botanical Leaf
-    const t4 = setTimeout(() => setEntranceStep(5), 1600)  // Objects 03, 04, 05: Seed Pod, Tree Slice, Herbarium
-    const t5 = setTimeout(() => setEntranceStep(6), 2100)  // Object 02: Botanical Magnifying Lens
-    const t6 = setTimeout(() => setEntranceStep(7), 2600)  // RENDEZVOUS'26 Logo
-    const t7 = setTimeout(() => setEntranceStep(8), 3100)  // Title: DECODING PHYTOLORE
-    const t8 = setTimeout(() => setEntranceStep(9), 3700)  // Continuous idle & interactive focus decode
+    const t1 = setTimeout(() => setEntranceStep(2), 150)   // Atmospheric blue/green glow
+    const t2 = setTimeout(() => setEntranceStep(3), 500)   // Organic green ribbon emerges
+    const t3 = setTimeout(() => setEntranceStep(4), 950)   // 🍃 Object 01: Large Botanical Leaf
+    const t4 = setTimeout(() => setEntranceStep(5), 1400)  // 🌰 Object 03: Seed Pod
+    const t5 = setTimeout(() => setEntranceStep(6), 1850)  // 🌳 Object 04: Tree Cross-section
+    const t6 = setTimeout(() => setEntranceStep(7), 2300)  // 📜 Object 05: Herbarium Specimen Sheet
+    const t7 = setTimeout(() => setEntranceStep(8), 2750)  // 🔍 Object 02: Physical Magnifying Lens
+    const t8 = setTimeout(() => setEntranceStep(9), 3200)  // RENDEZVOUS'26 Logo
+    const t9 = setTimeout(() => setEntranceStep(10), 3650) // Title: DECODING PHYTOLORE
+    const t10 = setTimeout(() => setEntranceStep(11), 4200)// Settle into continuous idle & focus lens
 
     return () => {
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
       clearTimeout(t5); clearTimeout(t6); clearTimeout(t7); clearTimeout(t8);
+      clearTimeout(t9); clearTimeout(t10);
     }
   }, [prefersReducedMotion])
 
-  // Mouse & Touch Tracking for Parallax & Lens Proximity
+  // Mouse & Touch Tracking for Parallax & Lens Physics
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!containerRef.current) return
@@ -127,7 +130,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     let lerpX = 0
     let lerpY = 0
 
-    // Lens Smooth Physics Positioning
+    // Lens Smooth Physics Positioning (Object 02)
     let lensX = 0
     let lensY = 0
 
@@ -159,17 +162,17 @@ export default function PhytoloreHero({ onScrollToAbout }) {
     const render = () => {
       time += 0.012
 
-      // Lerp mouse
+      // Lerp mouse coordinates
       lerpX += (mousePos.targetX - lerpX) * 0.05
       lerpY += (mousePos.targetY - lerpY) * 0.05
 
-      // Target position for Object 02 (Magnifying Lens)
-      const leafCenterX = width * 0.26 + lerpX * 25
-      const leafCenterY = height * 0.36 + lerpY * 18
+      // Target position for 🍃 Object 01 (Large Botanical Leaf)
+      const leafCenterX = width * 0.24 + lerpX * 22
+      const leafCenterY = height * 0.36 + lerpY * 16
 
-      // Idle lens target vs active mouse target
-      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.32 + Math.sin(time * 0.5) * 15
-      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.45 + Math.cos(time * 0.4) * 15
+      // Target position for 🔍 Object 02 (Physical Magnifying Lens)
+      const targetLensX = isHovered && mousePos.canvasX ? mousePos.canvasX : width * 0.31 + Math.sin(time * 0.45) * 15
+      const targetLensY = isHovered && mousePos.canvasY ? mousePos.canvasY : height * 0.44 + Math.cos(time * 0.35) * 15
 
       // Smooth inertia lerp for physical floating lens
       lensX += (targetLensX - lensX) * 0.06
@@ -177,7 +180,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
 
       // Distance from lens to leaf center for optical reveal intensity
       const distToLeaf = Math.hypot(lensX - leafCenterX, lensY - leafCenterY)
-      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.35))
+      const revealIntensity = Math.max(0, 1 - distToLeaf / (width * 0.32))
 
       // Clear Canvas
       ctx.clearRect(0, 0, width, height)
@@ -226,7 +229,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.restore()
       }
 
-      // ── 3. OBJECT 01 — LARGE BOTANICAL LEAF (Top Left) ──
+      // ── 3. 🍃 OBJECT 01 — LARGE BOTANICAL LEAF (Observation - Top Left) ──
       if (entranceStep >= 4) {
         ctx.save()
         const leafX = leafCenterX
@@ -237,7 +240,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.translate(leafX, leafY)
         ctx.rotate(leafAngle)
 
-        // Leaf Outer Silhouette
+        // Leaf Outer Silhouette Bezier Path
         ctx.beginPath()
         ctx.moveTo(0, -leafScale * 0.8)
         ctx.bezierCurveTo(leafScale * 0.6, -leafScale * 0.4, leafScale * 0.7, leafScale * 0.4, 0, leafScale * 0.8)
@@ -259,7 +262,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.lineWidth = 1.5
         ctx.stroke()
 
-        // Primary Leaf Mid-Rib & Vein Network
+        // Primary Leaf Mid-Rib Line
         ctx.beginPath()
         ctx.moveTo(0, -leafScale * 0.75)
         ctx.lineTo(0, leafScale * 0.75)
@@ -267,7 +270,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.lineWidth = 2.5
         ctx.stroke()
 
-        // Lateral Veins
+        // Lateral Veins (Base state: subtle, partially veiled)
         const veinCount = 7
         for (let v = 1; v <= veinCount; v++) {
           const vy = -leafScale * 0.6 + (v * leafScale * 1.2) / (veinCount + 1)
@@ -293,7 +296,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.restore()
       }
 
-      // ── 4. OBJECT 03 — SEED / SEED POD (Top Right) ──
+      // ── 4. 🌰 OBJECT 03 — SEED POD (Hidden Potential - Top Right) ──
       if (entranceStep >= 5) {
         ctx.save()
         const podX = width * 0.76 + lerpX * 30
@@ -333,8 +336,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.restore()
       }
 
-      // ── 5. OBJECT 04 — TREE CROSS-SECTION (Lower Left) ──
-      if (entranceStep >= 5) {
+      // ── 5. 🌳 OBJECT 04 — TREE CROSS-SECTION (Growth / Memory / Time - Lower Left) ──
+      if (entranceStep >= 6) {
         ctx.save()
         const treeX = width * 0.22 + lerpX * 18
         const treeY = height * 0.78 + Math.cos(time * 0.35) * 8 + lerpY * 15
@@ -357,7 +360,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.lineWidth = 2
         ctx.stroke()
 
-        // Concentric Growth Rings
+        // Concentric Growth Rings (Illuminates when focus lens is near)
         const ringCount = 6
         const distToLens = Math.hypot(treeX - lensX, treeY - lensY)
         const ringGlow = Math.max(0, 1 - distToLens / 180)
@@ -378,8 +381,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.restore()
       }
 
-      // ── 6. OBJECT 05 — BOTANICAL HERBARIUM SPECIMEN SHEET (Lower Right) ──
-      if (entranceStep >= 5) {
+      // ── 6. 📜 OBJECT 05 — BOTANICAL HERBARIUM SPECIMEN (Recorded Knowledge - Lower Right) ──
+      if (entranceStep >= 7) {
         ctx.save()
         const sheetX = width * 0.78 + lerpX * 22
         const sheetY = height * 0.74 + Math.sin(time * 0.3) * 10 + lerpY * 18
@@ -426,13 +429,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
         ctx.restore()
       }
 
-      // ── 7. OBJECT 02 — BOTANICAL MAGNIFYING LENS (Floating Interactive Lens) ──
-      if (entranceStep >= 6) {
+      // ── 7. 🔍 OBJECT 02 — PHYSICAL MAGNIFYING LENS (Focus / Decode) ──
+      if (entranceStep >= 8) {
         ctx.save()
         const lensRadius = Math.min(width * 0.18, 140)
 
-        // 1. Lens Optical Glass Magnification / Reveal Zone inside Leaf Focus
-        if (entranceStep >= 9 && revealIntensity > 0) {
+        // Optical Lens Magnification / Reveal Zone inside Glass Lens over Leaf
+        if (entranceStep >= 11 && revealIntensity > 0) {
           ctx.save()
           ctx.beginPath()
           ctx.arc(lensX, lensY, lensRadius - 4, 0, Math.PI * 2)
@@ -482,7 +485,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           ctx.restore()
         }
 
-        // 2. Physical 3D Lens Rim & Metallic Frame with Brand Gradient Reflection
+        // Physical 3D Lens Rim & Metallic Frame with Brand Gradient Reflection
         ctx.beginPath()
         ctx.arc(lensX, lensY, lensRadius, 0, Math.PI * 2)
         const frameGrad = ctx.createLinearGradient(lensX - lensRadius, lensY - lensRadius, lensX + lensRadius, lensY + lensRadius)
@@ -605,13 +608,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       {/* ── CENTRAL DOMINANT TYPOGRAPHY & BRANDING ── */}
       <div className="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full">
         
-        {/* 1. RENDEZVOUS'26 Official Logo Asset (Step 07) */}
+        {/* 1. RENDEZVOUS'26 Official Logo Asset (Step 09) */}
         <div
           className="mb-4 sm:mb-6 transition-all duration-1000"
           style={{
             ...layerTransform(0.18),
-            opacity: entranceStep >= 7 ? 1 : 0,
-            transform: `${layerTransform(0.18).transform || ''} scale(${entranceStep >= 7 ? 1 : 0.92})`,
+            opacity: entranceStep >= 9 ? 1 : 0,
+            transform: `${layerTransform(0.18).transform || ''} scale(${entranceStep >= 9 ? 1 : 0.92})`,
           }}
         >
           <div
@@ -625,13 +628,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           />
         </div>
 
-        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 08) */}
+        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10) */}
         <div
           className="transition-all duration-1000 my-2"
           style={{
             ...layerTransform(0.22),
-            opacity: entranceStep >= 8 ? 1 : 0,
-            transform: `${layerTransform(0.22).transform || ''} translateY(${entranceStep >= 8 ? 0 : 25}px)`
+            opacity: entranceStep >= 10 ? 1 : 0,
+            transform: `${layerTransform(0.22).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
           }}
         >
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
@@ -646,13 +649,13 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           </p>
         </div>
 
-        {/* 3. Action Buttons (Step 09) */}
+        {/* 3. Action Buttons (Step 11) */}
         <div
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 transition-all duration-1000"
           style={{
             ...layerTransform(0.25),
-            opacity: entranceStep >= 9 ? 1 : 0,
-            transform: `${layerTransform(0.25).transform || ''} translateY(${entranceStep >= 9 ? 0 : 20}px)`
+            opacity: entranceStep >= 11 ? 1 : 0,
+            transform: `${layerTransform(0.25).transform || ''} translateY(${entranceStep >= 11 ? 0 : 20}px)`
           }}
         >
           <button
@@ -677,8 +680,8 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       <div
         className="relative z-20 pb-6 sm:pb-8 flex flex-col items-center justify-center text-center transition-all duration-1000 pointer-events-auto"
         style={{
-          opacity: entranceStep >= 9 ? 1 : 0,
-          transform: `translateY(${entranceStep >= 9 ? 0 : 15}px)`
+          opacity: entranceStep >= 11 ? 1 : 0,
+          transform: `translateY(${entranceStep >= 11 ? 0 : 15}px)`
         }}
       >
         <button
