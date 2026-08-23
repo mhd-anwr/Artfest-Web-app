@@ -302,7 +302,7 @@ export default function PhytoloreHero({ onScrollToAbout }) {
       />
 
       {/* ── CENTRAL DOMINANT EDITORIAL TYPOGRAPHY & BRANDING ── */}
-      <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full pt-16 sm:pt-20">
+      <div className="relative z-30 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto w-full py-12 sm:py-16">
 
         {/* 1. RENDEZVOUS'26 Official Wordmark Image — Edge-Aligned (Step 09) */}
         <div
@@ -366,27 +366,6 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           </button>
         </div>
 
-      </div>
-
-      {/* ── BOTTOM "LOOK CLOSER" SCROLL INDICATOR ── */}
-      <div
-        className="relative z-30 pb-6 sm:pb-8 flex flex-col items-center justify-center text-center transition-all duration-1000 pointer-events-auto"
-        style={{
-          opacity: entranceStep >= 11 ? 1 : 0,
-          transform: `translateY(${entranceStep >= 11 ? 0 : 15}px)`
-        }}
-      >
-        <button
-          onClick={onScrollToAbout}
-          className="group flex flex-col items-center gap-2 text-mutedText hover:text-[#AEE515] transition cursor-pointer"
-        >
-          <span className="text-[11px] font-mono tracking-[0.35em] uppercase font-bold text-[#01B998] group-hover:text-[#AEE515] transition-colors">
-            LOOK CLOSER
-          </span>
-          <div className="w-5 h-8 rounded-full border border-[#01B998]/40 flex items-start justify-center p-1 group-hover:border-[#64D431] transition-colors">
-            <div className="w-1 h-2 rounded-full bg-[#64D431] animate-bounce mt-1" />
-          </div>
-        </button>
       </div>
 
     </section>
