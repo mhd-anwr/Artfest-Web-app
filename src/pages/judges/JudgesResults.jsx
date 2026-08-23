@@ -795,6 +795,7 @@ function JudgesResultsInner() {
           </div>
         )}
       </div>
+      </div>
 
       {/* Security Prompt Modal */}
       {promptOpen && editProg && (
