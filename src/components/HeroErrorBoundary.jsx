@@ -22,7 +22,7 @@ export default class HeroErrorBoundary extends React.Component {
             <img
               src="/rendezvous-wordmark.png"
               alt="Rendezvous'26 Official Wordmark"
-              className="w-36 sm:w-44 md:w-52 lg:w-56 h-auto object-contain mb-3 select-none"
+              className="w-full max-w-[260px] xs:max-w-[320px] sm:max-w-[440px] md:max-w-[620px] lg:max-w-[740px] h-auto object-contain mb-3 select-none"
               style={{
                 filter: 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(100, 212, 49, 0.35))',
                 mixBlendMode: 'screen',
