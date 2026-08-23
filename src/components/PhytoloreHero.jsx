@@ -332,25 +332,27 @@ export default function PhytoloreHero({ onScrollToAbout }) {
           />
         </div>
 
-        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10 & 11) */}
+        {/* 2. Primary Concept Title: DECODING PHYTOLORE (Step 10 & 11) — Single Horizontal Line */}
         <div
-          className="transition-all duration-1000 my-2"
+          className="transition-all duration-1000 my-3 sm:my-4 w-full flex justify-center"
           style={{
             ...layerTransform(0.16),
             opacity: entranceStep >= 10 ? 1 : 0,
             transform: `${layerTransform(0.16).transform || ''} translateY(${entranceStep >= 10 ? 0 : 25}px)`
           }}
         >
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-brand uppercase tracking-tight text-white leading-none drop-shadow-2xl">
-            <span className="block text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
-              PHYTOLORE
-            </span>
-          </h1>
+          <div className="flex flex-col items-center justify-center w-full max-w-full">
+            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-corvion font-bold uppercase tracking-wider text-white leading-none drop-shadow-2xl flex flex-nowrap items-center justify-center gap-x-[0.35em] whitespace-nowrap">
+              <span className="text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]">DECODING</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#01B998] via-[#64D431] to-[#AEE515] drop-shadow-[0_0_35px_rgba(100,212,49,0.4)]">
+                PHYTOLORE
+              </span>
+            </h1>
 
-          <p className="text-xs sm:text-sm md:text-base font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md">
-            OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
-          </p>
+            <p className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#64D431] mt-3 sm:mt-4 opacity-90 drop-shadow-md text-center">
+              OBSERVE &nbsp;·&nbsp; FOCUS &nbsp;·&nbsp; DECODE &nbsp;·&nbsp; REVEAL
+            </p>
+          </div>
         </div>
 
         {/* 3. Action Buttons (Step 11) */}
