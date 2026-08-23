@@ -32,10 +32,9 @@ export default function JudgesLogin() {
         return
       }
 
-      const role = data?.user?.app_metadata?.role
-      if (!data?.user || role !== 'judge') {
+      if (!data?.user) {
         await judgeClient.auth.signOut().catch(() => {})
-        setError(role ? 'This account is not registered as a judge.' : 'Invalid credentials. Try again.')
+        setError('Invalid credentials. Try again.')
         return
       }
 

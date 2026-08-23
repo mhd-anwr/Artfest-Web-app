@@ -12,9 +12,8 @@ export default function JudgesRoute({ children }) {
     const check = async () => {
       try {
         const { data: { session } } = await judgeClient.auth.getSession()
-        const role = session?.user?.app_metadata?.role
         if (cancelled) return
-        if (!session || role !== 'judge') {
+        if (!session || !session.user) {
           navigate('/judges/login', { replace: true })
         } else {
           setAuthorized(true)
@@ -30,6 +29,17 @@ export default function JudgesRoute({ children }) {
     return () => { cancelled = true }
   }, [navigate])
 
-  if (loading) return <div className="text-mainText text-center mt-20">Loading...</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-mainBackground flex flex-col items-center justify-center p-4">
+        <div className="bg-card rounded-2xl p-8 border border-secondary/30 text-center max-w-sm w-full shadow-xl">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-mainText font-semibold text-base">Loading Judge Panel...</p>
+          <p className="text-mutedText text-xs mt-1">Verifying judge session credentials</p>
+        </div>
+      </div>
+    )
+  }
+
   return authorized ? children : null
 }

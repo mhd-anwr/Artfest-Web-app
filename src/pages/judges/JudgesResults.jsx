@@ -1,12 +1,71 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { judgeClient, verifyJudgeClient } from '../../supabase/client'
-import { getProgrammes, getStudents, getAllResults, getCategories, getCodeAssignments, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { getProgrammes, getStudents, getAllResults, getCategories, getCodeAssignments, getTeams, PROGRAMME_CATEGORIES } from '../../supabase/queries'
 import { ArrowLeft, LogOut, Lock, ChevronDown, ChevronUp, Pencil, Eye, EyeOff, Award } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import FilterDropdown from '../../components/FilterDropdown'
 import ThemeToggle from '../../components/ThemeToggle'
 import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
+
+class JudgesErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('JudgesResults rendering error caught:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-mainBackground flex flex-col items-center justify-center p-4 sm:p-6">
+          <div className="bg-card rounded-2xl p-6 sm:p-8 max-w-md w-full border border-red-500/40 shadow-2xl text-center space-y-4">
+            <div className="w-14 h-14 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+              ⚠️
+            </div>
+            <h2 className="text-xl font-bold text-mainText">Judge Panel Error</h2>
+            <p className="text-mutedText text-sm leading-relaxed">
+              An unexpected display error occurred while rendering the Judge Panel.
+            </p>
+            {this.state.error?.message && (
+              <div className="bg-black/30 p-3 rounded-xl text-left border border-red-500/20">
+                <p className="text-xs font-mono text-red-300 break-words">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => window.location.reload()}
+                className="flex-1 bg-primary text-white py-2.5 px-4 rounded-xl font-semibold text-sm hover:opacity-90 transition shadow-sm"
+              >
+                Reload Page
+              </button>
+              <button
+                onClick={async () => {
+                  await judgeClient.auth.signOut().catch(() => {})
+                  window.location.href = '/judges/login'
+                }}
+                className="flex-1 bg-secondary/20 text-mainText py-2.5 px-4 rounded-xl font-semibold text-sm hover:bg-secondary/30 transition"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
 
 function calcGrade(points) {
   const p = Number(points)
@@ -24,7 +83,7 @@ function getOrdinalLabel(index) {
   return `${n}${(s[(v - 20) % 10] || s[v] || s[0])}`
 }
 
-export default function JudgesResults() {
+function JudgesResultsInner() {
   const [programmes, setProgrammes] = useState([])
   const [students, setStudents] = useState([])
   const [savedResults, setSavedResults] = useState([])
@@ -59,7 +118,7 @@ export default function JudgesResults() {
 
   const loadResults = () => {
     getAllResults().then(data => {
-      setSavedResults(data || [])
+      setSavedResults(Array.isArray(data) ? data : [])
     }).catch(err => {
       console.error('Failed to load results:', err)
       toast('Failed to load results: ' + err.message, 'error')
@@ -67,19 +126,26 @@ export default function JudgesResults() {
   }
 
   useEffect(() => {
-    getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
-    getStudents().then(setStudents).catch(err => console.error('Failed to load students:', err))
-    getTeams().then(setTeams).catch(err => console.error('Failed to load teams:', err))
-    getCategories().then(({ programme }) => setCategories(programme)).catch(err => console.error('Failed to load categories:', err))
+    getProgrammes().then(data => setProgrammes(Array.isArray(data) ? data : [])).catch(err => console.error('Failed to load programmes:', err))
+    getStudents().then(data => setStudents(Array.isArray(data) ? data : [])).catch(err => console.error('Failed to load students:', err))
+    getTeams().then(data => setTeams(Array.isArray(data) ? data : [])).catch(err => console.error('Failed to load teams:', err))
+    getCategories().then(res => {
+      if (res && Array.isArray(res.programme)) setCategories(res.programme)
+    }).catch(err => console.error('Failed to load categories:', err))
     loadResults()
   }, [])
+
+  const safeCategories = Array.isArray(categories) && categories.length > 0 ? categories : PROGRAMME_CATEGORIES
+  const safeProgrammes = Array.isArray(programmes) ? programmes : []
+  const safeStudents = Array.isArray(students) ? students : []
+  const safeSavedResults = Array.isArray(savedResults) ? savedResults : []
 
   const getCandidatesForProg = (prog, currentAssignments = null) => {
     if (!prog) return []
     const map = currentAssignments !== null ? currentAssignments : (progAssignments || {})
-    const registered = students.filter(s => (s.programmeIds || []).includes(prog.id))
+    const registered = safeStudents.filter(s => s && Array.isArray(s.programmeIds) && s.programmeIds.includes(prog.id))
     const baseCandidates = registered.length > 0
-      ? [...registered].sort((a, b) => (a.chestNo || a.name || a.id).localeCompare(b.chestNo || b.name || b.id))
+      ? [...registered].sort((a, b) => (a.chestNo || a.name || a.id || '').localeCompare(b.chestNo || b.name || b.id || ''))
       : []
 
     const mapKeys = Object.keys(map)
@@ -93,9 +159,9 @@ export default function JudgesResults() {
           if (code) {
             assignedCandidates.push({
               id: cand.id,
-              name: cand.name,
-              chestNo: cand.chestNo,
-              code: code,
+              name: cand.name || 'Candidate',
+              chestNo: cand.chestNo || '',
+              code: String(code),
             })
           }
         })
@@ -107,22 +173,22 @@ export default function JudgesResults() {
               id: key,
               name: `Performance ${code}`,
               chestNo: '',
-              code: code,
+              code: String(code),
             })
           }
         })
       }
 
       if (assignedCandidates.length > 0) {
-        return assignedCandidates.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+        return assignedCandidates.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }))
       }
     }
 
     if (baseCandidates.length > 0) {
       return baseCandidates.map((cand, idx) => ({
         id: cand.id,
-        name: cand.name,
-        chestNo: cand.chestNo,
+        name: cand.name || 'Candidate',
+        chestNo: cand.chestNo || '',
         code: cand.performanceCode || String.fromCharCode(65 + (idx % 26)),
       }))
     }
@@ -131,7 +197,7 @@ export default function JudgesResults() {
   }
 
   const getStudentObj = (id) => {
-    const s = students.find(s => s.id === id)
+    const s = safeStudents.find(s => s && s.id === id)
     return s ? { studentId: s.id, name: s.name, photoURL: s.photoURL } : null
   }
 
@@ -144,8 +210,8 @@ export default function JudgesResults() {
 
   const getResultNoMap = () => {
     const map = {}
-    savedResults.forEach(r => {
-      if (r.programmeId) map[r.programmeId] = r.resultNo
+    safeSavedResults.forEach(r => {
+      if (r && r.programmeId) map[r.programmeId] = r.resultNo
     })
     return map
   }
@@ -153,33 +219,34 @@ export default function JudgesResults() {
   const resultNoMap = getResultNoMap()
 
   const catCountByCategory = {}
-  categories.forEach(c => { catCountByCategory[c] = 0 })
-  programmes.forEach(p => {
-    if (p.category && catCountByCategory[p.category] !== undefined) {
+  safeCategories.forEach(c => { catCountByCategory[c] = 0 })
+  safeProgrammes.forEach(p => {
+    if (p && p.category && catCountByCategory[p.category] !== undefined) {
       catCountByCategory[p.category] += 1
     }
   })
 
   const catOptions = [
     { label: 'All Categories', value: '' },
-    ...categories.map(c => ({
+    ...safeCategories.map(c => ({
       label: `${c} (${catCountByCategory[c] || 0})`,
       value: c,
     }))
   ]
 
   const filteredProgrammes = categoryFilter
-    ? programmes.filter(p => categoryFilter === 'General' ? p.category === 'General' : p.category === categoryFilter)
-    : programmes
+    ? safeProgrammes.filter(p => p && (categoryFilter === 'General' ? p.category === 'General' : p.category === categoryFilter))
+    : safeProgrammes
 
-  const lockedProgrammeIds = new Set(savedResults.filter(r => r.locked).map(r => r.programmeId))
+  const lockedProgrammeIds = new Set(safeSavedResults.filter(r => r && r.locked).map(r => r.programmeId))
 
   const notSubmitted = filteredProgrammes
-    .filter(p => !lockedProgrammeIds.has(p.id) && !p.isFinished)
-    .sort((a, b) => (resultNoMap[a.id] || 999) - (resultNoMap[b.id] || 999) || a.name.localeCompare(b.name))
+    .filter(p => p && p.id && !lockedProgrammeIds.has(p.id) && !p.isFinished)
+    .sort((a, b) => (resultNoMap[a.id] || 999) - (resultNoMap[b.id] || 999) || (a.name || '').localeCompare(b.name || ''))
 
-  const validProgrammeMap = new Map(programmes.map(p => [p.id, p]))
-  const lockedResults = savedResults.filter(r => {
+  const validProgrammeMap = new Map(safeProgrammes.filter(Boolean).map(p => [p.id, p]))
+  const lockedResults = safeSavedResults.filter(r => {
+    if (!r) return false
     const prog = validProgrammeMap.get(r.programmeId)
     return r.locked && prog && prog.isFinished
   })
@@ -959,5 +1026,13 @@ export default function JudgesResults() {
         )
       })()}
     </div>
+  )
+}
+
+export default function JudgesResults() {
+  return (
+    <JudgesErrorBoundary>
+      <JudgesResultsInner />
+    </JudgesErrorBoundary>
   )
 }
