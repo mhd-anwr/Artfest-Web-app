@@ -290,7 +290,7 @@ export default function AdminPrint() {
     <div className="print-sheet-block" key={blockKey}>
       {showHeader && (
         <div className="print-header">
-          <div className="print-title">Rendezvous'26 - ISRA Vatanappally</div>
+          <div className="print-title">Rendezvous&apos;26 - ISRA Vatanappally</div>
           <div className="print-subtitle">{SHEET_SUBTITLES[item.sheet]}</div>
         </div>
       )}
@@ -523,7 +523,7 @@ export default function AdminPrint() {
                   {/* Results print: header appears once per page, at the top */}
                   {page[0].sheet === 'result' && (
                     <div className="print-header print-page-header">
-                      <div className="print-title">Rendezvous'26 - ISRA Vatanappally</div>
+                      <div className="print-title">Rendezvous&apos;26 - ISRA Vatanappally</div>
                       <div className="print-subtitle">Result</div>
                     </div>
                   )}

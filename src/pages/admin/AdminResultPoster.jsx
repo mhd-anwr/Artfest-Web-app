@@ -148,7 +148,7 @@ export default function AdminResultPoster() {
         </div>
         <div>
           <h2 className="text-xl sm:text-2xl font-poppins font-bold text-mainText">Result Poster</h2>
-          <p className="text-mutedText text-sm">Generate a cumulative team poster and publish it to the user's downloads area.</p>
+          <p className="text-mutedText text-sm">Generate a cumulative team poster and publish it to the user&apos;s downloads area.</p>
         </div>
       </div>
 

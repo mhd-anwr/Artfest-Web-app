@@ -325,7 +325,7 @@ export default function Home() {
           {/* Description Block */}
           <div className="max-w-4xl lg:max-w-5xl mx-auto px-5 sm:px-8">
             <p className="text-base sm:text-lg md:text-xl font-normal text-[#115F32] dark:text-[#D4FFB8] opacity-100 not-italic leading-relaxed sm:leading-loose text-left md:text-justify">
-              Rendezvous'26, the 26th edition of Jamia Madeenathunnoor's Life Festival, stands as a landmark moment in the institution's long-standing commitment to shaping well-rounded students. What began as a purely artistic gathering has, over time, grown into a dynamic space where academic achievement and creative talent come together. The festival continues its mission to build a thoughtful, ethical appreciation for the arts — recognizing their essential part in shaping character, personal growth, and intellectual maturity. Across 26 remarkable years, Rendezvous has left its mark on generations of students, refining their talents with a strong sense of purpose and preparing them to carry its values into the world beyond campus.
+              Rendezvous&apos;26, the 26th edition of Jamia Madeenathunnoor&apos;s Life Festival, stands as a landmark moment in the institution&apos;s long-standing commitment to shaping well-rounded students. What began as a purely artistic gathering has, over time, grown into a dynamic space where academic achievement and creative talent come together. The festival continues its mission to build a thoughtful, ethical appreciation for the arts — recognizing their essential part in shaping character, personal growth, and intellectual maturity. Across 26 remarkable years, Rendezvous has left its mark on generations of students, refining their talents with a strong sense of purpose and preparing them to carry its values into the world beyond campus.
             </p>
           </div>
 
@@ -392,7 +392,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="mt-20 mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-mutedText text-xs sm:text-sm font-inter">
-          <p className="font-bold text-mainText shrink-0">Rendezvous '26</p>
+          <p className="font-bold text-mainText shrink-0">Rendezvous &apos;26</p>
           <p className="text-center">© ISRA Vatanappally • <span className="font-corvion">Corvion</span> • Festival Collective. All rights reserved.</p>
           <div className="flex items-center gap-4 shrink-0">
             <a
