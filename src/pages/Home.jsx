@@ -24,7 +24,7 @@ const stats = [
 const teamMembers = [
   { name: 'Anwar Ahmed', role: 'Festival Chairman', initials: 'AA', tint: 'from-[#115F32] to-[#228C22]', photo: '/team/Anwar.jpg' },
   { name: 'Muhammed AbdulQadar', role: 'Festival Convenor', initials: 'MA', tint: 'from-[#228C22] to-[#4EBA16]', photo: '/team/Mohammed.jpeg' },
-  { name: 'Sayyid Mueenudheen ', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#4EBA16] to-[#71C247]', photo: '/team/Moinu.jpeg' },
+  { name: 'Sayyid Mueenudheen ', role: 'Finance Convenor', initials: 'SM', tint: 'from-[#4EBA16] to-[#71C247]', photo: '/team/syd mueen.jpeg' },
   { name: 'Shammas Mujeeb', role: 'Vice Chairman', initials: 'SM', tint: 'from-[#115F32] to-[#4EBA16]', photo: '/team/Shammas.jpeg' },
   { name: 'Midlaj Moideen', role: 'Vice Chairman', initials: 'MM', tint: 'from-[#228C22] to-[#71C247]', photo: '/team/midlaj moideen.jpg' },
   { name: 'Afsal Sharafudheen', role: 'Joint Convenor', initials: 'AS', tint: 'from-[#4EBA16] to-[#8ED06C]', photo: '/team/Afsal.jpg' },
