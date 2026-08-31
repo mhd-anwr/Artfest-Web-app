@@ -209,8 +209,8 @@ export default function Home() {
             {teamData.map((team, i) => {
               const dotColor = team.color || (
                 team.name?.includes('Dara') ? '#EFFF00' :
-                team.name?.includes('Baza') ? '#E21B23' :
-                team.name?.includes('Qaza') ? '#A855F7' : '#2872A1'
+                  team.name?.includes('Baza') ? '#E21B23' :
+                    team.name?.includes('Qaza') ? '#A855F7' : '#2872A1'
               )
               return (
                 <div
