@@ -88,11 +88,6 @@ export default function AdminProgrammes() {
       const { data: updated, error } = await supabase.from('programmes').update({ isFinished: nextStatus }).eq('id', prog.id).select('id')
       if (error) throw error
       if (!updated || updated.length === 0) throw new Error('the database rejected the update (permission denied)')
-
-      if (!nextStatus) {
-        await supabase.from('results').delete().eq('programmeId', prog.id)
-        loadData()
-      }
     } catch (err) {
       setProgrammes(prev => prev.map(p => p.id === prog.id ? { ...p, isFinished: originalStatus } : p))
       toast('Failed to update status: ' + err.message, 'error')
