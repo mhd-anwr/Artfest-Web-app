@@ -67,6 +67,35 @@ class JudgesErrorBoundary extends React.Component {
   }
 }
 
+function computeAutoPoints(category, place, grade) {
+  const cat = (category || '').toString().trim().toLowerCase()
+  const isGeneral = cat.includes('general')
+
+  const pStr = (place || '').toString().trim().toLowerCase()
+  let placePts = 0
+  if (pStr.includes('1st') || pStr === '1') {
+    placePts = isGeneral ? 10 : 5
+  } else if (pStr.includes('2nd') || pStr === '2') {
+    placePts = isGeneral ? 5 : 3
+  } else if (pStr.includes('3rd') || pStr === '3') {
+    placePts = isGeneral ? 3 : 1
+  }
+
+  const gStr = (grade || '').toString().trim().toUpperCase()
+  let gradePts = 0
+  if (gStr === 'A+') {
+    gradePts = isGeneral ? 12 : 6
+  } else if (gStr === 'A') {
+    gradePts = isGeneral ? 10 : 5
+  } else if (gStr === 'B') {
+    gradePts = isGeneral ? 5 : 3
+  } else if (gStr === 'C') {
+    gradePts = isGeneral ? 3 : 1
+  }
+
+  return placePts + gradePts
+}
+
 function calcGrade(points) {
   const p = Number(points)
   if (p === 10) return 'A+'
@@ -82,6 +111,7 @@ function getOrdinalLabel(index) {
   const v = n % 100
   return `${n}${(s[(v - 20) % 10] || s[v] || s[0])}`
 }
+
 
 function JudgesResultsInner() {
   const [programmes, setProgrammes] = useState([])
@@ -262,7 +292,29 @@ function JudgesResultsInner() {
   }
 
   const updateRowField = (index, field, value) => {
-    setEntryRows(prev => prev.map((row, i) => i === index ? { ...row, [field]: value } : row))
+    setEntryRows(prev => prev.map((row, i) => {
+      if (i !== index) return row
+      const updatedRow = { ...row, [field]: value }
+
+      if ((field === 'place' || field === 'grade') && !updatedRow.isManualPoints) {
+        const autoPts = computeAutoPoints(editProg?.category, updatedRow.place, updatedRow.grade)
+        updatedRow.points = String(autoPts)
+      }
+
+      return updatedRow
+    }))
+  }
+
+  const toggleManualPoints = (index) => {
+    setEntryRows(prev => prev.map((row, i) => {
+      if (i !== index) return row
+      const nextManual = !row.isManualPoints
+      let nextPoints = row.points
+      if (!nextManual) {
+        nextPoints = String(computeAutoPoints(editProg?.category, row.place, row.grade))
+      }
+      return { ...row, isManualPoints: nextManual, points: nextPoints }
+    }))
   }
 
   const openEditFlow = (prog) => {
@@ -279,12 +331,18 @@ function JudgesResultsInner() {
     setProgAssignments(assignmentsMap || {})
 
     const cands = getCandidatesForProg(prog, assignmentsMap || {})
-    const initialRows = cands.map((_, idx) => ({
-      place: getOrdinalLabel(idx),
-      code: '',
-      points: '',
-      grade: '',
-    }))
+    const initialRows = cands.map((_, idx) => {
+      const defaultPlace = getOrdinalLabel(idx)
+      const defaultGrade = ''
+      const autoPts = computeAutoPoints(prog?.category, defaultPlace, defaultGrade)
+      return {
+        place: defaultPlace,
+        code: '',
+        points: String(autoPts),
+        grade: defaultGrade,
+        isManualPoints: false,
+      }
+    })
 
     setEntryRows(initialRows)
     setEditOpen(true)
@@ -474,11 +532,15 @@ function JudgesResultsInner() {
           }
         }
 
+        const autoPts = computeAutoPoints(prog?.category, savedPlace, savedGrade)
+        const isDifferent = savedPoints !== '' && Number(savedPoints) !== autoPts
+
         return {
           place: savedPlace,
           code: savedCode,
-          points: savedPoints,
+          points: savedPoints !== '' ? savedPoints : String(autoPts),
           grade: savedGrade,
+          isManualPoints: isDifferent,
         }
       })
 
@@ -899,11 +961,11 @@ function JudgesResultsInner() {
                 </div>
               ) : (
                 <>
-                  {/* Column Headers: Place header removed completely */}
+                  {/* Column Headers */}
                   <div className="grid grid-cols-12 gap-2 text-xs font-bold text-mutedText px-1 mb-2">
-                    <span className="col-span-3"></span>
-                    <span className="col-span-4">Code Letter</span>
-                    <span className="col-span-2 text-center">Points</span>
+                    <span className="col-span-3">Place</span>
+                    <span className="col-span-3">Code Letter</span>
+                    <span className="col-span-3 text-center">Points</span>
                     <span className="col-span-3 text-center">Grade</span>
                   </div>
 
@@ -919,23 +981,32 @@ function JudgesResultsInner() {
                           .filter(Boolean)
                       )
 
+                      const standardPlaces = ['1st', '2nd', '3rd', '4th', '5th', 'No Place']
+                      const placeList = (row.place && !standardPlaces.includes(row.place))
+                        ? [row.place, ...standardPlaces]
+                        : standardPlaces
+
                       return (
                         <div key={i} className="grid grid-cols-12 gap-2 items-center mb-3">
-                          {/* Editable Place Text Input */}
+                          {/* Place Select Dropdown */}
                           <div className="col-span-3">
-                            <input
-                              type="text"
-                              placeholder="Place"
-                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold focus:border-[#62C744]"
-                              value={row.place}
+                            <select
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
+                              value={row.place || ''}
                               onChange={e => updateRowField(i, 'place', e.target.value)}
-                            />
+                            >
+                              {placeList.map(p => (
+                                <option key={p} value={p} className="bg-[#FFFFFF] dark:bg-[#092619] text-[#123B27] dark:text-[#EAF8E5] font-bold">
+                                  {p}
+                                </option>
+                              ))}
+                            </select>
                           </div>
 
                           {/* Select Dropdown for Code Letter */}
-                          <div className="col-span-4">
+                          <div className="col-span-3">
                             <select
-                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
+                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
                               value={row.code || ''}
                               onChange={e => updateRowField(i, 'code', e.target.value)}
                             >
@@ -961,20 +1032,35 @@ function JudgesResultsInner() {
                             </select>
                           </div>
 
-                          {/* Points Input */}
-                          <div className="col-span-2">
+                          {/* Points Input + Small Edit Button for Exceptional Cases */}
+                          <div className="col-span-3 flex items-center gap-1">
                             <input
                               type="number"
                               placeholder="Pts"
                               min="0"
-                              max="10"
-                              className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-center text-sm font-bold focus:border-[#62C744]"
+                              max="100"
+                              disabled={!row.isManualPoints}
+                              className={`w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border ${row.isManualPoints
+                                  ? 'border-amber-500 ring-1 ring-amber-500/50 text-amber-500 dark:text-amber-400'
+                                  : 'border-[#115F32] dark:border-[#1E6339]'
+                                } rounded-xl p-2.5 outline-none text-center text-xs sm:text-sm font-bold disabled:opacity-90 disabled:cursor-not-allowed`}
                               value={row.points}
                               onChange={e => updateRowField(i, 'points', e.target.value)}
                             />
+                            <button
+                              type="button"
+                              title={row.isManualPoints ? "Switch to Auto Points" : "Manual Edit Points"}
+                              onClick={() => toggleManualPoints(i)}
+                              className={`p-2 rounded-xl border transition shrink-0 ${row.isManualPoints
+                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                                  : 'bg-secondary/15 text-mutedText border-secondary/30 hover:text-mainText hover:bg-secondary/30'
+                                }`}
+                            >
+                              <Pencil size={13} />
+                            </button>
                           </div>
 
-                          {/* Grade Manual Select Dropdown */}
+                          {/* Grade Select Dropdown */}
                           <div className="col-span-3">
                             <select
                               className="w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border border-[#115F32] dark:border-[#1E6339] rounded-xl p-2.5 outline-none text-xs sm:text-sm font-bold cursor-pointer transition hover:border-[#62C744]"
