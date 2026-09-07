@@ -692,7 +692,6 @@ function JudgesResultsInner() {
 
     // Sync programme.isFinished = true in database so all result listings & previews display the result
     await judgeClient.from('programmes').update({ isFinished: true }).eq('id', editProg.id).catch(err => console.error('Prog update error:', err))
-    await supabase.from('programmes').update({ isFinished: true }).eq('id', editProg.id).catch(err => console.error('Prog update error:', err))
 
     // Update local programmes state
     setProgrammes(prev => prev.map(p => p.id === editProg.id ? { ...p, isFinished: true } : p))
