@@ -558,7 +558,7 @@ function JudgesResultsInner() {
   }
 
   const handleSaveEdit = async () => {
-    if (!editProg) return
+    if (!editProg || saving) return
 
     const cands = getCandidatesForProg(editProg, progAssignments || {})
     const validCodesSet = new Set(cands.map(c => (c.code || '').trim().toUpperCase()).filter(Boolean))
@@ -663,46 +663,60 @@ function JudgesResultsInner() {
     setSaving(true)
     setEditError('')
 
-    const { data: existingRow } = await judgeClient
-      .from('results')
-      .select('id')
-      .eq('programmeId', editProg.id)
-      .maybeSingle()
+    try {
+      const { data: existingRow, error: lookupError } = await judgeClient
+        .from('results')
+        .select('id')
+        .eq('programmeId', editProg.id)
+        .maybeSingle()
 
-    let error = null
-    if (existingRow) {
-      const res = await judgeClient.from('results').update(payload).eq('id', existingRow.id)
-      error = res.error
-    } else {
-      const res = await judgeClient.from('results').insert({
-        ...payload,
-        ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
-      })
-      error = res.error
-    }
+      if (lookupError) throw lookupError
 
-    if (error) {
+      if (existingRow) {
+        const { error } = await judgeClient
+          .from('results')
+          .update(payload)
+          .eq('id', existingRow.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await judgeClient.from('results').insert({
+          ...payload,
+          ...(resultNoMap[editProg.id] ? { resultNo: resultNoMap[editProg.id] } : {}),
+        })
+
+        if (error) throw error
+      }
+
+      // Result is saved successfully. Update the UI immediately.
+      setProgrammes(prev => prev.map(p => p.id === editProg.id ? { ...p, isFinished: true } : p))
+      toast(isFirstTime ? 'Result submitted successfully!' : 'Result updated successfully!')
+      closeEdit()
+
+      // Secondary database sync runs independently and cannot keep the Save button buffering.
+      void judgeClient
+        .from('programmes')
+        .update({ isFinished: true })
+        .eq('id', editProg.id)
+        .then(({ error }) => {
+          if (error) console.error('Prog update error:', error)
+        })
+        .catch(err => console.error('Prog update error:', err))
+
+      // Refresh data independently after the result has already been saved.
+      void getProgrammes()
+        .then(data => setProgrammes(Array.isArray(data) ? data : []))
+        .catch(err => console.error('Failed to load programmes:', err))
+
+      void loadResults()
+    } catch (error) {
       console.error('Result save error:', error)
       const errorMsg = error?.message || 'Failed to submit the result.'
       setEditError(errorMsg)
       toast(errorMsg, 'error')
+    } finally {
       setSaving(false)
-      return
     }
-
-    // Sync programme.isFinished = true in database so all result listings & previews display the result
-    await judgeClient.from('programmes').update({ isFinished: true }).eq('id', editProg.id).catch(err => console.error('Prog update error:', err))
-
-    // Update local programmes state
-    setProgrammes(prev => prev.map(p => p.id === editProg.id ? { ...p, isFinished: true } : p))
-
-    toast(isFirstTime ? 'Result submitted successfully!' : 'Result updated successfully!')
-    setSaving(false)
-    closeEdit()
-
-    // Reload all programmes & results to keep everything 100% in sync
-    getProgrammes().then(setProgrammes).catch(err => console.error('Failed to load programmes:', err))
-    loadResults()
   }
 
   return (
