@@ -50,7 +50,7 @@ class JudgesErrorBoundary extends React.Component {
               </button>
               <button
                 onClick={async () => {
-                  await judgeClient.auth.signOut().catch(() => {})
+                  await judgeClient.auth.signOut().catch(() => { })
                   window.location.href = '/judges/login'
                 }}
                 className="flex-1 bg-secondary/20 text-mainText py-2.5 px-4 rounded-xl font-semibold text-sm hover:bg-secondary/30 transition"
@@ -822,9 +822,9 @@ function JudgesResultsInner() {
                             <span className="text-accent font-bold text-sm sm:text-base ml-auto">{data.points || 0} pts</span>
                             {data.grade && data.grade !== '-' && (
                               <span className={`text-xs font-bold px-2 py-0.5 rounded ${data.grade === 'A+' ? 'bg-success/15 text-success' :
-                                  data.grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247]' :
-                                    data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
-                                      'bg-orange-500/15 text-orange-400'
+                                data.grade === 'A' ? 'bg-[#71C247]/20 text-[#71C247]' :
+                                  data.grade === 'B' ? 'bg-yellow-500/15 text-yellow-400' :
+                                    'bg-orange-500/15 text-orange-400'
                                 }`}>
                                 {data.grade}
                               </span>
@@ -1021,8 +1021,8 @@ function JudgesResultsInner() {
                                     value={code}
                                     disabled={isTaken}
                                     className={`bg-[#FFFFFF] dark:bg-[#092619] ${isTaken
-                                        ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
-                                        : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
+                                      ? 'text-[#64806F]/40 dark:text-[#B8D9BA]/40 font-normal'
+                                      : 'text-[#123B27] dark:text-[#EAF8E5] font-bold'
                                       }`}
                                   >
                                     {code}{isTaken ? ' (Selected)' : ''}
@@ -1041,8 +1041,8 @@ function JudgesResultsInner() {
                               max="100"
                               disabled={!row.isManualPoints}
                               className={`w-full bg-[#FFFFFF] dark:bg-[#0D3220] text-[#123B27] dark:text-[#EAF8E5] border ${row.isManualPoints
-                                  ? 'border-amber-500 ring-1 ring-amber-500/50 text-amber-500 dark:text-amber-400'
-                                  : 'border-[#115F32] dark:border-[#1E6339]'
+                                ? 'border-amber-500 ring-1 ring-amber-500/50 text-amber-500 dark:text-amber-400'
+                                : 'border-[#115F32] dark:border-[#1E6339]'
                                 } rounded-xl p-2.5 outline-none text-center text-xs sm:text-sm font-bold disabled:opacity-90 disabled:cursor-not-allowed`}
                               value={row.points}
                               onChange={e => updateRowField(i, 'points', e.target.value)}
@@ -1052,8 +1052,8 @@ function JudgesResultsInner() {
                               title={row.isManualPoints ? "Switch to Auto Points" : "Manual Edit Points"}
                               onClick={() => toggleManualPoints(i)}
                               className={`p-2 rounded-xl border transition shrink-0 ${row.isManualPoints
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
-                                  : 'bg-secondary/15 text-mutedText border-secondary/30 hover:text-mainText hover:bg-secondary/30'
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                                : 'bg-secondary/15 text-mutedText border-secondary/30 hover:text-mainText hover:bg-secondary/30'
                                 }`}
                             >
                               <Pencil size={13} />
