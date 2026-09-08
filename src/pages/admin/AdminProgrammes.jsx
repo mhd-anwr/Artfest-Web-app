@@ -54,9 +54,13 @@ export default function AdminProgrammes() {
   useEffect(() => { loadData() }, [])
 
   const assignResultNumberIfNeeded = async (prog) => {
-    if (resultNoMap[prog.id] != null) return
+    const latestResultNoMap = await getResultNoMap()
+    if (latestResultNoMap[prog.id] != null) return
 
     const nextResultNo = await getNextResultNo()
+    if (!Number.isInteger(nextResultNo) || nextResultNo < 1) {
+      throw new Error('Could not calculate the next result number')
+    }
     const { data, error } = await supabase.rpc('admin_set_result_no', {
       p_programme_id: prog.id,
       p_programme_name: prog.name,
@@ -64,6 +68,7 @@ export default function AdminProgrammes() {
     })
     const rpcError = error?.message || data?.error
     if (rpcError) throw new Error(rpcError)
+    setResultNoMap(prev => ({ ...prev, [prog.id]: nextResultNo }))
   }
 
   const handleAdd = async () => {
@@ -226,8 +231,31 @@ export default function AdminProgrammes() {
       .filter(p => (!progFilter || p.category === progFilter)
         && (!progTypeFilter || (p.programmeType || p.type || '') === progTypeFilter)
         && (!partFilter || (p.participationType || p.participation_type || '') === partFilter))
-      .sort((a, b) => (resultNoMap[a.id] || Number.MAX_SAFE_INTEGER) - (resultNoMap[b.id] || Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name))
-  }, [programmes, progFilter, progTypeFilter, partFilter, resultNoMap])
+      .map((programme, index) => ({ programme, index }))
+      .sort((a, b) => {
+        const aJudgeUploaded = Boolean(judgeResultStatusMap[a.programme.id])
+        const bJudgeUploaded = Boolean(judgeResultStatusMap[b.programme.id])
+        const aGroup = a.programme.isFinished ? 0 : aJudgeUploaded ? 1 : 2
+        const bGroup = b.programme.isFinished ? 0 : bJudgeUploaded ? 1 : 2
+
+        if (aGroup !== bGroup) return aGroup - bGroup
+
+        if (aGroup === 0) {
+          const aResultNo = Number(resultNoMap[a.programme.id])
+          const bResultNo = Number(resultNoMap[b.programme.id])
+          const aSortableNo = Number.isFinite(aResultNo) ? aResultNo : Number.MAX_SAFE_INTEGER
+          const bSortableNo = Number.isFinite(bResultNo) ? bResultNo : Number.MAX_SAFE_INTEGER
+          return aSortableNo - bSortableNo || a.index - b.index
+        }
+
+        if (aGroup === 1) {
+          return (a.programme.name || '').localeCompare(b.programme.name || '') || a.index - b.index
+        }
+
+        return a.index - b.index
+      })
+      .map(({ programme }) => programme)
+  }, [programmes, progFilter, progTypeFilter, partFilter, resultNoMap, judgeResultStatusMap])
 
   const totalItems = filteredList.length
   const effectivePageSize = pageSize === 'All' ? totalItems || 1 : Number(pageSize)

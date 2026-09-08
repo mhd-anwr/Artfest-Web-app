@@ -387,9 +387,13 @@ export async function getStudentPoints(studentId) {
 }
 
 export const getNextResultNo = async () => {
-  const { data, error } = await supabase.from('results').select('resultNo').order('resultNo', { ascending: false }).limit(1)
-  if (error) { console.error('getNextResultNo error:', error); return 1 }
-  return (data?.[0]?.resultNo || 0) + 1
+  const { data: results, error } = await supabase.from('results').select('resultNo')
+  if (error) throw error
+  const highestResultNo = results.reduce((highest, result) => {
+    const resultNo = Number(result?.resultNo)
+    return Number.isFinite(resultNo) ? Math.max(highest, resultNo) : highest
+  }, 0)
+  return highestResultNo + 1
 }
 
 export const getStudentSessionState = async (studentId) => {
