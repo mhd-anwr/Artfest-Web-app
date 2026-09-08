@@ -61,13 +61,46 @@ export default function AdminProgrammes() {
     if (!Number.isInteger(nextResultNo) || nextResultNo < 1) {
       throw new Error('Could not calculate the next result number')
     }
-    const { data, error } = await supabase.rpc('admin_set_result_no', {
-      p_programme_id: prog.id,
-      p_programme_name: prog.name,
-      p_result_no: nextResultNo,
-    })
-    const rpcError = error?.message || data?.error
-    if (rpcError) throw new Error(rpcError)
+
+    const { data: resultRows, error: lookupError } = await supabase
+      .from('results')
+      .select('id, locked')
+      .eq('programmeId', prog.id)
+      .order('updatedAt', { ascending: false, nullsFirst: false })
+      .limit(1)
+
+    if (lookupError) throw lookupError
+
+    const latestResult = resultRows?.[0]
+    if (!latestResult) {
+      const { error } = await supabase.from('results').insert({
+        programmeId: prog.id,
+        name: prog.name || '',
+        entries: [],
+        first: null,
+        second: null,
+        third: null,
+        resultNo: nextResultNo,
+        locked: false,
+        updatedAt: new Date().toISOString(),
+      })
+      if (error) throw error
+    } else if (!latestResult.locked) {
+      const { error } = await supabase
+        .from('results')
+        .update({ resultNo: nextResultNo, updatedAt: new Date().toISOString() })
+        .eq('id', latestResult.id)
+      if (error) throw error
+    } else {
+      const { data, error } = await supabase.rpc('admin_set_result_no', {
+        p_programme_id: prog.id,
+        p_programme_name: prog.name,
+        p_result_no: nextResultNo,
+      })
+      const rpcError = error?.message || data?.error
+      if (rpcError) throw new Error(rpcError)
+    }
+
     setResultNoMap(prev => ({ ...prev, [prog.id]: nextResultNo }))
   }
 
