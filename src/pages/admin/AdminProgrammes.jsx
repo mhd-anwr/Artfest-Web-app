@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
-import { getProgrammes, getResultNoMap, getNextResultNo, getJudgeResultStatusMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
+import { getProgrammes, getResultNoMap, getJudgeResultStatusMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
 import { Plus, X, Printer, Pencil, Trash2, Upload, ChevronLeft, ChevronRight, CheckCircle2, Clock3 } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
@@ -57,51 +57,18 @@ export default function AdminProgrammes() {
     const latestResultNoMap = await getResultNoMap()
     if (latestResultNoMap[prog.id] != null) return
 
-    const nextResultNo = await getNextResultNo()
-    if (!Number.isInteger(nextResultNo) || nextResultNo < 1) {
-      throw new Error('Could not calculate the next result number')
+    const { data, error } = await supabase.rpc('admin_assign_next_result_no', {
+      p_programme_id: prog.id,
+      p_programme_name: prog.name || '',
+    })
+    if (error) throw error
+    if (data?.error) throw new Error(data.error)
+
+    const assignedNumber = Number(data?.result_no)
+    if (!Number.isInteger(assignedNumber) || assignedNumber < 1) {
+      throw new Error('The database did not return a valid result number')
     }
-
-    const { data: resultRows, error: lookupError } = await supabase
-      .from('results')
-      .select('id, locked')
-      .eq('programmeId', prog.id)
-      .order('updatedAt', { ascending: false, nullsFirst: false })
-      .limit(1)
-
-    if (lookupError) throw lookupError
-
-    const latestResult = resultRows?.[0]
-    if (!latestResult) {
-      const { error } = await supabase.from('results').insert({
-        programmeId: prog.id,
-        name: prog.name || '',
-        entries: [],
-        first: null,
-        second: null,
-        third: null,
-        resultNo: nextResultNo,
-        locked: false,
-        updatedAt: new Date().toISOString(),
-      })
-      if (error) throw error
-    } else if (!latestResult.locked) {
-      const { error } = await supabase
-        .from('results')
-        .update({ resultNo: nextResultNo, updatedAt: new Date().toISOString() })
-        .eq('id', latestResult.id)
-      if (error) throw error
-    } else {
-      const { data, error } = await supabase.rpc('admin_set_result_no', {
-        p_programme_id: prog.id,
-        p_programme_name: prog.name,
-        p_result_no: nextResultNo,
-      })
-      const rpcError = error?.message || data?.error
-      if (rpcError) throw new Error(rpcError)
-    }
-
-    setResultNoMap(prev => ({ ...prev, [prog.id]: nextResultNo }))
+    setResultNoMap(prev => ({ ...prev, [prog.id]: assignedNumber }))
   }
 
   const handleAdd = async () => {
