@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { judgeClient, verifyJudgeClient } from '../../supabase/client'
-import { getProgrammes, getStudents, getAllResults, getCategories, getCodeAssignments, getTeams, PROGRAMME_CATEGORIES } from '../../supabase/queries'
+import { getProgrammes, getStudents, getAllJudgeResults, getCategories, getCodeAssignments, getTeams, PROGRAMME_CATEGORIES } from '../../supabase/queries'
 import { ArrowLeft, LogOut, Lock, ChevronDown, ChevronUp, Pencil, Eye, EyeOff, Award } from 'lucide-react'
 import { useToast } from '../../components/Toast'
 import FilterDropdown from '../../components/FilterDropdown'
@@ -147,7 +147,7 @@ function JudgesResultsInner() {
   const toast = useToast()
 
   const loadResults = () => {
-    getAllResults().then(data => {
+    getAllJudgeResults().then(data => {
       setSavedResults(Array.isArray(data) ? data : [])
     }).catch(err => {
       console.error('Failed to load results:', err)
@@ -278,7 +278,7 @@ function JudgesResultsInner() {
   const lockedResults = safeSavedResults.filter(r => {
     if (!r) return false
     const prog = validProgrammeMap.get(r.programmeId)
-    return r.locked && prog && prog.isFinished
+    return r.locked && prog
   })
   const filteredLockedResults = categoryFilter
     ? lockedResults.filter(r => {
@@ -688,20 +688,8 @@ function JudgesResultsInner() {
         if (error) throw error
       }
 
-      // Result is saved successfully. Update the UI immediately.
-      setProgrammes(prev => prev.map(p => p.id === editProg.id ? { ...p, isFinished: true } : p))
       toast(isFirstTime ? 'Result submitted successfully!' : 'Result updated successfully!')
       closeEdit()
-
-      // Secondary database sync runs independently and cannot keep the Save button buffering.
-      void judgeClient
-        .from('programmes')
-        .update({ isFinished: true })
-        .eq('id', editProg.id)
-        .then(({ error }) => {
-          if (error) console.error('Prog update error:', error)
-        })
-        .catch(err => console.error('Prog update error:', err))
 
       // Refresh data independently after the result has already been saved.
       void getProgrammes()

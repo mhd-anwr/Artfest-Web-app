@@ -224,6 +224,13 @@ export const getAllResults = async () => {
   return await attachTeamNamesToResults(sorted)
 }
 
+export const getAllJudgeResults = async () => {
+  const results = await fetchAllRows('results', '*')
+  const latest = latestPerProgramme(results)
+  const sorted = latest.sort((a, b) => (b.resultNo || 0) - (a.resultNo || 0))
+  return await attachTeamNamesToResults(sorted)
+}
+
 export const getAllMasterResultsForAdmin = async () => {
   const [results, progs] = await Promise.all([
     fetchAllRows('results', '*'),
