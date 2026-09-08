@@ -55,7 +55,8 @@ export default function AdminProgrammes() {
 
   const assignResultNumberIfNeeded = async (prog) => {
     const latestResultNoMap = await getResultNoMap()
-    if (latestResultNoMap[prog.id] != null) return
+    const existingResultNo = Number(latestResultNoMap[prog.id])
+    if (Number.isInteger(existingResultNo) && existingResultNo > 0) return
 
     const { data, error } = await supabase.rpc('admin_assign_next_result_no', {
       p_programme_id: prog.id,

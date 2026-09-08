@@ -30,7 +30,10 @@ export const getResultNoMap = async () => {
   const results = await fetchAllRows('results', 'programmeId, resultNo, updatedAt')
   const latest = latestPerProgramme(results)
   const map = {}
-    ; (latest || []).forEach(r => { if (r.programmeId && r.resultNo != null) map[r.programmeId] = r.resultNo })
+    ; (latest || []).forEach(r => {
+      const resultNo = Number(r.resultNo)
+      if (r.programmeId && Number.isInteger(resultNo) && resultNo > 0) map[r.programmeId] = resultNo
+    })
   return map
 }
 

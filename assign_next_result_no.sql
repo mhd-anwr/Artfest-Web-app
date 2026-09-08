@@ -23,7 +23,8 @@ BEGIN
 
   SELECT COALESCE(MAX("resultNo"), 0) + 1
     INTO v_next_result_no
-  FROM public.results;
+  FROM public.results
+  WHERE "resultNo" > 0;
 
   SELECT id
     INTO v_result_id
