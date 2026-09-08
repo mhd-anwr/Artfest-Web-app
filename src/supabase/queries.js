@@ -33,6 +33,16 @@ export const getResultNoMap = async () => {
   return map
 }
 
+export const getJudgeResultStatusMap = async () => {
+  const results = await fetchAllRows('results', 'programmeId, locked, updatedAt')
+  const latest = latestPerProgramme(results)
+  const map = {}
+  latest.forEach(result => {
+    if (result.programmeId) map[result.programmeId] = Boolean(result.locked)
+  })
+  return map
+}
+
 const getLocalSessionState = (studentId) => {
   const token = localStorage.getItem(`student_session_${studentId}`)
   const expiresAt = Number(localStorage.getItem(`student_session_expires_${studentId}`) || 0)

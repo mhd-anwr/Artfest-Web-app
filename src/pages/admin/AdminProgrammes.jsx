@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
-import { getProgrammes, getResultNoMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
-import { Plus, X, Printer, Pencil, Trash2, Upload, ChevronLeft, ChevronRight } from 'lucide-react'
+import { getProgrammes, getResultNoMap, getJudgeResultStatusMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
+import { Plus, X, Printer, Pencil, Trash2, Upload, ChevronLeft, ChevronRight, CheckCircle2, Clock3 } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
 import { CATEGORY_COLORS } from '../../components/TeamBreakdown'
@@ -19,6 +19,7 @@ export default function AdminProgrammes() {
 
   const [programmes, setProgrammes] = useState([])
   const [resultNoMap, setResultNoMap] = useState({})
+  const [judgeResultStatusMap, setJudgeResultStatusMap] = useState({})
   const [categories, setCategories] = useState(PROGRAMME_CATEGORIES)
   const [students, setStudents] = useState([])
   const [teams, setTeams] = useState([])
@@ -48,6 +49,7 @@ export default function AdminProgrammes() {
   const loadData = () => {
     getProgrammes().then(setProgrammes)
     getResultNoMap().then(setResultNoMap)
+    getJudgeResultStatusMap().then(setJudgeResultStatusMap)
     getCategories().then(({ programme }) => setCategories(programme))
     getTeams().then(setTeams)
     supabase.from('students').select('id, name, team, programmeIds').then(({ data }) => setStudents(data || []))
@@ -331,6 +333,10 @@ export default function AdminProgrammes() {
                 {prog.name}
               </p>
               <p className="text-mutedText text-xs sm:text-sm">{prog.category} · {(prog.programmeType || prog.type || 'Unspecified')} · {(prog.participationType || prog.participation_type || 'Unspecified')}</p>
+              <span className={`inline-flex items-center gap-1 mt-2 text-[11px] sm:text-xs font-semibold ${judgeResultStatusMap[prog.id] ? 'text-success' : 'text-mutedText'}`}>
+                {judgeResultStatusMap[prog.id] ? <CheckCircle2 size={13} /> : <Clock3 size={13} />}
+                {judgeResultStatusMap[prog.id] ? 'Result uploaded by judge' : 'Awaiting judge result'}
+              </span>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3">
               <button
