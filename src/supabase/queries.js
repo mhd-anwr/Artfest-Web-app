@@ -27,9 +27,10 @@ export const getCategories = async () => {
 // result number per programme built from the SAME latest-per-programme
 // source used by the Admin Result List, so both views always agree.
 export const getResultNoMap = async () => {
-  const results = await getAllResults()
+  const results = await fetchAllRows('results', 'programmeId, resultNo, updatedAt')
+  const latest = latestPerProgramme(results)
   const map = {}
-    ; (results || []).forEach(r => { if (r.programmeId) map[r.programmeId] = r.resultNo })
+    ; (latest || []).forEach(r => { if (r.programmeId && r.resultNo != null) map[r.programmeId] = r.resultNo })
   return map
 }
 

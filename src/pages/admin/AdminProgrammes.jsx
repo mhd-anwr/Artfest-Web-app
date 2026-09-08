@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase/client'
-import { getProgrammes, getResultNoMap, getJudgeResultStatusMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
+import { getProgrammes, getResultNoMap, getNextResultNo, getJudgeResultStatusMap, getCategories, getTeams, ensureResultMasterRow, PROGRAMME_CATEGORIES, PROGRAMME_TYPES, PARTICIPATION_TYPES } from '../../supabase/queries'
 import { Plus, X, Printer, Pencil, Trash2, Upload, ChevronLeft, ChevronRight, CheckCircle2, Clock3 } from 'lucide-react'
 import KebabMenu from '../../components/KebabMenu'
 import FilterDropdown from '../../components/FilterDropdown'
@@ -12,10 +12,8 @@ import ProgrammeBulkImportModal from '../../components/ProgrammeBulkImportModal'
 export default function AdminProgrammes() {
   const addNameRef = useRef(null)
   const addCatRef = useRef(null)
-  const addNoRef = useRef(null)
   const editNameRef = useRef(null)
   const editCatRef = useRef(null)
-  const editNoRef = useRef(null)
 
   const [programmes, setProgrammes] = useState([])
   const [resultNoMap, setResultNoMap] = useState({})
@@ -29,7 +27,6 @@ export default function AdminProgrammes() {
   const [category, setCategory] = useState('')
   const [programmeType, setProgrammeType] = useState('')
   const [addParticipationType, setAddParticipationType] = useState('')
-  const [addResultNo, setAddResultNo] = useState('')
   const [progFilter, setProgFilter] = useState('')
   const [progTypeFilter, setProgTypeFilter] = useState('')
   const [partFilter, setPartFilter] = useState('')
@@ -38,7 +35,6 @@ export default function AdminProgrammes() {
   const [editCategory, setEditCategory] = useState('')
   const [editProgrammeType, setEditProgrammeType] = useState('')
   const [editParticipationType, setEditParticipationType] = useState('')
-  const [editResultNo, setEditResultNo] = useState('')
   const [editFinished, setEditFinished] = useState(false)
   const [viewProg, setViewProg] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -57,6 +53,19 @@ export default function AdminProgrammes() {
 
   useEffect(() => { loadData() }, [])
 
+  const assignResultNumberIfNeeded = async (prog) => {
+    if (resultNoMap[prog.id] != null) return
+
+    const nextResultNo = await getNextResultNo()
+    const { data, error } = await supabase.rpc('admin_set_result_no', {
+      p_programme_id: prog.id,
+      p_programme_name: prog.name,
+      p_result_no: nextResultNo,
+    })
+    const rpcError = error?.message || data?.error
+    if (rpcError) throw new Error(rpcError)
+  }
+
   const handleAdd = async () => {
     if (!name || !category || !programmeType || !addParticipationType) return toast('Fill all fields', 'error')
     const { data: newProg, error: progErr } = await supabase.from('programmes').insert({ name, category, programmeType, participationType: addParticipationType, isFinished: false }).select('id')
@@ -67,16 +76,7 @@ export default function AdminProgrammes() {
     const addedId = newProg[0].id
     await ensureResultMasterRow(addedId, name)
 
-    if (addResultNo) {
-      const { data: rpcData, error: noErr } = await supabase.rpc('admin_set_result_no', {
-        p_programme_id: addedId,
-        p_programme_name: name,
-        p_result_no: Number(addResultNo),
-      })
-      const rpcMsg = noErr?.message || rpcData?.error
-      if (rpcMsg) return toast('Programme added but result number not saved: ' + rpcMsg, 'error')
-    }
-    setName(''); setCategory(''); setProgrammeType(''); setAddParticipationType(''); setAddResultNo(''); setShowAdd(false)
+    setName(''); setCategory(''); setProgrammeType(''); setAddParticipationType(''); setShowAdd(false)
     toast('Programme added!')
     loadData()
   }
@@ -90,10 +90,15 @@ export default function AdminProgrammes() {
       const { data: updated, error } = await supabase.from('programmes').update({ isFinished: nextStatus }).eq('id', prog.id).select('id')
       if (error) throw error
       if (!updated || updated.length === 0) throw new Error('the database rejected the update (permission denied)')
+      if (nextStatus) await assignResultNumberIfNeeded(prog)
     } catch (err) {
       setProgrammes(prev => prev.map(p => p.id === prog.id ? { ...p, isFinished: originalStatus } : p))
+      if (nextStatus && !originalStatus) {
+        await supabase.from('programmes').update({ isFinished: originalStatus }).eq('id', prog.id)
+      }
       toast('Failed to update status: ' + err.message, 'error')
     }
+    loadData()
   }
 
   const handleClearResult = async (prog) => {
@@ -124,16 +129,16 @@ export default function AdminProgrammes() {
     setEditProgrammeType(prog.programmeType || prog.type || '')
     setEditParticipationType(prog.participationType || prog.participation_type || '')
     setEditFinished(prog.isFinished)
-    setEditResultNo(resultNoMap[prog.id] || '')
   }
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditName(''); setEditCategory(''); setEditProgrammeType(''); setEditParticipationType(''); setEditResultNo(''); setEditFinished(false)
+    setEditName(''); setEditCategory(''); setEditProgrammeType(''); setEditParticipationType(''); setEditFinished(false)
   }
 
   const handleEditSave = async () => {
     if (!editName || !editCategory || !editProgrammeType || !editParticipationType) return toast('Fill all fields', 'error')
+    const originalProgramme = programmes.find(p => p.id === editingId)
     const { data: updated, error: progErr } = await supabase.from('programmes').update({
       name: editName, category: editCategory, programmeType: editProgrammeType, participationType: editParticipationType, isFinished: editFinished,
     }).eq('id', editingId).select('id')
@@ -142,14 +147,13 @@ export default function AdminProgrammes() {
       return toast('Failed to update programme: ' + (progErr?.message || 'the database rejected the update (permission denied).'), 'error')
     }
 
-    if (editResultNo) {
-      const { data: rpcData, error: noErr } = await supabase.rpc('admin_set_result_no', {
-        p_programme_id: editingId,
-        p_programme_name: editName,
-        p_result_no: Number(editResultNo),
-      })
-      const rpcMsg = noErr?.message || rpcData?.error
-      if (rpcMsg) return toast('Failed to save result number: ' + rpcMsg, 'error')
+    if (editFinished && !originalProgramme?.isFinished) {
+      try {
+        await assignResultNumberIfNeeded({ id: editingId, name: editName })
+      } catch (err) {
+        await supabase.from('programmes').update({ isFinished: false }).eq('id', editingId)
+        return toast('Programme updated but result number was not assigned: ' + err.message, 'error')
+      }
     }
 
     toast('Programme updated!')
@@ -384,7 +388,6 @@ export default function AdminProgrammes() {
               className="w-full bg-white text-black rounded-xl p-3 mb-3 outline-none border border-black/20 focus:border-black"
               value={category}
               onChange={e => setCategory(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNoRef.current?.focus() } }}
             >
               <option value="">Select Category</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -409,17 +412,6 @@ export default function AdminProgrammes() {
               <option value="">Select</option>
               {PARTICIPATION_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-
-            <label className="text-black text-sm block mb-1">Result Number</label>
-            <input
-              ref={addNoRef}
-              type="number"
-              className="w-full bg-white text-black rounded-xl p-3 mb-3 outline-none border border-black/20 focus:border-black"
-              placeholder="Result number"
-              value={addResultNo}
-              onChange={e => setAddResultNo(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
-            />
 
             <button
               onClick={handleAdd}
@@ -457,7 +449,6 @@ export default function AdminProgrammes() {
               className="w-full bg-white text-black rounded-xl p-3 mb-3 outline-none border border-black/20 focus:border-black"
               value={editCategory}
               onChange={e => setEditCategory(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); editNoRef.current?.focus() } }}
             >
               {categories.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -483,17 +474,6 @@ export default function AdminProgrammes() {
               <option value="">Select</option>
               {PARTICIPATION_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-
-            <label className="text-black text-sm block mb-1">Result Number</label>
-            <input
-              ref={editNoRef}
-              type="number"
-              className="w-full bg-white text-black rounded-xl p-3 mb-3 outline-none border border-black/20 focus:border-black"
-              value={editResultNo}
-              onChange={e => setEditResultNo(e.target.value)}
-              placeholder="e.g. 1"
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleEditSave() } }}
-            />
 
             <label className="flex items-center gap-3 text-black mb-4 cursor-pointer">
               <input
